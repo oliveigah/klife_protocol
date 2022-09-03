@@ -1,6 +1,6 @@
 # KAFE
 
-**TODO: Add description**
+Kafka client for elixir
 
 ## Installation
 

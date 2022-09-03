@@ -1,18 +1,15 @@
 defmodule KAFE do
-  @moduledoc """
-  Documentation for `KAFE`.
-  """
+  alias KAFE.Protocol.Messages.ApiVersions
 
-  @doc """
-  Hello world.
+  def test do
+    {:ok, socket} = :gen_tcp.connect('localhost', 19092, [:binary, active: false, packet: 4])
+    msg = ApiVersions.serialize_request(%{correlation_id: 12345, client_id: "client"}, 0)
+    :gen_tcp.send(socket, msg)
+    {:ok, received_data} = :gen_tcp.recv(socket, 0, 1000)
 
-  ## Examples
+    ApiVersions.deserialize_response(received_data, 0)
+    |> IO.inspect(label: "Kafka Response")
 
-      iex> KAFE.hello()
-      :world
-
-  """
-  def hello do
-    :world
+    :gen_tcp.close(socket)
   end
 end
