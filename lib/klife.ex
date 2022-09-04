@@ -1,5 +1,5 @@
-defmodule KAFE do
-  alias KAFE.Protocol.Messages
+defmodule Klife do
+  alias Klife.Protocol.Messages
 
   def test do
     {:ok, socket} = :gen_tcp.connect('localhost', 19092, [:binary, active: false, packet: 4])

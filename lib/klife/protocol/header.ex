@@ -1,6 +1,6 @@
-defmodule KAFE.Protocol.Header do
-  alias KAFE.Protocol.Deserializer
-  alias KAFE.Protocol.Serializer
+defmodule Klife.Protocol.Header do
+  alias Klife.Protocol.Deserializer
+  alias Klife.Protocol.Serializer
 
   defp get_request_schema(0),
     do: [

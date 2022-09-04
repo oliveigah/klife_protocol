@@ -1,4 +1,4 @@
-defmodule KAFE.Protocol.Serializer do
+defmodule Klife.Protocol.Serializer do
   def execute(input, schema, append_binary \\ <<>>) do
     do_serialize(schema, input, append_binary)
   end

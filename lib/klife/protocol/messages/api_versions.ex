@@ -1,7 +1,7 @@
-defmodule KAFE.Protocol.Messages.ApiVersions do
-  alias KAFE.Protocol.Deserializer
-  alias KAFE.Protocol.Serializer
-  alias KAFE.Protocol.Header
+defmodule Klife.Protocol.Messages.ApiVersions do
+  alias Klife.Protocol.Deserializer
+  alias Klife.Protocol.Serializer
+  alias Klife.Protocol.Header
 
   @api_key 18
 

@@ -1,4 +1,4 @@
-defmodule KAFE.Application do
+defmodule Klife.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
   @moduledoc false
@@ -8,13 +8,13 @@ defmodule KAFE.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: KAFE.Worker.start_link(arg)
-      # {KAFE.Worker, arg}
+      # Starts a worker by calling: Klife.Worker.start_link(arg)
+      # {Klife.Worker, arg}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: KAFE.Supervisor]
+    opts = [strategy: :one_for_one, name: Klife.Supervisor]
     Supervisor.start_link(children, opts)
   end
 end

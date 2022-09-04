@@ -1,4 +1,4 @@
-defmodule KAFE.Protocol.Deserializer do
+defmodule Klife.Protocol.Deserializer do
   def execute(data, schema) do
     do_deserialize(schema, data, %{})
   end
