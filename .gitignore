@@ -24,3 +24,6 @@ klife-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# Kafka commom message JSON files
+priv/kafka_commom_messages/*
