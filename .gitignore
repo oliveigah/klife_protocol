@@ -26,4 +26,4 @@ klife-*.tar
 /tmp/
 
 # Kafka commom message JSON files
-priv/kafka_commom_messages/*
+priv/kafka_commons/*

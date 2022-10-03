@@ -1,0 +1,22 @@
+defmodule Klife.Protocol.Header do
+    alias Klife.Protocol.Deserializer
+    alias Klife.Protocol.Serializer
+
+    <%= Enum.map(request_schemas, fn {version, schema} -> 
+        """
+        defp request_schema(#{version}), do: #{inspect(schema)}
+        """
+    end) %>
+
+    <%= Enum.map(response_schemas, fn {version, schema} -> 
+        """
+        defp response_schema(#{version}), do: #{inspect(schema)}
+        """
+    end) %>
+
+    def deserialize_response(data, version),
+    do: Deserializer.execute(data, response_schema(version))
+
+    def serialize_request(data, version),
+    do: Serializer.execute(data, request_schema(version))
+end

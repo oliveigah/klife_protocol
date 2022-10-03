@@ -1,0 +1,19 @@
+defmodule Klife.Protocol.Messages.<%= module_name %> do
+    alias Klife.Protocol.Deserializer
+    alias Klife.Protocol.Serializer
+    alias Klife.Protocol.Header
+
+    def get_api_key(), do: <%= api_key %>
+
+    <%= Enum.map(request_schemas, fn {version, schema} -> 
+        """
+        def request_schema(#{version}), do: #{inspect(schema)}
+        """
+    end) %>
+
+    <%= Enum.map(response_schemas, fn {version, schema} -> 
+        """
+        def response_schema(#{version}), do: #{inspect(schema)}
+        """
+    end) %>
+end
