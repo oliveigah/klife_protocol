@@ -3,32 +3,55 @@ defmodule Klife.Protocol.Messages.ListGroups do
   alias Klife.Protocol.Serializer
   alias Klife.Protocol.Header
 
-  def get_api_key(), do: 16
+  @api_key 16
+  @min_flexible_version_req 3
+  @min_flexible_version_res 3
 
-  def request_schema(0), do: []
-  def request_schema(1), do: []
-  def request_schema(2), do: []
-  def request_schema(3), do: [tag_buffer: %{}]
-  def request_schema(4), do: [states_filter: {:array, :string}, tag_buffer: %{}]
+  def deserialize_response(data, version) do
+    with {headers, rest_data} <- Header.deserialize_response(data, res_header_version(version)),
+         {content, <<>>} <- Deserializer.execute(rest_data, response_schema(version)) do
+      %{headers: headers, content: content}
+    end
+  end
 
-  def response_schema(0),
+  def serialize_request(input, version) do
+    input
+    |> Map.put(:request_api_key, @api_key)
+    |> Map.put(:request_api_version, version)
+    |> Header.serialize_request(req_header_version(version))
+    |> then(&Serializer.execute(input, request_schema(version), &1))
+  end
+
+  defp req_header_version(msg_version),
+    do: if(msg_version >= @min_flexible_version_req, do: 2, else: 1)
+
+  defp res_header_version(msg_version),
+    do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
+
+  defp request_schema(0), do: []
+  defp request_schema(1), do: []
+  defp request_schema(2), do: []
+  defp request_schema(3), do: [tag_buffer: %{}]
+  defp request_schema(4), do: [states_filter: {:array, :string}, tag_buffer: %{}]
+
+  defp response_schema(0),
     do: [error_code: :int16, groups: {:array, [group_id: :string, protocol_type: :string]}]
 
-  def response_schema(1),
+  defp response_schema(1),
     do: [
       throttle_time_ms: :int32,
       error_code: :int16,
       groups: {:array, [group_id: :string, protocol_type: :string]}
     ]
 
-  def response_schema(2),
+  defp response_schema(2),
     do: [
       throttle_time_ms: :int32,
       error_code: :int16,
       groups: {:array, [group_id: :string, protocol_type: :string]}
     ]
 
-  def response_schema(3),
+  defp response_schema(3),
     do: [
       throttle_time_ms: :int32,
       error_code: :int16,
@@ -36,7 +59,7 @@ defmodule Klife.Protocol.Messages.ListGroups do
       tag_buffer: %{}
     ]
 
-  def response_schema(4),
+  defp response_schema(4),
     do: [
       throttle_time_ms: :int32,
       error_code: :int16,

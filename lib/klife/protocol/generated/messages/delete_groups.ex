@@ -3,19 +3,42 @@ defmodule Klife.Protocol.Messages.DeleteGroups do
   alias Klife.Protocol.Serializer
   alias Klife.Protocol.Header
 
-  def get_api_key(), do: 42
+  @api_key 42
+  @min_flexible_version_req 2
+  @min_flexible_version_res 2
 
-  def request_schema(0), do: [groups_names: {:array, :string}]
-  def request_schema(1), do: [groups_names: {:array, :string}]
-  def request_schema(2), do: [groups_names: {:array, :string}, tag_buffer: %{}]
+  def deserialize_response(data, version) do
+    with {headers, rest_data} <- Header.deserialize_response(data, res_header_version(version)),
+         {content, <<>>} <- Deserializer.execute(rest_data, response_schema(version)) do
+      %{headers: headers, content: content}
+    end
+  end
 
-  def response_schema(0),
+  def serialize_request(input, version) do
+    input
+    |> Map.put(:request_api_key, @api_key)
+    |> Map.put(:request_api_version, version)
+    |> Header.serialize_request(req_header_version(version))
+    |> then(&Serializer.execute(input, request_schema(version), &1))
+  end
+
+  defp req_header_version(msg_version),
+    do: if(msg_version >= @min_flexible_version_req, do: 2, else: 1)
+
+  defp res_header_version(msg_version),
+    do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
+
+  defp request_schema(0), do: [groups_names: {:array, :string}]
+  defp request_schema(1), do: [groups_names: {:array, :string}]
+  defp request_schema(2), do: [groups_names: {:array, :string}, tag_buffer: %{}]
+
+  defp response_schema(0),
     do: [throttle_time_ms: :int32, results: {:array, [group_id: :string, error_code: :int16]}]
 
-  def response_schema(1),
+  defp response_schema(1),
     do: [throttle_time_ms: :int32, results: {:array, [group_id: :string, error_code: :int16]}]
 
-  def response_schema(2),
+  defp response_schema(2),
     do: [
       throttle_time_ms: :int32,
       results: {:array, [group_id: :string, error_code: :int16, tag_buffer: %{}]},

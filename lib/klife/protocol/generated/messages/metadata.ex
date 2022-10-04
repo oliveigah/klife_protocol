@@ -3,26 +3,49 @@ defmodule Klife.Protocol.Messages.Metadata do
   alias Klife.Protocol.Serializer
   alias Klife.Protocol.Header
 
-  def get_api_key(), do: 3
+  @api_key 3
+  @min_flexible_version_req 9
+  @min_flexible_version_res 9
 
-  def request_schema(0), do: [topics: {:array, [name: :string]}]
-  def request_schema(1), do: [topics: {:array, [name: :string]}]
-  def request_schema(2), do: [topics: {:array, [name: :string]}]
-  def request_schema(3), do: [topics: {:array, [name: :string]}]
+  def deserialize_response(data, version) do
+    with {headers, rest_data} <- Header.deserialize_response(data, res_header_version(version)),
+         {content, <<>>} <- Deserializer.execute(rest_data, response_schema(version)) do
+      %{headers: headers, content: content}
+    end
+  end
 
-  def request_schema(4),
+  def serialize_request(input, version) do
+    input
+    |> Map.put(:request_api_key, @api_key)
+    |> Map.put(:request_api_version, version)
+    |> Header.serialize_request(req_header_version(version))
+    |> then(&Serializer.execute(input, request_schema(version), &1))
+  end
+
+  defp req_header_version(msg_version),
+    do: if(msg_version >= @min_flexible_version_req, do: 2, else: 1)
+
+  defp res_header_version(msg_version),
+    do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
+
+  defp request_schema(0), do: [topics: {:array, [name: :string]}]
+  defp request_schema(1), do: [topics: {:array, [name: :string]}]
+  defp request_schema(2), do: [topics: {:array, [name: :string]}]
+  defp request_schema(3), do: [topics: {:array, [name: :string]}]
+
+  defp request_schema(4),
     do: [topics: {:array, [name: :string]}, allow_auto_topic_creation: :boolean]
 
-  def request_schema(5),
+  defp request_schema(5),
     do: [topics: {:array, [name: :string]}, allow_auto_topic_creation: :boolean]
 
-  def request_schema(6),
+  defp request_schema(6),
     do: [topics: {:array, [name: :string]}, allow_auto_topic_creation: :boolean]
 
-  def request_schema(7),
+  defp request_schema(7),
     do: [topics: {:array, [name: :string]}, allow_auto_topic_creation: :boolean]
 
-  def request_schema(8),
+  defp request_schema(8),
     do: [
       topics: {:array, [name: :string]},
       allow_auto_topic_creation: :boolean,
@@ -30,7 +53,7 @@ defmodule Klife.Protocol.Messages.Metadata do
       include_topic_authorized_operations: :boolean
     ]
 
-  def request_schema(9),
+  defp request_schema(9),
     do: [
       topics: {:array, [name: :string, tag_buffer: %{}]},
       allow_auto_topic_creation: :boolean,
@@ -38,7 +61,7 @@ defmodule Klife.Protocol.Messages.Metadata do
       tag_buffer: %{}
     ]
 
-  def request_schema(10),
+  defp request_schema(10),
     do: [
       topics: {:array, [topic_id: :uuid, name: :string, tag_buffer: %{}]},
       allow_auto_topic_creation: :boolean,
@@ -47,7 +70,7 @@ defmodule Klife.Protocol.Messages.Metadata do
       tag_buffer: %{}
     ]
 
-  def request_schema(11),
+  defp request_schema(11),
     do: [
       topics: {:array, [topic_id: :uuid, name: :string, tag_buffer: %{}]},
       allow_auto_topic_creation: :boolean,
@@ -55,7 +78,7 @@ defmodule Klife.Protocol.Messages.Metadata do
       tag_buffer: %{}
     ]
 
-  def request_schema(12),
+  defp request_schema(12),
     do: [
       topics: {:array, [topic_id: :uuid, name: :string, tag_buffer: %{}]},
       allow_auto_topic_creation: :boolean,
@@ -63,7 +86,7 @@ defmodule Klife.Protocol.Messages.Metadata do
       tag_buffer: %{}
     ]
 
-  def response_schema(0),
+  defp response_schema(0),
     do: [
       brokers: {:array, [node_id: :int32, host: :string, port: :int32]},
       topics:
@@ -83,7 +106,7 @@ defmodule Klife.Protocol.Messages.Metadata do
          ]}
     ]
 
-  def response_schema(1),
+  defp response_schema(1),
     do: [
       brokers: {:array, [node_id: :int32, host: :string, port: :int32, rack: :string]},
       controller_id: :int32,
@@ -105,7 +128,7 @@ defmodule Klife.Protocol.Messages.Metadata do
          ]}
     ]
 
-  def response_schema(2),
+  defp response_schema(2),
     do: [
       brokers: {:array, [node_id: :int32, host: :string, port: :int32, rack: :string]},
       cluster_id: :string,
@@ -128,7 +151,7 @@ defmodule Klife.Protocol.Messages.Metadata do
          ]}
     ]
 
-  def response_schema(3),
+  defp response_schema(3),
     do: [
       throttle_time_ms: :int32,
       brokers: {:array, [node_id: :int32, host: :string, port: :int32, rack: :string]},
@@ -152,7 +175,7 @@ defmodule Klife.Protocol.Messages.Metadata do
          ]}
     ]
 
-  def response_schema(4),
+  defp response_schema(4),
     do: [
       throttle_time_ms: :int32,
       brokers: {:array, [node_id: :int32, host: :string, port: :int32, rack: :string]},
@@ -176,32 +199,7 @@ defmodule Klife.Protocol.Messages.Metadata do
          ]}
     ]
 
-  def response_schema(5),
-    do: [
-      throttle_time_ms: :int32,
-      brokers: {:array, [node_id: :int32, host: :string, port: :int32, rack: :string]},
-      cluster_id: :string,
-      controller_id: :int32,
-      topics:
-        {:array,
-         [
-           error_code: :int16,
-           name: :string,
-           is_internal: :boolean,
-           partitions:
-             {:array,
-              [
-                error_code: :int16,
-                partition_index: :int32,
-                leader_id: :int32,
-                replica_nodes: {:array, :int32},
-                isr_nodes: {:array, :int32},
-                offline_replicas: {:array, :int32}
-              ]}
-         ]}
-    ]
-
-  def response_schema(6),
+  defp response_schema(5),
     do: [
       throttle_time_ms: :int32,
       brokers: {:array, [node_id: :int32, host: :string, port: :int32, rack: :string]},
@@ -226,7 +224,32 @@ defmodule Klife.Protocol.Messages.Metadata do
          ]}
     ]
 
-  def response_schema(7),
+  defp response_schema(6),
+    do: [
+      throttle_time_ms: :int32,
+      brokers: {:array, [node_id: :int32, host: :string, port: :int32, rack: :string]},
+      cluster_id: :string,
+      controller_id: :int32,
+      topics:
+        {:array,
+         [
+           error_code: :int16,
+           name: :string,
+           is_internal: :boolean,
+           partitions:
+             {:array,
+              [
+                error_code: :int16,
+                partition_index: :int32,
+                leader_id: :int32,
+                replica_nodes: {:array, :int32},
+                isr_nodes: {:array, :int32},
+                offline_replicas: {:array, :int32}
+              ]}
+         ]}
+    ]
+
+  defp response_schema(7),
     do: [
       throttle_time_ms: :int32,
       brokers: {:array, [node_id: :int32, host: :string, port: :int32, rack: :string]},
@@ -252,7 +275,7 @@ defmodule Klife.Protocol.Messages.Metadata do
          ]}
     ]
 
-  def response_schema(8),
+  defp response_schema(8),
     do: [
       throttle_time_ms: :int32,
       brokers: {:array, [node_id: :int32, host: :string, port: :int32, rack: :string]},
@@ -280,7 +303,7 @@ defmodule Klife.Protocol.Messages.Metadata do
       cluster_authorized_operations: :int32
     ]
 
-  def response_schema(9),
+  defp response_schema(9),
     do: [
       throttle_time_ms: :int32,
       brokers:
@@ -311,7 +334,7 @@ defmodule Klife.Protocol.Messages.Metadata do
       tag_buffer: %{}
     ]
 
-  def response_schema(10),
+  defp response_schema(10),
     do: [
       throttle_time_ms: :int32,
       brokers:
@@ -344,7 +367,7 @@ defmodule Klife.Protocol.Messages.Metadata do
       tag_buffer: %{}
     ]
 
-  def response_schema(11),
+  defp response_schema(11),
     do: [
       throttle_time_ms: :int32,
       brokers:
@@ -376,7 +399,7 @@ defmodule Klife.Protocol.Messages.Metadata do
       tag_buffer: %{}
     ]
 
-  def response_schema(12),
+  defp response_schema(12),
     do: [
       throttle_time_ms: :int32,
       brokers:

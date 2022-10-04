@@ -3,9 +3,32 @@ defmodule Klife.Protocol.Messages.Produce do
   alias Klife.Protocol.Serializer
   alias Klife.Protocol.Header
 
-  def get_api_key(), do: 0
+  @api_key 0
+  @min_flexible_version_req 9
+  @min_flexible_version_res 9
 
-  def request_schema(0),
+  def deserialize_response(data, version) do
+    with {headers, rest_data} <- Header.deserialize_response(data, res_header_version(version)),
+         {content, <<>>} <- Deserializer.execute(rest_data, response_schema(version)) do
+      %{headers: headers, content: content}
+    end
+  end
+
+  def serialize_request(input, version) do
+    input
+    |> Map.put(:request_api_key, @api_key)
+    |> Map.put(:request_api_version, version)
+    |> Header.serialize_request(req_header_version(version))
+    |> then(&Serializer.execute(input, request_schema(version), &1))
+  end
+
+  defp req_header_version(msg_version),
+    do: if(msg_version >= @min_flexible_version_req, do: 2, else: 1)
+
+  defp res_header_version(msg_version),
+    do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
+
+  defp request_schema(0),
     do: [
       acks: :int16,
       timeout_ms: :int32,
@@ -13,7 +36,7 @@ defmodule Klife.Protocol.Messages.Produce do
         {:array, [name: :string, partition_data: {:array, [index: :int32, records: :records]}]}
     ]
 
-  def request_schema(1),
+  defp request_schema(1),
     do: [
       acks: :int16,
       timeout_ms: :int32,
@@ -21,7 +44,7 @@ defmodule Klife.Protocol.Messages.Produce do
         {:array, [name: :string, partition_data: {:array, [index: :int32, records: :records]}]}
     ]
 
-  def request_schema(2),
+  defp request_schema(2),
     do: [
       acks: :int16,
       timeout_ms: :int32,
@@ -29,34 +52,7 @@ defmodule Klife.Protocol.Messages.Produce do
         {:array, [name: :string, partition_data: {:array, [index: :int32, records: :records]}]}
     ]
 
-  def request_schema(3),
-    do: [
-      transactional_id: :string,
-      acks: :int16,
-      timeout_ms: :int32,
-      topic_data:
-        {:array, [name: :string, partition_data: {:array, [index: :int32, records: :records]}]}
-    ]
-
-  def request_schema(4),
-    do: [
-      transactional_id: :string,
-      acks: :int16,
-      timeout_ms: :int32,
-      topic_data:
-        {:array, [name: :string, partition_data: {:array, [index: :int32, records: :records]}]}
-    ]
-
-  def request_schema(5),
-    do: [
-      transactional_id: :string,
-      acks: :int16,
-      timeout_ms: :int32,
-      topic_data:
-        {:array, [name: :string, partition_data: {:array, [index: :int32, records: :records]}]}
-    ]
-
-  def request_schema(6),
+  defp request_schema(3),
     do: [
       transactional_id: :string,
       acks: :int16,
@@ -65,7 +61,7 @@ defmodule Klife.Protocol.Messages.Produce do
         {:array, [name: :string, partition_data: {:array, [index: :int32, records: :records]}]}
     ]
 
-  def request_schema(7),
+  defp request_schema(4),
     do: [
       transactional_id: :string,
       acks: :int16,
@@ -74,7 +70,7 @@ defmodule Klife.Protocol.Messages.Produce do
         {:array, [name: :string, partition_data: {:array, [index: :int32, records: :records]}]}
     ]
 
-  def request_schema(8),
+  defp request_schema(5),
     do: [
       transactional_id: :string,
       acks: :int16,
@@ -83,7 +79,34 @@ defmodule Klife.Protocol.Messages.Produce do
         {:array, [name: :string, partition_data: {:array, [index: :int32, records: :records]}]}
     ]
 
-  def request_schema(9),
+  defp request_schema(6),
+    do: [
+      transactional_id: :string,
+      acks: :int16,
+      timeout_ms: :int32,
+      topic_data:
+        {:array, [name: :string, partition_data: {:array, [index: :int32, records: :records]}]}
+    ]
+
+  defp request_schema(7),
+    do: [
+      transactional_id: :string,
+      acks: :int16,
+      timeout_ms: :int32,
+      topic_data:
+        {:array, [name: :string, partition_data: {:array, [index: :int32, records: :records]}]}
+    ]
+
+  defp request_schema(8),
+    do: [
+      transactional_id: :string,
+      acks: :int16,
+      timeout_ms: :int32,
+      topic_data:
+        {:array, [name: :string, partition_data: {:array, [index: :int32, records: :records]}]}
+    ]
+
+  defp request_schema(9),
     do: [
       transactional_id: :string,
       acks: :int16,
@@ -98,7 +121,7 @@ defmodule Klife.Protocol.Messages.Produce do
       tag_buffer: %{}
     ]
 
-  def response_schema(0),
+  defp response_schema(0),
     do: [
       responses:
         {:array,
@@ -108,7 +131,7 @@ defmodule Klife.Protocol.Messages.Produce do
          ]}
     ]
 
-  def response_schema(1),
+  defp response_schema(1),
     do: [
       responses:
         {:array,
@@ -119,7 +142,7 @@ defmodule Klife.Protocol.Messages.Produce do
       throttle_time_ms: :int32
     ]
 
-  def response_schema(2),
+  defp response_schema(2),
     do: [
       responses:
         {:array,
@@ -132,7 +155,7 @@ defmodule Klife.Protocol.Messages.Produce do
       throttle_time_ms: :int32
     ]
 
-  def response_schema(3),
+  defp response_schema(3),
     do: [
       responses:
         {:array,
@@ -145,7 +168,7 @@ defmodule Klife.Protocol.Messages.Produce do
       throttle_time_ms: :int32
     ]
 
-  def response_schema(4),
+  defp response_schema(4),
     do: [
       responses:
         {:array,
@@ -158,7 +181,7 @@ defmodule Klife.Protocol.Messages.Produce do
       throttle_time_ms: :int32
     ]
 
-  def response_schema(5),
+  defp response_schema(5),
     do: [
       responses:
         {:array,
@@ -177,7 +200,7 @@ defmodule Klife.Protocol.Messages.Produce do
       throttle_time_ms: :int32
     ]
 
-  def response_schema(6),
+  defp response_schema(6),
     do: [
       responses:
         {:array,
@@ -196,7 +219,7 @@ defmodule Klife.Protocol.Messages.Produce do
       throttle_time_ms: :int32
     ]
 
-  def response_schema(7),
+  defp response_schema(7),
     do: [
       responses:
         {:array,
@@ -215,7 +238,7 @@ defmodule Klife.Protocol.Messages.Produce do
       throttle_time_ms: :int32
     ]
 
-  def response_schema(8),
+  defp response_schema(8),
     do: [
       responses:
         {:array,
@@ -237,7 +260,7 @@ defmodule Klife.Protocol.Messages.Produce do
       throttle_time_ms: :int32
     ]
 
-  def response_schema(9),
+  defp response_schema(9),
     do: [
       responses:
         {:array,

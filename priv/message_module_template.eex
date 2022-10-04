@@ -3,17 +3,82 @@ defmodule Klife.Protocol.Messages.<%= module_name %> do
     alias Klife.Protocol.Serializer
     alias Klife.Protocol.Header
 
-    def get_api_key(), do: <%= api_key %>
+    @api_key <%= api_key %>
+    <%= 
+    case req_header_exceptions do
+        {:fixed, _} -> ""
+        _ ->
+            if req_flexible_version == :none, 
+            do: "@min_flexible_version_req :none", 
+            else: "@min_flexible_version_req #{req_flexible_version}" 
+    end
+    %>
+    <%= 
+    case res_header_exceptions do
+        {:fixed, _} -> ""
+        _ ->
+            if res_flexible_version == :none, 
+            do: "@min_flexible_version_res :none", 
+            else: "@min_flexible_version_res #{res_flexible_version}" 
+    end
+    %>
+
+    def deserialize_response(data, version) do
+        with {headers, rest_data} <- Header.deserialize_response(data, res_header_version(version)),
+            {content, <<>>} <- Deserializer.execute(rest_data, response_schema(version)) do
+        %{headers: headers, content: content}
+        end
+    end
+
+    def serialize_request(input, version) do
+        input
+        |> Map.put(:request_api_key, @api_key)
+        |> Map.put(:request_api_version, version)
+        |> Header.serialize_request(req_header_version(version))
+        |> then(&Serializer.execute(input, request_schema(version), &1))
+    end
+
+
+    <% 
+        default_res_header_code = "if(msg_version >= @min_flexible_version_res, do: 1, else: 0)"
+        default_req_header_code = "if(msg_version >= @min_flexible_version_req, do: 2, else: 1)"
+    %>
+
+    <%= 
+        case req_header_exceptions do
+            {:fixed, v} -> "defp req_header_version(_msg_version), do: #{v}"
+            {:versions, list, v} ->
+            "defp req_header_version(msg_version) do
+             if msg_version in #{inspect(list)}, do: #{v}, else: #{default_req_header_code}
+             end
+            "
+            nil -> "defp req_header_version(msg_version), do: #{default_req_header_code}"
+        end
+    %>
+
+    <%= 
+        case res_header_exceptions do
+            {:fixed, v} -> "defp res_header_version(_msg_version), do: #{v}"
+            {:versions, list, v} ->
+            "defp res_header_version(msg_version) do
+             if msg_version in #{inspect(list)}, do: #{v}, else: #{default_res_header_code}
+             end
+            "
+            nil -> "defp res_header_version(msg_version), do: #{default_res_header_code}"
+        end
+    %>
 
     <%= Enum.map(request_schemas, fn {version, schema} -> 
         """
-        def request_schema(#{version}), do: #{inspect(schema)}
+        defp request_schema(#{version}), do: #{inspect(schema)}
         """
     end) %>
 
     <%= Enum.map(response_schemas, fn {version, schema} -> 
         """
-        def response_schema(#{version}), do: #{inspect(schema)}
+        defp response_schema(#{version}), do: #{inspect(schema)}
         """
     end) %>
+
+
 end

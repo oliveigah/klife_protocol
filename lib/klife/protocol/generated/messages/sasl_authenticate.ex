@@ -3,15 +3,38 @@ defmodule Klife.Protocol.Messages.SaslAuthenticate do
   alias Klife.Protocol.Serializer
   alias Klife.Protocol.Header
 
-  def get_api_key(), do: 36
+  @api_key 36
+  @min_flexible_version_req 2
+  @min_flexible_version_res 2
 
-  def request_schema(0), do: [auth_bytes: :bytes]
-  def request_schema(1), do: [auth_bytes: :bytes]
-  def request_schema(2), do: [auth_bytes: :bytes, tag_buffer: %{}]
+  def deserialize_response(data, version) do
+    with {headers, rest_data} <- Header.deserialize_response(data, res_header_version(version)),
+         {content, <<>>} <- Deserializer.execute(rest_data, response_schema(version)) do
+      %{headers: headers, content: content}
+    end
+  end
 
-  def response_schema(0), do: [error_code: :int16, error_message: :string, auth_bytes: :bytes]
+  def serialize_request(input, version) do
+    input
+    |> Map.put(:request_api_key, @api_key)
+    |> Map.put(:request_api_version, version)
+    |> Header.serialize_request(req_header_version(version))
+    |> then(&Serializer.execute(input, request_schema(version), &1))
+  end
 
-  def response_schema(1),
+  defp req_header_version(msg_version),
+    do: if(msg_version >= @min_flexible_version_req, do: 2, else: 1)
+
+  defp res_header_version(msg_version),
+    do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
+
+  defp request_schema(0), do: [auth_bytes: :bytes]
+  defp request_schema(1), do: [auth_bytes: :bytes]
+  defp request_schema(2), do: [auth_bytes: :bytes, tag_buffer: %{}]
+
+  defp response_schema(0), do: [error_code: :int16, error_message: :string, auth_bytes: :bytes]
+
+  defp response_schema(1),
     do: [
       error_code: :int16,
       error_message: :string,
@@ -19,7 +42,7 @@ defmodule Klife.Protocol.Messages.SaslAuthenticate do
       session_lifetime_ms: :int64
     ]
 
-  def response_schema(2),
+  defp response_schema(2),
     do: [
       error_code: :int16,
       error_message: :string,
