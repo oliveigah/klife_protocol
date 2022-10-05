@@ -9,9 +9,13 @@ defmodule Klife.Protocol.Serializer do
   defp do_serialize(_schema, [], result_data), do: result_data
 
   defp do_serialize([{key, type} | rest_schema], %{} = input_map, acc_data) do
+    IO.inspect({key, type})
+
     input_map
     |> Map.get(key)
+    |> IO.inspect(label: "val")
     |> serialize_value(type)
+    |> IO.inspect(label: "serialized_val")
     |> then(&do_serialize(rest_schema, input_map, acc_data <> &1))
   end
 
@@ -41,13 +45,29 @@ defmodule Klife.Protocol.Serializer do
   defp serialize_value(val, :int32), do: <<val::32-signed>>
   defp serialize_value(nil, :string), do: <<-1::16-signed>>
   defp serialize_value(val, :string) when is_binary(val), do: <<byte_size(val)::16-signed>> <> val
+
   defp serialize_value(nil, {:array, _array_type}), do: <<-1::32-signed>>
 
   defp serialize_value(val, {:array, array_type}) do
     do_serialize(array_type, val, <<length(val)::32-signed>>)
   end
 
-  defp serialize_value(nil, {:tag_buffer, _tag_schema}), do: serialize_value(17, :varint)
+  defp serialize_value(nil, :compact_bytes), do: serialize_value(0, :varint)
+
+  defp serialize_value(val, :compact_bytes),
+    do: serialize_value(byte_size(val) + 1, :varint) <> val
+
+  defp serialize_value(nil, :compact_string), do: serialize_value(0, :varint)
+
+  defp serialize_value(val, :compact_string),
+    do: serialize_value(byte_size(val) + 1, :varint) <> val
+
+  defp serialize_value(nil, {:compact_array, _type}), do: serialize_value(0, :varint)
+
+  defp serialize_value(val, {:compact_array, type}),
+    do: do_serialize(type, val, serialize_value(length(val) + 1, :varint))
+
+  defp serialize_value(nil, {:tag_buffer, _tag_schema}), do: serialize_value(0, :varint)
 
   defp serialize_value(val, {:tag_buffer, tag_schema}) do
     ordered_tags = Enum.sort(val, fn {k1, _v1}, {k2, _v2} -> k1 < k2 end)
