@@ -127,9 +127,12 @@ if Mix.env() == :dev do
 
     defp parse_message_schema(message) do
       type =
-        message.type
-        |> to_snake_case()
-        |> String.to_atom()
+        cond do
+          String.contains?(message.name, "Response") -> :response
+          String.contains?(message.name, "Request") -> :request
+        end
+
+      message_type = message.type |> to_snake_case() |> String.to_atom()
 
       [min_version, max_version] = get_versions(message.validVersions)
 
@@ -140,7 +143,8 @@ if Mix.env() == :dev do
           metadata = %{
             type: type,
             version: version,
-            is_flexible: is_flexible
+            is_flexible: is_flexible,
+            message_type: message_type
           }
 
           common_structs = parse_commom_structs(message[:commonStructs] || [], metadata)
@@ -169,7 +173,7 @@ if Mix.env() == :dev do
       do: do_parse_schema(fields, metadata, [], [])
 
     defp do_parse_schema([], %{is_flexible: true}, schema, tag_buffer),
-      do: schema ++ [{:tag_buffer, Map.new(tag_buffer)}]
+      do: schema ++ [{:tag_buffer, {:tag_buffer, Map.new(tag_buffer)}}]
 
     defp do_parse_schema([], %{is_flexible: false}, schema, _tag_buffer),
       do: schema
@@ -202,13 +206,21 @@ if Mix.env() == :dev do
       name = field.name |> to_snake_case() |> String.to_atom()
       has_fields? = Map.has_key?(field, :fields)
 
-      case get_type(field.type, !has_fields?) do
+      case get_type(field.type, metadata, !has_fields?) do
         :array ->
           if has_fields? do
             {name, {:array, parse_schema(field.fields, metadata)}}
           else
             {:object, schema} = Keyword.fetch!(metadata.common_structs, get_type_name(field.type))
             {name, {:array, schema}}
+          end
+
+        :compact_array ->
+          if has_fields? do
+            {name, {:compact_array, parse_schema(field.fields, metadata)}}
+          else
+            {:object, schema} = Keyword.fetch!(metadata.common_structs, get_type_name(field.type))
+            {name, {:compact_array, schema}}
           end
 
         :not_found ->
@@ -314,22 +326,26 @@ if Mix.env() == :dev do
 
     defp is_tagged_field?(field), do: Map.get(field, :tag) != nil
 
-    defp get_type(string_type, raise?)
+    defp get_type(string_type, metadata, raise?)
 
-    defp get_type("int8", _raise?), do: :int8
-    defp get_type("int16", _raise?), do: :int16
-    defp get_type("int32", _raise?), do: :int32
-    defp get_type("int64", _raise?), do: :int64
-    defp get_type("string", _raise?), do: :string
-    defp get_type("bool", _raise?), do: :boolean
-    defp get_type("uuid", _raise?), do: :uuid
-    defp get_type("float64", _raise?), do: :float64
-    defp get_type("bytes", _raise?), do: :bytes
-    defp get_type("uint16", _raise?), do: :uint16
-    defp get_type("records", _raise?), do: :records
+    defp get_type("int8", _metadata, _raise?), do: :int8
+    defp get_type("int16", _metadata, _raise?), do: :int16
+    defp get_type("int32", _metadata, _raise?), do: :int32
+    defp get_type("int64", _metadata, _raise?), do: :int64
+    defp get_type("string", %{message_type: :header}, _raise?), do: :string
+    defp get_type("string", %{is_flexible: false}, _raise?), do: :string
+    defp get_type("string", %{is_flexible: true}, _raise?), do: :compact_string
+    defp get_type("bool", _metadata, _raise?), do: :boolean
+    defp get_type("uuid", _metadata, _raise?), do: :uuid
+    defp get_type("float64", _metadata, _raise?), do: :float64
+    defp get_type("bytes", %{message_type: :header}, _raise?), do: :bytes
+    defp get_type("bytes", %{is_flexible: false}, _raise?), do: :bytes
+    defp get_type("bytes", %{is_flexible: true}, _raise?), do: :compact_bytes
+    defp get_type("uint16", _metadata, _raise?), do: :uint16
+    defp get_type("records", _metadata, _raise?), do: :records
 
-    defp get_type("[]" <> type, _raise?) do
-      case get_type(type, false) do
+    defp get_type("[]" <> type, %{message_type: :header} = metadata, _raise?) do
+      case get_type(type, metadata, false) do
         :not_found ->
           :array
 
@@ -338,7 +354,27 @@ if Mix.env() == :dev do
       end
     end
 
-    defp get_type(_, false), do: :not_found
+    defp get_type("[]" <> type, %{is_flexible: false} = metadata, _raise?) do
+      case get_type(type, metadata, false) do
+        :not_found ->
+          :array
+
+        val ->
+          {:array, val}
+      end
+    end
+
+    defp get_type("[]" <> type, %{is_flexible: true} = metadata, _raise?) do
+      case get_type(type, metadata, false) do
+        :not_found ->
+          :compact_array
+
+        val ->
+          {:compact_array, val}
+      end
+    end
+
+    defp get_type(_, _, false), do: :not_found
 
     defp get_type_name("[]" <> name), do: name |> to_snake_case() |> String.to_atom()
 
