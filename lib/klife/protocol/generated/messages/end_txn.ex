@@ -54,15 +54,17 @@ defmodule Klife.Protocol.Messages.EndTxn do
 
   defp request_schema(3),
     do: [
-      transactional_id: :string,
+      transactional_id: :compact_string,
       producer_id: :int64,
       producer_epoch: :int16,
       committed: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0), do: [throttle_time_ms: :int32, error_code: :int16]
   defp response_schema(1), do: [throttle_time_ms: :int32, error_code: :int16]
   defp response_schema(2), do: [throttle_time_ms: :int32, error_code: :int16]
-  defp response_schema(3), do: [throttle_time_ms: :int32, error_code: :int16, tag_buffer: %{}]
+
+  defp response_schema(3),
+    do: [throttle_time_ms: :int32, error_code: :int16, tag_buffer: {:tag_buffer, %{}}]
 end

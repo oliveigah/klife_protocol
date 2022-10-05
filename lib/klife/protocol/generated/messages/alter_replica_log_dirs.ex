@@ -43,13 +43,19 @@ defmodule Klife.Protocol.Messages.AlterReplicaLogDirs do
   defp request_schema(2),
     do: [
       dirs:
-        {:array,
+        {:compact_array,
          [
-           path: :string,
-           topics: {:array, [name: :string, partitions: {:array, :int32}, tag_buffer: %{}]},
-           tag_buffer: %{}
+           path: :compact_string,
+           topics:
+             {:compact_array,
+              [
+                name: :compact_string,
+                partitions: {:compact_array, :int32},
+                tag_buffer: {:tag_buffer, %{}}
+              ]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -78,12 +84,14 @@ defmodule Klife.Protocol.Messages.AlterReplicaLogDirs do
     do: [
       throttle_time_ms: :int32,
       results:
-        {:array,
+        {:compact_array,
          [
-           topic_name: :string,
-           partitions: {:array, [partition_index: :int32, error_code: :int16, tag_buffer: %{}]},
-           tag_buffer: %{}
+           topic_name: :compact_string,
+           partitions:
+             {:compact_array,
+              [partition_index: :int32, error_code: :int16, tag_buffer: {:tag_buffer, %{}}]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

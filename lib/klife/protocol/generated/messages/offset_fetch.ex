@@ -39,28 +39,39 @@ defmodule Klife.Protocol.Messages.OffsetFetch do
   defp request_schema(3), do: []
   defp request_schema(4), do: []
   defp request_schema(5), do: []
-  defp request_schema(6), do: [tag_buffer: %{}]
+  defp request_schema(6), do: [tag_buffer: {:tag_buffer, %{}}]
 
   defp request_schema(7),
     do: [
-      group_id: :string,
-      topics: {:array, [name: :string, partition_indexes: {:array, :int32}, tag_buffer: %{}]},
+      group_id: :compact_string,
+      topics:
+        {:compact_array,
+         [
+           name: :compact_string,
+           partition_indexes: {:compact_array, :int32},
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
       require_stable: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(8),
     do: [
       groups:
-        {:array,
+        {:compact_array,
          [
-           group_id: :string,
+           group_id: :compact_string,
            topics:
-             {:array, [name: :string, partition_indexes: {:array, :int32}, tag_buffer: %{}]},
-           tag_buffer: %{}
+             {:compact_array,
+              [
+                name: :compact_string,
+                partition_indexes: {:compact_array, :int32},
+                tag_buffer: {:tag_buffer, %{}}
+              ]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       require_stable: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -85,57 +96,57 @@ defmodule Klife.Protocol.Messages.OffsetFetch do
   defp response_schema(3), do: [throttle_time_ms: :int32]
   defp response_schema(4), do: [throttle_time_ms: :int32]
   defp response_schema(5), do: [throttle_time_ms: :int32]
-  defp response_schema(6), do: [throttle_time_ms: :int32, tag_buffer: %{}]
+  defp response_schema(6), do: [throttle_time_ms: :int32, tag_buffer: {:tag_buffer, %{}}]
 
   defp response_schema(7),
     do: [
       throttle_time_ms: :int32,
       topics:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
            partitions:
-             {:array,
+             {:compact_array,
               [
                 partition_index: :int32,
                 committed_offset: :int64,
                 committed_leader_epoch: :int32,
-                metadata: :string,
+                metadata: :compact_string,
                 error_code: :int16,
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       error_code: :int16,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(8),
     do: [
       throttle_time_ms: :int32,
       groups:
-        {:array,
+        {:compact_array,
          [
-           group_id: :string,
+           group_id: :compact_string,
            topics:
-             {:array,
+             {:compact_array,
               [
-                name: :string,
+                name: :compact_string,
                 partitions:
-                  {:array,
+                  {:compact_array,
                    [
                      partition_index: :int32,
                      committed_offset: :int64,
                      committed_leader_epoch: :int32,
-                     metadata: :string,
+                     metadata: :compact_string,
                      error_code: :int16,
-                     tag_buffer: %{}
+                     tag_buffer: {:tag_buffer, %{}}
                    ]},
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
            error_code: :int16,
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

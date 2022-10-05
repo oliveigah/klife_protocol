@@ -125,29 +125,35 @@ defmodule Klife.Protocol.Messages.LeaderAndIsr do
       controller_epoch: :int32,
       broker_epoch: :int64,
       topic_states:
-        {:array,
+        {:compact_array,
          [
-           topic_name: :string,
+           topic_name: :compact_string,
            partition_states:
-             {:array,
+             {:compact_array,
               [
                 partition_index: :int32,
                 controller_epoch: :int32,
                 leader: :int32,
                 leader_epoch: :int32,
-                isr: {:array, :int32},
+                isr: {:compact_array, :int32},
                 partition_epoch: :int32,
-                replicas: {:array, :int32},
-                adding_replicas: {:array, :int32},
-                removing_replicas: {:array, :int32},
+                replicas: {:compact_array, :int32},
+                adding_replicas: {:compact_array, :int32},
+                removing_replicas: {:compact_array, :int32},
                 is_new: :boolean,
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       live_leaders:
-        {:array, [broker_id: :int32, host_name: :string, port: :int32, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           broker_id: :int32,
+           host_name: :compact_string,
+           port: :int32,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(5),
@@ -157,30 +163,36 @@ defmodule Klife.Protocol.Messages.LeaderAndIsr do
       broker_epoch: :int64,
       type: :int8,
       topic_states:
-        {:array,
+        {:compact_array,
          [
-           topic_name: :string,
+           topic_name: :compact_string,
            topic_id: :uuid,
            partition_states:
-             {:array,
+             {:compact_array,
               [
                 partition_index: :int32,
                 controller_epoch: :int32,
                 leader: :int32,
                 leader_epoch: :int32,
-                isr: {:array, :int32},
+                isr: {:compact_array, :int32},
                 partition_epoch: :int32,
-                replicas: {:array, :int32},
-                adding_replicas: {:array, :int32},
-                removing_replicas: {:array, :int32},
+                replicas: {:compact_array, :int32},
+                adding_replicas: {:compact_array, :int32},
+                removing_replicas: {:compact_array, :int32},
                 is_new: :boolean,
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       live_leaders:
-        {:array, [broker_id: :int32, host_name: :string, port: :int32, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           broker_id: :int32,
+           host_name: :compact_string,
+           port: :int32,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(6),
@@ -190,31 +202,37 @@ defmodule Klife.Protocol.Messages.LeaderAndIsr do
       broker_epoch: :int64,
       type: :int8,
       topic_states:
-        {:array,
+        {:compact_array,
          [
-           topic_name: :string,
+           topic_name: :compact_string,
            topic_id: :uuid,
            partition_states:
-             {:array,
+             {:compact_array,
               [
                 partition_index: :int32,
                 controller_epoch: :int32,
                 leader: :int32,
                 leader_epoch: :int32,
-                isr: {:array, :int32},
+                isr: {:compact_array, :int32},
                 partition_epoch: :int32,
-                replicas: {:array, :int32},
-                adding_replicas: {:array, :int32},
-                removing_replicas: {:array, :int32},
+                replicas: {:compact_array, :int32},
+                adding_replicas: {:compact_array, :int32},
+                removing_replicas: {:compact_array, :int32},
                 is_new: :boolean,
                 leader_recovery_state: :int8,
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       live_leaders:
-        {:array, [broker_id: :int32, host_name: :string, port: :int32, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           broker_id: :int32,
+           host_name: :compact_string,
+           port: :int32,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -232,36 +250,43 @@ defmodule Klife.Protocol.Messages.LeaderAndIsr do
     do: [
       error_code: :int16,
       partition_errors:
-        {:array,
-         [topic_name: :string, partition_index: :int32, error_code: :int16, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           topic_name: :compact_string,
+           partition_index: :int32,
+           error_code: :int16,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(5),
     do: [
       error_code: :int16,
       topics:
-        {:array,
+        {:compact_array,
          [
            topic_id: :uuid,
            partition_errors:
-             {:array, [partition_index: :int32, error_code: :int16, tag_buffer: %{}]},
-           tag_buffer: %{}
+             {:compact_array,
+              [partition_index: :int32, error_code: :int16, tag_buffer: {:tag_buffer, %{}}]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(6),
     do: [
       error_code: :int16,
       topics:
-        {:array,
+        {:compact_array,
          [
            topic_id: :uuid,
            partition_errors:
-             {:array, [partition_index: :int32, error_code: :int16, tag_buffer: %{}]},
-           tag_buffer: %{}
+             {:compact_array,
+              [partition_index: :int32, error_code: :int16, tag_buffer: {:tag_buffer, %{}}]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

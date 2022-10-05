@@ -33,20 +33,38 @@ defmodule Klife.Protocol.Messages.DescribeLogDirs do
 
   defp request_schema(2),
     do: [
-      topics: {:array, [topic: :string, partitions: {:array, :int32}, tag_buffer: %{}]},
-      tag_buffer: %{}
+      topics:
+        {:compact_array,
+         [
+           topic: :compact_string,
+           partitions: {:compact_array, :int32},
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(3),
     do: [
-      topics: {:array, [topic: :string, partitions: {:array, :int32}, tag_buffer: %{}]},
-      tag_buffer: %{}
+      topics:
+        {:compact_array,
+         [
+           topic: :compact_string,
+           partitions: {:compact_array, :int32},
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(4),
     do: [
-      topics: {:array, [topic: :string, partitions: {:array, :int32}, tag_buffer: %{}]},
-      tag_buffer: %{}
+      topics:
+        {:compact_array,
+         [
+           topic: :compact_string,
+           partitions: {:compact_array, :int32},
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -101,28 +119,28 @@ defmodule Klife.Protocol.Messages.DescribeLogDirs do
     do: [
       throttle_time_ms: :int32,
       results:
-        {:array,
+        {:compact_array,
          [
            error_code: :int16,
-           log_dir: :string,
+           log_dir: :compact_string,
            topics:
-             {:array,
+             {:compact_array,
               [
-                name: :string,
+                name: :compact_string,
                 partitions:
-                  {:array,
+                  {:compact_array,
                    [
                      partition_index: :int32,
                      partition_size: :int64,
                      offset_lag: :int64,
                      is_future_key: :boolean,
-                     tag_buffer: %{}
+                     tag_buffer: {:tag_buffer, %{}}
                    ]},
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(3),
@@ -130,28 +148,28 @@ defmodule Klife.Protocol.Messages.DescribeLogDirs do
       throttle_time_ms: :int32,
       error_code: :int16,
       results:
-        {:array,
+        {:compact_array,
          [
            error_code: :int16,
-           log_dir: :string,
+           log_dir: :compact_string,
            topics:
-             {:array,
+             {:compact_array,
               [
-                name: :string,
+                name: :compact_string,
                 partitions:
-                  {:array,
+                  {:compact_array,
                    [
                      partition_index: :int32,
                      partition_size: :int64,
                      offset_lag: :int64,
                      is_future_key: :boolean,
-                     tag_buffer: %{}
+                     tag_buffer: {:tag_buffer, %{}}
                    ]},
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(4),
@@ -159,29 +177,29 @@ defmodule Klife.Protocol.Messages.DescribeLogDirs do
       throttle_time_ms: :int32,
       error_code: :int16,
       results:
-        {:array,
+        {:compact_array,
          [
            error_code: :int16,
-           log_dir: :string,
+           log_dir: :compact_string,
            topics:
-             {:array,
+             {:compact_array,
               [
-                name: :string,
+                name: :compact_string,
                 partitions:
-                  {:array,
+                  {:compact_array,
                    [
                      partition_index: :int32,
                      partition_size: :int64,
                      offset_lag: :int64,
                      is_future_key: :boolean,
-                     tag_buffer: %{}
+                     tag_buffer: {:tag_buffer, %{}}
                    ]},
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
            total_bytes: :int64,
            usable_bytes: :int64,
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

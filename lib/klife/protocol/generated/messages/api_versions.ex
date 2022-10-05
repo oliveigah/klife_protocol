@@ -31,7 +31,11 @@ defmodule Klife.Protocol.Messages.ApiVersions do
   defp request_schema(2), do: []
 
   defp request_schema(3),
-    do: [client_software_name: :string, client_software_version: :string, tag_buffer: %{}]
+    do: [
+      client_software_name: :compact_string,
+      client_software_version: :compact_string,
+      tag_buffer: {:tag_buffer, %{}}
+    ]
 
   defp response_schema(0),
     do: [
@@ -57,17 +61,36 @@ defmodule Klife.Protocol.Messages.ApiVersions do
     do: [
       error_code: :int16,
       api_keys:
-        {:array, [api_key: :int16, min_version: :int16, max_version: :int16, tag_buffer: %{}]},
+        {:compact_array,
+         [
+           api_key: :int16,
+           min_version: :int16,
+           max_version: :int16,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
       throttle_time_ms: :int32,
-      tag_buffer: %{
-        0 =>
-          {:supported_features,
-           {:array, [name: :string, min_version: :int16, max_version: :int16, tag_buffer: %{}]}},
-        1 => {:finalized_features_epoch, :int64},
-        2 =>
-          {:finalized_features,
-           {:array,
-            [name: :string, max_version_level: :int16, min_version_level: :int16, tag_buffer: %{}]}}
-      }
+      tag_buffer:
+        {:tag_buffer,
+         %{
+           0 =>
+             {:supported_features,
+              {:compact_array,
+               [
+                 name: :compact_string,
+                 min_version: :int16,
+                 max_version: :int16,
+                 tag_buffer: {:tag_buffer, %{}}
+               ]}},
+           1 => {:finalized_features_epoch, :int64},
+           2 =>
+             {:finalized_features,
+              {:compact_array,
+               [
+                 name: :compact_string,
+                 max_version_level: :int16,
+                 min_version_level: :int16,
+                 tag_buffer: {:tag_buffer, %{}}
+               ]}}
+         }}
     ]
 end

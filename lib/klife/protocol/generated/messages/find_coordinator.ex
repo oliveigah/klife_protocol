@@ -31,10 +31,16 @@ defmodule Klife.Protocol.Messages.FindCoordinator do
   defp request_schema(0), do: [key: :string]
   defp request_schema(1), do: [key_type: :int8]
   defp request_schema(2), do: [key_type: :int8]
-  defp request_schema(3), do: [key: :string, key_type: :int8, tag_buffer: %{}]
+
+  defp request_schema(3),
+    do: [key: :compact_string, key_type: :int8, tag_buffer: {:tag_buffer, %{}}]
 
   defp request_schema(4),
-    do: [key_type: :int8, coordinator_keys: {:array, :string}, tag_buffer: %{}]
+    do: [
+      key_type: :int8,
+      coordinator_keys: {:compact_array, :compact_string},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
 
   defp response_schema(0), do: [error_code: :int16, node_id: :int32, host: :string, port: :int32]
   defp response_schema(1), do: [throttle_time_ms: :int32, error_message: :string]
@@ -44,27 +50,27 @@ defmodule Klife.Protocol.Messages.FindCoordinator do
     do: [
       throttle_time_ms: :int32,
       error_code: :int16,
-      error_message: :string,
+      error_message: :compact_string,
       node_id: :int32,
-      host: :string,
+      host: :compact_string,
       port: :int32,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(4),
     do: [
       throttle_time_ms: :int32,
       coordinators:
-        {:array,
+        {:compact_array,
          [
-           key: :string,
+           key: :compact_string,
            node_id: :int32,
-           host: :string,
+           host: :compact_string,
            port: :int32,
            error_code: :int16,
-           error_message: :string,
-           tag_buffer: %{}
+           error_message: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

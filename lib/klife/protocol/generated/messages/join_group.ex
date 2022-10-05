@@ -90,52 +90,60 @@ defmodule Klife.Protocol.Messages.JoinGroup do
 
   defp request_schema(6),
     do: [
-      group_id: :string,
+      group_id: :compact_string,
       session_timeout_ms: :int32,
       rebalance_timeout_ms: :int32,
-      member_id: :string,
-      group_instance_id: :string,
-      protocol_type: :string,
-      protocols: {:array, [name: :string, metadata: :bytes, tag_buffer: %{}]},
-      tag_buffer: %{}
+      member_id: :compact_string,
+      group_instance_id: :compact_string,
+      protocol_type: :compact_string,
+      protocols:
+        {:compact_array,
+         [name: :compact_string, metadata: :compact_bytes, tag_buffer: {:tag_buffer, %{}}]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(7),
     do: [
-      group_id: :string,
+      group_id: :compact_string,
       session_timeout_ms: :int32,
       rebalance_timeout_ms: :int32,
-      member_id: :string,
-      group_instance_id: :string,
-      protocol_type: :string,
-      protocols: {:array, [name: :string, metadata: :bytes, tag_buffer: %{}]},
-      tag_buffer: %{}
+      member_id: :compact_string,
+      group_instance_id: :compact_string,
+      protocol_type: :compact_string,
+      protocols:
+        {:compact_array,
+         [name: :compact_string, metadata: :compact_bytes, tag_buffer: {:tag_buffer, %{}}]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(8),
     do: [
-      group_id: :string,
+      group_id: :compact_string,
       session_timeout_ms: :int32,
       rebalance_timeout_ms: :int32,
-      member_id: :string,
-      group_instance_id: :string,
-      protocol_type: :string,
-      protocols: {:array, [name: :string, metadata: :bytes, tag_buffer: %{}]},
-      reason: :string,
-      tag_buffer: %{}
+      member_id: :compact_string,
+      group_instance_id: :compact_string,
+      protocol_type: :compact_string,
+      protocols:
+        {:compact_array,
+         [name: :compact_string, metadata: :compact_bytes, tag_buffer: {:tag_buffer, %{}}]},
+      reason: :compact_string,
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(9),
     do: [
-      group_id: :string,
+      group_id: :compact_string,
       session_timeout_ms: :int32,
       rebalance_timeout_ms: :int32,
-      member_id: :string,
-      group_instance_id: :string,
-      protocol_type: :string,
-      protocols: {:array, [name: :string, metadata: :bytes, tag_buffer: %{}]},
-      reason: :string,
-      tag_buffer: %{}
+      member_id: :compact_string,
+      group_instance_id: :compact_string,
+      protocol_type: :compact_string,
+      protocols:
+        {:compact_array,
+         [name: :compact_string, metadata: :compact_bytes, tag_buffer: {:tag_buffer, %{}}]},
+      reason: :compact_string,
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -207,13 +215,18 @@ defmodule Klife.Protocol.Messages.JoinGroup do
       throttle_time_ms: :int32,
       error_code: :int16,
       generation_id: :int32,
-      protocol_name: :string,
-      leader: :string,
-      member_id: :string,
+      protocol_name: :compact_string,
+      leader: :compact_string,
+      member_id: :compact_string,
       members:
-        {:array,
-         [member_id: :string, group_instance_id: :string, metadata: :bytes, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           member_id: :compact_string,
+           group_instance_id: :compact_string,
+           metadata: :compact_bytes,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(7),
@@ -221,14 +234,19 @@ defmodule Klife.Protocol.Messages.JoinGroup do
       throttle_time_ms: :int32,
       error_code: :int16,
       generation_id: :int32,
-      protocol_type: :string,
-      protocol_name: :string,
-      leader: :string,
-      member_id: :string,
+      protocol_type: :compact_string,
+      protocol_name: :compact_string,
+      leader: :compact_string,
+      member_id: :compact_string,
       members:
-        {:array,
-         [member_id: :string, group_instance_id: :string, metadata: :bytes, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           member_id: :compact_string,
+           group_instance_id: :compact_string,
+           metadata: :compact_bytes,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(8),
@@ -236,14 +254,19 @@ defmodule Klife.Protocol.Messages.JoinGroup do
       throttle_time_ms: :int32,
       error_code: :int16,
       generation_id: :int32,
-      protocol_type: :string,
-      protocol_name: :string,
-      leader: :string,
-      member_id: :string,
+      protocol_type: :compact_string,
+      protocol_name: :compact_string,
+      leader: :compact_string,
+      member_id: :compact_string,
       members:
-        {:array,
-         [member_id: :string, group_instance_id: :string, metadata: :bytes, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           member_id: :compact_string,
+           group_instance_id: :compact_string,
+           metadata: :compact_bytes,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(9),
@@ -251,14 +274,19 @@ defmodule Klife.Protocol.Messages.JoinGroup do
       throttle_time_ms: :int32,
       error_code: :int16,
       generation_id: :int32,
-      protocol_type: :string,
-      protocol_name: :string,
-      leader: :string,
+      protocol_type: :compact_string,
+      protocol_name: :compact_string,
+      leader: :compact_string,
       skip_assignment: :boolean,
-      member_id: :string,
+      member_id: :compact_string,
       members:
-        {:array,
-         [member_id: :string, group_instance_id: :string, metadata: :bytes, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           member_id: :compact_string,
+           group_instance_id: :compact_string,
+           metadata: :compact_bytes,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

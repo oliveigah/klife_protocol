@@ -30,7 +30,9 @@ defmodule Klife.Protocol.Messages.ExpireDelegationToken do
 
   defp request_schema(0), do: [hmac: :bytes, expiry_time_period_ms: :int64]
   defp request_schema(1), do: [hmac: :bytes, expiry_time_period_ms: :int64]
-  defp request_schema(2), do: [hmac: :bytes, expiry_time_period_ms: :int64, tag_buffer: %{}]
+
+  defp request_schema(2),
+    do: [hmac: :compact_bytes, expiry_time_period_ms: :int64, tag_buffer: {:tag_buffer, %{}}]
 
   defp response_schema(0),
     do: [error_code: :int16, expiry_timestamp_ms: :int64, throttle_time_ms: :int32]
@@ -43,6 +45,6 @@ defmodule Klife.Protocol.Messages.ExpireDelegationToken do
       error_code: :int16,
       expiry_timestamp_ms: :int64,
       throttle_time_ms: :int32,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

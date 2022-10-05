@@ -35,7 +35,7 @@ defmodule Klife.Protocol.Messages.BrokerHeartbeat do
       current_metadata_offset: :int64,
       want_fence: :boolean,
       want_shut_down: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -45,6 +45,6 @@ defmodule Klife.Protocol.Messages.BrokerHeartbeat do
       is_caught_up: :boolean,
       is_fenced: :boolean,
       should_shut_down: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

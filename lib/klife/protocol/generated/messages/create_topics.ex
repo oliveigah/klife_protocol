@@ -105,55 +105,76 @@ defmodule Klife.Protocol.Messages.CreateTopics do
   defp request_schema(5),
     do: [
       topics:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
            num_partitions: :int32,
            replication_factor: :int16,
            assignments:
-             {:array, [partition_index: :int32, broker_ids: {:array, :int32}, tag_buffer: %{}]},
-           configs: {:array, [name: :string, value: :string, tag_buffer: %{}]},
-           tag_buffer: %{}
+             {:compact_array,
+              [
+                partition_index: :int32,
+                broker_ids: {:compact_array, :int32},
+                tag_buffer: {:tag_buffer, %{}}
+              ]},
+           configs:
+             {:compact_array,
+              [name: :compact_string, value: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       timeout_ms: :int32,
       validate_only: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(6),
     do: [
       topics:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
            num_partitions: :int32,
            replication_factor: :int16,
            assignments:
-             {:array, [partition_index: :int32, broker_ids: {:array, :int32}, tag_buffer: %{}]},
-           configs: {:array, [name: :string, value: :string, tag_buffer: %{}]},
-           tag_buffer: %{}
+             {:compact_array,
+              [
+                partition_index: :int32,
+                broker_ids: {:compact_array, :int32},
+                tag_buffer: {:tag_buffer, %{}}
+              ]},
+           configs:
+             {:compact_array,
+              [name: :compact_string, value: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       timeout_ms: :int32,
       validate_only: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(7),
     do: [
       topics:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
            num_partitions: :int32,
            replication_factor: :int16,
            assignments:
-             {:array, [partition_index: :int32, broker_ids: {:array, :int32}, tag_buffer: %{}]},
-           configs: {:array, [name: :string, value: :string, tag_buffer: %{}]},
-           tag_buffer: %{}
+             {:compact_array,
+              [
+                partition_index: :int32,
+                broker_ids: {:compact_array, :int32},
+                tag_buffer: {:tag_buffer, %{}}
+              ]},
+           configs:
+             {:compact_array,
+              [name: :compact_string, value: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       timeout_ms: :int32,
       validate_only: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0), do: [topics: {:array, [name: :string, error_code: :int16]}]
@@ -183,78 +204,78 @@ defmodule Klife.Protocol.Messages.CreateTopics do
     do: [
       throttle_time_ms: :int32,
       topics:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
            error_code: :int16,
-           error_message: :string,
+           error_message: :compact_string,
            num_partitions: :int32,
            replication_factor: :int16,
            configs:
-             {:array,
+             {:compact_array,
               [
-                name: :string,
-                value: :string,
+                name: :compact_string,
+                value: :compact_string,
                 read_only: :boolean,
                 config_source: :int8,
                 is_sensitive: :boolean,
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{0 => {:topic_config_error_code, :int16}}
+           tag_buffer: {:tag_buffer, %{0 => {:topic_config_error_code, :int16}}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(6),
     do: [
       throttle_time_ms: :int32,
       topics:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
            error_code: :int16,
-           error_message: :string,
+           error_message: :compact_string,
            num_partitions: :int32,
            replication_factor: :int16,
            configs:
-             {:array,
+             {:compact_array,
               [
-                name: :string,
-                value: :string,
+                name: :compact_string,
+                value: :compact_string,
                 read_only: :boolean,
                 config_source: :int8,
                 is_sensitive: :boolean,
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{0 => {:topic_config_error_code, :int16}}
+           tag_buffer: {:tag_buffer, %{0 => {:topic_config_error_code, :int16}}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(7),
     do: [
       throttle_time_ms: :int32,
       topics:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
            topic_id: :uuid,
            error_code: :int16,
-           error_message: :string,
+           error_message: :compact_string,
            num_partitions: :int32,
            replication_factor: :int16,
            configs:
-             {:array,
+             {:compact_array,
               [
-                name: :string,
-                value: :string,
+                name: :compact_string,
+                value: :compact_string,
                 read_only: :boolean,
                 config_source: :int8,
                 is_sensitive: :boolean,
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{0 => {:topic_config_error_code, :int16}}
+           tag_buffer: {:tag_buffer, %{0 => {:topic_config_error_code, :int16}}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

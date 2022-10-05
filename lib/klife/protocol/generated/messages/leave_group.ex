@@ -37,18 +37,29 @@ defmodule Klife.Protocol.Messages.LeaveGroup do
 
   defp request_schema(4),
     do: [
-      group_id: :string,
-      members: {:array, [member_id: :string, group_instance_id: :string, tag_buffer: %{}]},
-      tag_buffer: %{}
+      group_id: :compact_string,
+      members:
+        {:compact_array,
+         [
+           member_id: :compact_string,
+           group_instance_id: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(5),
     do: [
-      group_id: :string,
+      group_id: :compact_string,
       members:
-        {:array,
-         [member_id: :string, group_instance_id: :string, reason: :string, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           member_id: :compact_string,
+           group_instance_id: :compact_string,
+           reason: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0), do: [error_code: :int16]
@@ -67,9 +78,14 @@ defmodule Klife.Protocol.Messages.LeaveGroup do
       throttle_time_ms: :int32,
       error_code: :int16,
       members:
-        {:array,
-         [member_id: :string, group_instance_id: :string, error_code: :int16, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           member_id: :compact_string,
+           group_instance_id: :compact_string,
+           error_code: :int16,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(5),
@@ -77,8 +93,13 @@ defmodule Klife.Protocol.Messages.LeaveGroup do
       throttle_time_ms: :int32,
       error_code: :int16,
       members:
-        {:array,
-         [member_id: :string, group_instance_id: :string, error_code: :int16, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           member_id: :compact_string,
+           group_instance_id: :compact_string,
+           error_code: :int16,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

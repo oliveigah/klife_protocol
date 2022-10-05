@@ -60,35 +60,35 @@ defmodule Klife.Protocol.Messages.CreateAcls do
   defp request_schema(2),
     do: [
       creations:
-        {:array,
+        {:compact_array,
          [
            resource_type: :int8,
-           resource_name: :string,
+           resource_name: :compact_string,
            resource_pattern_type: :int8,
-           principal: :string,
-           host: :string,
+           principal: :compact_string,
+           host: :compact_string,
            operation: :int8,
            permission_type: :int8,
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(3),
     do: [
       creations:
-        {:array,
+        {:compact_array,
          [
            resource_type: :int8,
-           resource_name: :string,
+           resource_name: :compact_string,
            resource_pattern_type: :int8,
-           principal: :string,
-           host: :string,
+           principal: :compact_string,
+           host: :compact_string,
            operation: :int8,
            permission_type: :int8,
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -106,14 +106,18 @@ defmodule Klife.Protocol.Messages.CreateAcls do
   defp response_schema(2),
     do: [
       throttle_time_ms: :int32,
-      results: {:array, [error_code: :int16, error_message: :string, tag_buffer: %{}]},
-      tag_buffer: %{}
+      results:
+        {:compact_array,
+         [error_code: :int16, error_message: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(3),
     do: [
       throttle_time_ms: :int32,
-      results: {:array, [error_code: :int16, error_message: :string, tag_buffer: %{}]},
-      tag_buffer: %{}
+      results:
+        {:compact_array,
+         [error_code: :int16, error_message: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

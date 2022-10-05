@@ -43,16 +43,22 @@ defmodule Klife.Protocol.Messages.IncrementalAlterConfigs do
   defp request_schema(1),
     do: [
       resources:
-        {:array,
+        {:compact_array,
          [
            resource_type: :int8,
-           resource_name: :string,
+           resource_name: :compact_string,
            configs:
-             {:array, [name: :string, config_operation: :int8, value: :string, tag_buffer: %{}]},
-           tag_buffer: %{}
+             {:compact_array,
+              [
+                name: :compact_string,
+                config_operation: :int8,
+                value: :compact_string,
+                tag_buffer: {:tag_buffer, %{}}
+              ]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       validate_only: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -72,14 +78,14 @@ defmodule Klife.Protocol.Messages.IncrementalAlterConfigs do
     do: [
       throttle_time_ms: :int32,
       responses:
-        {:array,
+        {:compact_array,
          [
            error_code: :int16,
-           error_message: :string,
+           error_message: :compact_string,
            resource_type: :int8,
-           resource_name: :string,
-           tag_buffer: %{}
+           resource_name: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

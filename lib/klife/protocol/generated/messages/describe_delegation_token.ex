@@ -36,14 +36,26 @@ defmodule Klife.Protocol.Messages.DescribeDelegationToken do
 
   defp request_schema(2),
     do: [
-      owners: {:array, [principal_type: :string, principal_name: :string, tag_buffer: %{}]},
-      tag_buffer: %{}
+      owners:
+        {:compact_array,
+         [
+           principal_type: :compact_string,
+           principal_name: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(3),
     do: [
-      owners: {:array, [principal_type: :string, principal_name: :string, tag_buffer: %{}]},
-      tag_buffer: %{}
+      owners:
+        {:compact_array,
+         [
+           principal_type: :compact_string,
+           principal_name: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -86,43 +98,53 @@ defmodule Klife.Protocol.Messages.DescribeDelegationToken do
     do: [
       error_code: :int16,
       tokens:
-        {:array,
+        {:compact_array,
          [
-           principal_type: :string,
-           principal_name: :string,
+           principal_type: :compact_string,
+           principal_name: :compact_string,
            issue_timestamp: :int64,
            expiry_timestamp: :int64,
            max_timestamp: :int64,
-           token_id: :string,
-           hmac: :bytes,
+           token_id: :compact_string,
+           hmac: :compact_bytes,
            renewers:
-             {:array, [principal_type: :string, principal_name: :string, tag_buffer: %{}]},
-           tag_buffer: %{}
+             {:compact_array,
+              [
+                principal_type: :compact_string,
+                principal_name: :compact_string,
+                tag_buffer: {:tag_buffer, %{}}
+              ]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       throttle_time_ms: :int32,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(3),
     do: [
       error_code: :int16,
       tokens:
-        {:array,
+        {:compact_array,
          [
-           principal_type: :string,
-           principal_name: :string,
-           token_requester_principal_type: :string,
-           token_requester_principal_name: :string,
+           principal_type: :compact_string,
+           principal_name: :compact_string,
+           token_requester_principal_type: :compact_string,
+           token_requester_principal_name: :compact_string,
            issue_timestamp: :int64,
            expiry_timestamp: :int64,
            max_timestamp: :int64,
-           token_id: :string,
-           hmac: :bytes,
+           token_id: :compact_string,
+           hmac: :compact_bytes,
            renewers:
-             {:array, [principal_type: :string, principal_name: :string, tag_buffer: %{}]},
-           tag_buffer: %{}
+             {:compact_array,
+              [
+                principal_type: :compact_string,
+                principal_name: :compact_string,
+                tag_buffer: {:tag_buffer, %{}}
+              ]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       throttle_time_ms: :int32,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

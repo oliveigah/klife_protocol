@@ -273,11 +273,11 @@ defmodule Klife.Protocol.Messages.Fetch do
       session_id: :int32,
       session_epoch: :int32,
       topics:
-        {:array,
+        {:compact_array,
          [
-           topic: :string,
+           topic: :compact_string,
            partitions:
-             {:array,
+             {:compact_array,
               [
                 partition: :int32,
                 current_leader_epoch: :int32,
@@ -285,14 +285,19 @@ defmodule Klife.Protocol.Messages.Fetch do
                 last_fetched_epoch: :int32,
                 log_start_offset: :int64,
                 partition_max_bytes: :int32,
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       forgotten_topics_data:
-        {:array, [topic: :string, partitions: {:array, :int32}, tag_buffer: %{}]},
-      rack_id: :string,
-      tag_buffer: %{cluster_id: {0, :string}}
+        {:compact_array,
+         [
+           topic: :compact_string,
+           partitions: {:compact_array, :int32},
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      rack_id: :compact_string,
+      tag_buffer: {:tag_buffer, %{cluster_id: {0, :compact_string}}}
     ]
 
   defp request_schema(13),
@@ -305,11 +310,11 @@ defmodule Klife.Protocol.Messages.Fetch do
       session_id: :int32,
       session_epoch: :int32,
       topics:
-        {:array,
+        {:compact_array,
          [
            topic_id: :uuid,
            partitions:
-             {:array,
+             {:compact_array,
               [
                 partition: :int32,
                 current_leader_epoch: :int32,
@@ -317,14 +322,15 @@ defmodule Klife.Protocol.Messages.Fetch do
                 last_fetched_epoch: :int32,
                 log_start_offset: :int64,
                 partition_max_bytes: :int32,
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       forgotten_topics_data:
-        {:array, [topic_id: :uuid, partitions: {:array, :int32}, tag_buffer: %{}]},
-      rack_id: :string,
-      tag_buffer: %{cluster_id: {0, :string}}
+        {:compact_array,
+         [topic_id: :uuid, partitions: {:compact_array, :int32}, tag_buffer: {:tag_buffer, %{}}]},
+      rack_id: :compact_string,
+      tag_buffer: {:tag_buffer, %{cluster_id: {0, :compact_string}}}
     ]
 
   defp response_schema(0),
@@ -571,11 +577,11 @@ defmodule Klife.Protocol.Messages.Fetch do
       error_code: :int16,
       session_id: :int32,
       responses:
-        {:array,
+        {:compact_array,
          [
-           topic: :string,
+           topic: :compact_string,
            partitions:
-             {:array,
+             {:compact_array,
               [
                 partition_index: :int32,
                 error_code: :int16,
@@ -583,24 +589,30 @@ defmodule Klife.Protocol.Messages.Fetch do
                 last_stable_offset: :int64,
                 log_start_offset: :int64,
                 aborted_transactions:
-                  {:array, [producer_id: :int64, first_offset: :int64, tag_buffer: %{}]},
+                  {:compact_array,
+                   [producer_id: :int64, first_offset: :int64, tag_buffer: {:tag_buffer, %{}}]},
                 preferred_read_replica: :int32,
                 records: :records,
-                tag_buffer: %{
-                  0 =>
-                    {:diverging_epoch,
-                     {:object, [epoch: :int32, end_offset: :int64, tag_buffer: %{}]}},
-                  1 =>
-                    {:current_leader,
-                     {:object, [leader_id: :int32, leader_epoch: :int32, tag_buffer: %{}]}},
-                  2 =>
-                    {:snapshot_id,
-                     {:object, [end_offset: :int64, epoch: :int32, tag_buffer: %{}]}}
-                }
+                tag_buffer:
+                  {:tag_buffer,
+                   %{
+                     0 =>
+                       {:diverging_epoch,
+                        {:object,
+                         [epoch: :int32, end_offset: :int64, tag_buffer: {:tag_buffer, %{}}]}},
+                     1 =>
+                       {:current_leader,
+                        {:object,
+                         [leader_id: :int32, leader_epoch: :int32, tag_buffer: {:tag_buffer, %{}}]}},
+                     2 =>
+                       {:snapshot_id,
+                        {:object,
+                         [end_offset: :int64, epoch: :int32, tag_buffer: {:tag_buffer, %{}}]}}
+                   }}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(13),
@@ -609,11 +621,11 @@ defmodule Klife.Protocol.Messages.Fetch do
       error_code: :int16,
       session_id: :int32,
       responses:
-        {:array,
+        {:compact_array,
          [
            topic_id: :uuid,
            partitions:
-             {:array,
+             {:compact_array,
               [
                 partition_index: :int32,
                 error_code: :int16,
@@ -621,23 +633,29 @@ defmodule Klife.Protocol.Messages.Fetch do
                 last_stable_offset: :int64,
                 log_start_offset: :int64,
                 aborted_transactions:
-                  {:array, [producer_id: :int64, first_offset: :int64, tag_buffer: %{}]},
+                  {:compact_array,
+                   [producer_id: :int64, first_offset: :int64, tag_buffer: {:tag_buffer, %{}}]},
                 preferred_read_replica: :int32,
                 records: :records,
-                tag_buffer: %{
-                  0 =>
-                    {:diverging_epoch,
-                     {:object, [epoch: :int32, end_offset: :int64, tag_buffer: %{}]}},
-                  1 =>
-                    {:current_leader,
-                     {:object, [leader_id: :int32, leader_epoch: :int32, tag_buffer: %{}]}},
-                  2 =>
-                    {:snapshot_id,
-                     {:object, [end_offset: :int64, epoch: :int32, tag_buffer: %{}]}}
-                }
+                tag_buffer:
+                  {:tag_buffer,
+                   %{
+                     0 =>
+                       {:diverging_epoch,
+                        {:object,
+                         [epoch: :int32, end_offset: :int64, tag_buffer: {:tag_buffer, %{}}]}},
+                     1 =>
+                       {:current_leader,
+                        {:object,
+                         [leader_id: :int32, leader_epoch: :int32, tag_buffer: {:tag_buffer, %{}}]}},
+                     2 =>
+                       {:snapshot_id,
+                        {:object,
+                         [end_offset: :int64, epoch: :int32, tag_buffer: {:tag_buffer, %{}}]}}
+                   }}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

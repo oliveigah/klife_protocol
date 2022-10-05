@@ -35,7 +35,11 @@ defmodule Klife.Protocol.Messages.DescribeGroups do
   defp request_schema(4), do: [groups: {:array, :string}, include_authorized_operations: :boolean]
 
   defp request_schema(5),
-    do: [groups: {:array, :string}, include_authorized_operations: :boolean, tag_buffer: %{}]
+    do: [
+      groups: {:compact_array, :compact_string},
+      include_authorized_operations: :boolean,
+      tag_buffer: {:tag_buffer, %{}}
+    ]
 
   defp response_schema(0),
     do: [
@@ -158,27 +162,27 @@ defmodule Klife.Protocol.Messages.DescribeGroups do
     do: [
       throttle_time_ms: :int32,
       groups:
-        {:array,
+        {:compact_array,
          [
            error_code: :int16,
-           group_id: :string,
-           group_state: :string,
-           protocol_type: :string,
-           protocol_data: :string,
+           group_id: :compact_string,
+           group_state: :compact_string,
+           protocol_type: :compact_string,
+           protocol_data: :compact_string,
            members:
-             {:array,
+             {:compact_array,
               [
-                member_id: :string,
-                group_instance_id: :string,
-                client_id: :string,
-                client_host: :string,
-                member_metadata: :bytes,
-                member_assignment: :bytes,
-                tag_buffer: %{}
+                member_id: :compact_string,
+                group_instance_id: :compact_string,
+                client_id: :compact_string,
+                client_host: :compact_string,
+                member_metadata: :compact_bytes,
+                member_assignment: :compact_bytes,
+                tag_buffer: {:tag_buffer, %{}}
               ]},
            authorized_operations: :int32,
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

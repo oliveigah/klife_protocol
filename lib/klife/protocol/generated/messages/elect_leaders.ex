@@ -44,9 +44,15 @@ defmodule Klife.Protocol.Messages.ElectLeaders do
   defp request_schema(2),
     do: [
       election_type: :int8,
-      topic_partitions: {:array, [topic: :string, partitions: {:array, :int32}, tag_buffer: %{}]},
+      topic_partitions:
+        {:compact_array,
+         [
+           topic: :compact_string,
+           partitions: {:compact_array, :int32},
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
       timeout_ms: :int32,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -79,14 +85,19 @@ defmodule Klife.Protocol.Messages.ElectLeaders do
       throttle_time_ms: :int32,
       error_code: :int16,
       replica_election_results:
-        {:array,
+        {:compact_array,
          [
-           topic: :string,
+           topic: :compact_string,
            partition_result:
-             {:array,
-              [partition_id: :int32, error_code: :int16, error_message: :string, tag_buffer: %{}]},
-           tag_buffer: %{}
+             {:compact_array,
+              [
+                partition_id: :int32,
+                error_code: :int16,
+                error_message: :compact_string,
+                tag_buffer: {:tag_buffer, %{}}
+              ]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

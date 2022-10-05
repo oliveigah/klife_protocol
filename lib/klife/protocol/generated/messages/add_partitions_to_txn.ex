@@ -54,11 +54,17 @@ defmodule Klife.Protocol.Messages.AddPartitionsToTxn do
 
   defp request_schema(3),
     do: [
-      transactional_id: :string,
+      transactional_id: :compact_string,
       producer_id: :int64,
       producer_epoch: :int16,
-      topics: {:array, [name: :string, partitions: {:array, :int32}, tag_buffer: %{}]},
-      tag_buffer: %{}
+      topics:
+        {:compact_array,
+         [
+           name: :compact_string,
+           partitions: {:compact_array, :int32},
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -89,12 +95,14 @@ defmodule Klife.Protocol.Messages.AddPartitionsToTxn do
     do: [
       throttle_time_ms: :int32,
       results:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
-           results: {:array, [partition_index: :int32, error_code: :int16, tag_buffer: %{}]},
-           tag_buffer: %{}
+           name: :compact_string,
+           results:
+             {:compact_array,
+              [partition_index: :int32, error_code: :int16, tag_buffer: {:tag_buffer, %{}}]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

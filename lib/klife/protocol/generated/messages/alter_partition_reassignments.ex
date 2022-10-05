@@ -32,35 +32,40 @@ defmodule Klife.Protocol.Messages.AlterPartitionReassignments do
     do: [
       timeout_ms: :int32,
       topics:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
            partitions:
-             {:array, [partition_index: :int32, replicas: {:array, :int32}, tag_buffer: %{}]},
-           tag_buffer: %{}
+             {:compact_array,
+              [
+                partition_index: :int32,
+                replicas: {:compact_array, :int32},
+                tag_buffer: {:tag_buffer, %{}}
+              ]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
     do: [
       throttle_time_ms: :int32,
       error_code: :int16,
-      error_message: :string,
+      error_message: :compact_string,
       responses:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
            partitions:
-             {:array,
+             {:compact_array,
               [
                 partition_index: :int32,
                 error_code: :int16,
-                error_message: :string,
-                tag_buffer: %{}
+                error_message: :compact_string,
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

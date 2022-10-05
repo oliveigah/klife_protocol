@@ -30,7 +30,9 @@ defmodule Klife.Protocol.Messages.DeleteGroups do
 
   defp request_schema(0), do: [groups_names: {:array, :string}]
   defp request_schema(1), do: [groups_names: {:array, :string}]
-  defp request_schema(2), do: [groups_names: {:array, :string}, tag_buffer: %{}]
+
+  defp request_schema(2),
+    do: [groups_names: {:compact_array, :compact_string}, tag_buffer: {:tag_buffer, %{}}]
 
   defp response_schema(0),
     do: [throttle_time_ms: :int32, results: {:array, [group_id: :string, error_code: :int16]}]
@@ -41,7 +43,9 @@ defmodule Klife.Protocol.Messages.DeleteGroups do
   defp response_schema(2),
     do: [
       throttle_time_ms: :int32,
-      results: {:array, [group_id: :string, error_code: :int16, tag_buffer: %{}]},
-      tag_buffer: %{}
+      results:
+        {:compact_array,
+         [group_id: :compact_string, error_code: :int16, tag_buffer: {:tag_buffer, %{}}]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

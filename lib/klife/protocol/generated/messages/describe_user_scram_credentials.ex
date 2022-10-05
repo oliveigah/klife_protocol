@@ -28,22 +28,28 @@ defmodule Klife.Protocol.Messages.DescribeUserScramCredentials do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0), do: [users: {:array, [name: :string, tag_buffer: %{}]}, tag_buffer: %{}]
+  defp request_schema(0),
+    do: [
+      users: {:compact_array, [name: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
 
   defp response_schema(0),
     do: [
       throttle_time_ms: :int32,
       error_code: :int16,
-      error_message: :string,
+      error_message: :compact_string,
       results:
-        {:array,
+        {:compact_array,
          [
-           user: :string,
+           user: :compact_string,
            error_code: :int16,
-           error_message: :string,
-           credential_infos: {:array, [mechanism: :int8, iterations: :int32, tag_buffer: %{}]},
-           tag_buffer: %{}
+           error_message: :compact_string,
+           credential_infos:
+             {:compact_array,
+              [mechanism: :int8, iterations: :int32, tag_buffer: {:tag_buffer, %{}}]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

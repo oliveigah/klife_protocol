@@ -42,18 +42,30 @@ defmodule Klife.Protocol.Messages.CreateDelegationToken do
 
   defp request_schema(2),
     do: [
-      renewers: {:array, [principal_type: :string, principal_name: :string, tag_buffer: %{}]},
+      renewers:
+        {:compact_array,
+         [
+           principal_type: :compact_string,
+           principal_name: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
       max_lifetime_ms: :int64,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(3),
     do: [
-      owner_principal_type: :string,
-      owner_principal_name: :string,
-      renewers: {:array, [principal_type: :string, principal_name: :string, tag_buffer: %{}]},
+      owner_principal_type: :compact_string,
+      owner_principal_name: :compact_string,
+      renewers:
+        {:compact_array,
+         [
+           principal_type: :compact_string,
+           principal_name: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
       max_lifetime_ms: :int64,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -85,30 +97,30 @@ defmodule Klife.Protocol.Messages.CreateDelegationToken do
   defp response_schema(2),
     do: [
       error_code: :int16,
-      principal_type: :string,
-      principal_name: :string,
+      principal_type: :compact_string,
+      principal_name: :compact_string,
       issue_timestamp_ms: :int64,
       expiry_timestamp_ms: :int64,
       max_timestamp_ms: :int64,
-      token_id: :string,
-      hmac: :bytes,
+      token_id: :compact_string,
+      hmac: :compact_bytes,
       throttle_time_ms: :int32,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(3),
     do: [
       error_code: :int16,
-      principal_type: :string,
-      principal_name: :string,
-      token_requester_principal_type: :string,
-      token_requester_principal_name: :string,
+      principal_type: :compact_string,
+      principal_name: :compact_string,
+      token_requester_principal_type: :compact_string,
+      token_requester_principal_name: :compact_string,
       issue_timestamp_ms: :int64,
       expiry_timestamp_ms: :int64,
       max_timestamp_ms: :int64,
-      token_id: :string,
-      hmac: :bytes,
+      token_id: :compact_string,
+      hmac: :compact_bytes,
       throttle_time_ms: :int32,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

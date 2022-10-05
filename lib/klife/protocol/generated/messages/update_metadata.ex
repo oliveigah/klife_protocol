@@ -151,41 +151,41 @@ defmodule Klife.Protocol.Messages.UpdateMetadata do
       controller_epoch: :int32,
       broker_epoch: :int64,
       topic_states:
-        {:array,
+        {:compact_array,
          [
-           topic_name: :string,
+           topic_name: :compact_string,
            partition_states:
-             {:array,
+             {:compact_array,
               [
                 partition_index: :int32,
                 controller_epoch: :int32,
                 leader: :int32,
                 leader_epoch: :int32,
-                isr: {:array, :int32},
+                isr: {:compact_array, :int32},
                 zk_version: :int32,
-                replicas: {:array, :int32},
-                offline_replicas: {:array, :int32},
-                tag_buffer: %{}
+                replicas: {:compact_array, :int32},
+                offline_replicas: {:compact_array, :int32},
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       live_brokers:
-        {:array,
+        {:compact_array,
          [
            id: :int32,
            endpoints:
-             {:array,
+             {:compact_array,
               [
                 port: :int32,
-                host: :string,
-                listener: :string,
+                host: :compact_string,
+                listener: :compact_string,
                 security_protocol: :int16,
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           rack: :string,
-           tag_buffer: %{}
+           rack: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(7),
@@ -194,42 +194,42 @@ defmodule Klife.Protocol.Messages.UpdateMetadata do
       controller_epoch: :int32,
       broker_epoch: :int64,
       topic_states:
-        {:array,
+        {:compact_array,
          [
-           topic_name: :string,
+           topic_name: :compact_string,
            topic_id: :uuid,
            partition_states:
-             {:array,
+             {:compact_array,
               [
                 partition_index: :int32,
                 controller_epoch: :int32,
                 leader: :int32,
                 leader_epoch: :int32,
-                isr: {:array, :int32},
+                isr: {:compact_array, :int32},
                 zk_version: :int32,
-                replicas: {:array, :int32},
-                offline_replicas: {:array, :int32},
-                tag_buffer: %{}
+                replicas: {:compact_array, :int32},
+                offline_replicas: {:compact_array, :int32},
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       live_brokers:
-        {:array,
+        {:compact_array,
          [
            id: :int32,
            endpoints:
-             {:array,
+             {:compact_array,
               [
                 port: :int32,
-                host: :string,
-                listener: :string,
+                host: :compact_string,
+                listener: :compact_string,
                 security_protocol: :int16,
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           rack: :string,
-           tag_buffer: %{}
+           rack: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0), do: [error_code: :int16]
@@ -238,6 +238,6 @@ defmodule Klife.Protocol.Messages.UpdateMetadata do
   defp response_schema(3), do: [error_code: :int16]
   defp response_schema(4), do: [error_code: :int16]
   defp response_schema(5), do: [error_code: :int16]
-  defp response_schema(6), do: [error_code: :int16, tag_buffer: %{}]
-  defp response_schema(7), do: [error_code: :int16, tag_buffer: %{}]
+  defp response_schema(6), do: [error_code: :int16, tag_buffer: {:tag_buffer, %{}}]
+  defp response_schema(7), do: [error_code: :int16, tag_buffer: {:tag_buffer, %{}}]
 end

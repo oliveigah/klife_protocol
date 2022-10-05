@@ -34,7 +34,9 @@ defmodule Klife.Protocol.Messages.ControlledShutdown do
   defp request_schema(0), do: [broker_id: :int32]
   defp request_schema(1), do: [broker_id: :int32]
   defp request_schema(2), do: [broker_id: :int32, broker_epoch: :int64]
-  defp request_schema(3), do: [broker_id: :int32, broker_epoch: :int64, tag_buffer: %{}]
+
+  defp request_schema(3),
+    do: [broker_id: :int32, broker_epoch: :int64, tag_buffer: {:tag_buffer, %{}}]
 
   defp response_schema(0),
     do: [
@@ -58,7 +60,8 @@ defmodule Klife.Protocol.Messages.ControlledShutdown do
     do: [
       error_code: :int16,
       remaining_partitions:
-        {:array, [topic_name: :string, partition_index: :int32, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [topic_name: :compact_string, partition_index: :int32, tag_buffer: {:tag_buffer, %{}}]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

@@ -30,7 +30,7 @@ defmodule Klife.Protocol.Messages.SaslAuthenticate do
 
   defp request_schema(0), do: [auth_bytes: :bytes]
   defp request_schema(1), do: [auth_bytes: :bytes]
-  defp request_schema(2), do: [auth_bytes: :bytes, tag_buffer: %{}]
+  defp request_schema(2), do: [auth_bytes: :compact_bytes, tag_buffer: {:tag_buffer, %{}}]
 
   defp response_schema(0), do: [error_code: :int16, error_message: :string, auth_bytes: :bytes]
 
@@ -45,9 +45,9 @@ defmodule Klife.Protocol.Messages.SaslAuthenticate do
   defp response_schema(2),
     do: [
       error_code: :int16,
-      error_message: :string,
-      auth_bytes: :bytes,
+      error_message: :compact_string,
+      auth_bytes: :compact_bytes,
       session_lifetime_ms: :int64,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

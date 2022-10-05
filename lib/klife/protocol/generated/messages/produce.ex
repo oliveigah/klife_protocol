@@ -108,17 +108,18 @@ defmodule Klife.Protocol.Messages.Produce do
 
   defp request_schema(9),
     do: [
-      transactional_id: :string,
+      transactional_id: :compact_string,
       acks: :int16,
       timeout_ms: :int32,
       topic_data:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
-           partition_data: {:array, [index: :int32, records: :records, tag_buffer: %{}]},
-           tag_buffer: %{}
+           name: :compact_string,
+           partition_data:
+             {:compact_array, [index: :int32, records: :records, tag_buffer: {:tag_buffer, %{}}]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -263,11 +264,11 @@ defmodule Klife.Protocol.Messages.Produce do
   defp response_schema(9),
     do: [
       responses:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
            partition_responses:
-             {:array,
+             {:compact_array,
               [
                 index: :int32,
                 error_code: :int16,
@@ -275,14 +276,18 @@ defmodule Klife.Protocol.Messages.Produce do
                 log_append_time_ms: :int64,
                 log_start_offset: :int64,
                 record_errors:
-                  {:array,
-                   [batch_index: :int32, batch_index_error_message: :string, tag_buffer: %{}]},
-                error_message: :string,
-                tag_buffer: %{}
+                  {:compact_array,
+                   [
+                     batch_index: :int32,
+                     batch_index_error_message: :compact_string,
+                     tag_buffer: {:tag_buffer, %{}}
+                   ]},
+                error_message: :compact_string,
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       throttle_time_ms: :int32,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

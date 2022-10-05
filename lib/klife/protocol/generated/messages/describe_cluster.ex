@@ -28,18 +28,26 @@ defmodule Klife.Protocol.Messages.DescribeCluster do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0), do: [include_cluster_authorized_operations: :boolean, tag_buffer: %{}]
+  defp request_schema(0),
+    do: [include_cluster_authorized_operations: :boolean, tag_buffer: {:tag_buffer, %{}}]
 
   defp response_schema(0),
     do: [
       throttle_time_ms: :int32,
       error_code: :int16,
-      error_message: :string,
-      cluster_id: :string,
+      error_message: :compact_string,
+      cluster_id: :compact_string,
       controller_id: :int32,
       brokers:
-        {:array, [broker_id: :int32, host: :string, port: :int32, rack: :string, tag_buffer: %{}]},
+        {:compact_array,
+         [
+           broker_id: :int32,
+           host: :compact_string,
+           port: :int32,
+           rack: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
       cluster_authorized_operations: :int32,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

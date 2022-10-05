@@ -50,8 +50,14 @@ defmodule Klife.Protocol.Messages.StopReplica do
       controller_epoch: :int32,
       broker_epoch: :int64,
       delete_partitions: :boolean,
-      topics: {:array, [name: :string, partition_indexes: {:array, :int32}, tag_buffer: %{}]},
-      tag_buffer: %{}
+      topics:
+        {:compact_array,
+         [
+           name: :compact_string,
+           partition_indexes: {:compact_array, :int32},
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(3),
@@ -60,20 +66,20 @@ defmodule Klife.Protocol.Messages.StopReplica do
       controller_epoch: :int32,
       broker_epoch: :int64,
       topic_states:
-        {:array,
+        {:compact_array,
          [
-           topic_name: :string,
+           topic_name: :compact_string,
            partition_states:
-             {:array,
+             {:compact_array,
               [
                 partition_index: :int32,
                 leader_epoch: :int32,
                 delete_partition: :boolean,
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -94,17 +100,27 @@ defmodule Klife.Protocol.Messages.StopReplica do
     do: [
       error_code: :int16,
       partition_errors:
-        {:array,
-         [topic_name: :string, partition_index: :int32, error_code: :int16, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           topic_name: :compact_string,
+           partition_index: :int32,
+           error_code: :int16,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(3),
     do: [
       error_code: :int16,
       partition_errors:
-        {:array,
-         [topic_name: :string, partition_index: :int32, error_code: :int16, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           topic_name: :compact_string,
+           partition_index: :int32,
+           error_code: :int16,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

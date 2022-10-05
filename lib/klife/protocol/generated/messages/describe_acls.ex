@@ -52,25 +52,25 @@ defmodule Klife.Protocol.Messages.DescribeAcls do
   defp request_schema(2),
     do: [
       resource_type_filter: :int8,
-      resource_name_filter: :string,
+      resource_name_filter: :compact_string,
       pattern_type_filter: :int8,
-      principal_filter: :string,
-      host_filter: :string,
+      principal_filter: :compact_string,
+      host_filter: :compact_string,
       operation: :int8,
       permission_type: :int8,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(3),
     do: [
       resource_type_filter: :int8,
-      resource_name_filter: :string,
+      resource_name_filter: :compact_string,
       pattern_type_filter: :int8,
-      principal_filter: :string,
-      host_filter: :string,
+      principal_filter: :compact_string,
+      host_filter: :compact_string,
       operation: :int8,
       permission_type: :int8,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -110,49 +110,49 @@ defmodule Klife.Protocol.Messages.DescribeAcls do
     do: [
       throttle_time_ms: :int32,
       error_code: :int16,
-      error_message: :string,
+      error_message: :compact_string,
       resources:
-        {:array,
+        {:compact_array,
          [
            resource_type: :int8,
-           resource_name: :string,
+           resource_name: :compact_string,
            pattern_type: :int8,
            acls:
-             {:array,
+             {:compact_array,
               [
-                principal: :string,
-                host: :string,
+                principal: :compact_string,
+                host: :compact_string,
                 operation: :int8,
                 permission_type: :int8,
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(3),
     do: [
       throttle_time_ms: :int32,
       error_code: :int16,
-      error_message: :string,
+      error_message: :compact_string,
       resources:
-        {:array,
+        {:compact_array,
          [
            resource_type: :int8,
-           resource_name: :string,
+           resource_name: :compact_string,
            pattern_type: :int8,
            acls:
-             {:array,
+             {:compact_array,
               [
-                principal: :string,
-                host: :string,
+                principal: :compact_string,
+                host: :compact_string,
                 operation: :int8,
                 permission_type: :int8,
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

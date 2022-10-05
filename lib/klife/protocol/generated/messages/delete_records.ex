@@ -45,14 +45,16 @@ defmodule Klife.Protocol.Messages.DeleteRecords do
   defp request_schema(2),
     do: [
       topics:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
-           partitions: {:array, [partition_index: :int32, offset: :int64, tag_buffer: %{}]},
-           tag_buffer: %{}
+           name: :compact_string,
+           partitions:
+             {:compact_array,
+              [partition_index: :int32, offset: :int64, tag_buffer: {:tag_buffer, %{}}]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       timeout_ms: :int32,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -83,19 +85,19 @@ defmodule Klife.Protocol.Messages.DeleteRecords do
     do: [
       throttle_time_ms: :int32,
       topics:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
            partitions:
-             {:array,
+             {:compact_array,
               [
                 partition_index: :int32,
                 low_watermark: :int64,
                 error_code: :int16,
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

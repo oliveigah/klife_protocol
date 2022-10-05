@@ -37,9 +37,15 @@ defmodule Klife.Protocol.Messages.DescribeClientQuotas do
   defp request_schema(1),
     do: [
       components:
-        {:array, [entity_type: :string, match_type: :int8, match: :string, tag_buffer: %{}]},
+        {:compact_array,
+         [
+           entity_type: :compact_string,
+           match_type: :int8,
+           match: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
       strict: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -59,14 +65,22 @@ defmodule Klife.Protocol.Messages.DescribeClientQuotas do
     do: [
       throttle_time_ms: :int32,
       error_code: :int16,
-      error_message: :string,
+      error_message: :compact_string,
       entries:
-        {:array,
+        {:compact_array,
          [
-           entity: {:array, [entity_type: :string, entity_name: :string, tag_buffer: %{}]},
-           values: {:array, [key: :string, value: :float64, tag_buffer: %{}]},
-           tag_buffer: %{}
+           entity:
+             {:compact_array,
+              [
+                entity_type: :compact_string,
+                entity_name: :compact_string,
+                tag_buffer: {:tag_buffer, %{}}
+              ]},
+           values:
+             {:compact_array,
+              [key: :compact_string, value: :float64, tag_buffer: {:tag_buffer, %{}}]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

@@ -55,35 +55,38 @@ defmodule Klife.Protocol.Messages.Metadata do
 
   defp request_schema(9),
     do: [
-      topics: {:array, [name: :string, tag_buffer: %{}]},
+      topics: {:compact_array, [name: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
       allow_auto_topic_creation: :boolean,
       include_topic_authorized_operations: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(10),
     do: [
-      topics: {:array, [topic_id: :uuid, name: :string, tag_buffer: %{}]},
+      topics:
+        {:compact_array, [topic_id: :uuid, name: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
       allow_auto_topic_creation: :boolean,
       include_cluster_authorized_operations: :boolean,
       include_topic_authorized_operations: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(11),
     do: [
-      topics: {:array, [topic_id: :uuid, name: :string, tag_buffer: %{}]},
+      topics:
+        {:compact_array, [topic_id: :uuid, name: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
       allow_auto_topic_creation: :boolean,
       include_topic_authorized_operations: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(12),
     do: [
-      topics: {:array, [topic_id: :uuid, name: :string, tag_buffer: %{}]},
+      topics:
+        {:compact_array, [topic_id: :uuid, name: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
       allow_auto_topic_creation: :boolean,
       include_topic_authorized_operations: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -307,127 +310,155 @@ defmodule Klife.Protocol.Messages.Metadata do
     do: [
       throttle_time_ms: :int32,
       brokers:
-        {:array, [node_id: :int32, host: :string, port: :int32, rack: :string, tag_buffer: %{}]},
-      cluster_id: :string,
+        {:compact_array,
+         [
+           node_id: :int32,
+           host: :compact_string,
+           port: :int32,
+           rack: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      cluster_id: :compact_string,
       controller_id: :int32,
       topics:
-        {:array,
+        {:compact_array,
          [
            error_code: :int16,
-           name: :string,
+           name: :compact_string,
            is_internal: :boolean,
            partitions:
-             {:array,
+             {:compact_array,
               [
                 error_code: :int16,
                 partition_index: :int32,
                 leader_id: :int32,
                 leader_epoch: :int32,
-                replica_nodes: {:array, :int32},
-                isr_nodes: {:array, :int32},
-                offline_replicas: {:array, :int32},
-                tag_buffer: %{}
+                replica_nodes: {:compact_array, :int32},
+                isr_nodes: {:compact_array, :int32},
+                offline_replicas: {:compact_array, :int32},
+                tag_buffer: {:tag_buffer, %{}}
               ]},
            topic_authorized_operations: :int32,
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(10),
     do: [
       throttle_time_ms: :int32,
       brokers:
-        {:array, [node_id: :int32, host: :string, port: :int32, rack: :string, tag_buffer: %{}]},
-      cluster_id: :string,
+        {:compact_array,
+         [
+           node_id: :int32,
+           host: :compact_string,
+           port: :int32,
+           rack: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      cluster_id: :compact_string,
       controller_id: :int32,
       topics:
-        {:array,
+        {:compact_array,
          [
            error_code: :int16,
-           name: :string,
+           name: :compact_string,
            topic_id: :uuid,
            is_internal: :boolean,
            partitions:
-             {:array,
+             {:compact_array,
               [
                 error_code: :int16,
                 partition_index: :int32,
                 leader_id: :int32,
                 leader_epoch: :int32,
-                replica_nodes: {:array, :int32},
-                isr_nodes: {:array, :int32},
-                offline_replicas: {:array, :int32},
-                tag_buffer: %{}
+                replica_nodes: {:compact_array, :int32},
+                isr_nodes: {:compact_array, :int32},
+                offline_replicas: {:compact_array, :int32},
+                tag_buffer: {:tag_buffer, %{}}
               ]},
            topic_authorized_operations: :int32,
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       cluster_authorized_operations: :int32,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(11),
     do: [
       throttle_time_ms: :int32,
       brokers:
-        {:array, [node_id: :int32, host: :string, port: :int32, rack: :string, tag_buffer: %{}]},
-      cluster_id: :string,
+        {:compact_array,
+         [
+           node_id: :int32,
+           host: :compact_string,
+           port: :int32,
+           rack: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      cluster_id: :compact_string,
       controller_id: :int32,
       topics:
-        {:array,
+        {:compact_array,
          [
            error_code: :int16,
-           name: :string,
+           name: :compact_string,
            topic_id: :uuid,
            is_internal: :boolean,
            partitions:
-             {:array,
+             {:compact_array,
               [
                 error_code: :int16,
                 partition_index: :int32,
                 leader_id: :int32,
                 leader_epoch: :int32,
-                replica_nodes: {:array, :int32},
-                isr_nodes: {:array, :int32},
-                offline_replicas: {:array, :int32},
-                tag_buffer: %{}
+                replica_nodes: {:compact_array, :int32},
+                isr_nodes: {:compact_array, :int32},
+                offline_replicas: {:compact_array, :int32},
+                tag_buffer: {:tag_buffer, %{}}
               ]},
            topic_authorized_operations: :int32,
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(12),
     do: [
       throttle_time_ms: :int32,
       brokers:
-        {:array, [node_id: :int32, host: :string, port: :int32, rack: :string, tag_buffer: %{}]},
-      cluster_id: :string,
+        {:compact_array,
+         [
+           node_id: :int32,
+           host: :compact_string,
+           port: :int32,
+           rack: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      cluster_id: :compact_string,
       controller_id: :int32,
       topics:
-        {:array,
+        {:compact_array,
          [
            error_code: :int16,
-           name: :string,
+           name: :compact_string,
            topic_id: :uuid,
            is_internal: :boolean,
            partitions:
-             {:array,
+             {:compact_array,
               [
                 error_code: :int16,
                 partition_index: :int32,
                 leader_id: :int32,
                 leader_epoch: :int32,
-                replica_nodes: {:array, :int32},
-                isr_nodes: {:array, :int32},
-                offline_replicas: {:array, :int32},
-                tag_buffer: %{}
+                replica_nodes: {:compact_array, :int32},
+                isr_nodes: {:compact_array, :int32},
+                offline_replicas: {:compact_array, :int32},
+                tag_buffer: {:tag_buffer, %{}}
               ]},
            topic_authorized_operations: :int32,
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

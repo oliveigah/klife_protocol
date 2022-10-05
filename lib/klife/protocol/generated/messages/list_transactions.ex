@@ -29,21 +29,25 @@ defmodule Klife.Protocol.Messages.ListTransactions do
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
   defp request_schema(0),
-    do: [state_filters: {:array, :string}, producer_id_filters: {:array, :int64}, tag_buffer: %{}]
+    do: [
+      state_filters: {:compact_array, :compact_string},
+      producer_id_filters: {:compact_array, :int64},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
 
   defp response_schema(0),
     do: [
       throttle_time_ms: :int32,
       error_code: :int16,
-      unknown_state_filters: {:array, :string},
+      unknown_state_filters: {:compact_array, :compact_string},
       transaction_states:
-        {:array,
+        {:compact_array,
          [
-           transactional_id: :string,
+           transactional_id: :compact_string,
            producer_id: :int64,
-           transaction_state: :string,
-           tag_buffer: %{}
+           transaction_state: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

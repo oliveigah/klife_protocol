@@ -31,23 +31,34 @@ defmodule Klife.Protocol.Messages.BrokerRegistration do
   defp request_schema(0),
     do: [
       broker_id: :int32,
-      cluster_id: :string,
+      cluster_id: :compact_string,
       incarnation_id: :uuid,
       listeners:
-        {:array,
-         [name: :string, host: :string, port: :uint16, security_protocol: :int16, tag_buffer: %{}]},
-      features:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
+           host: :compact_string,
+           port: :uint16,
+           security_protocol: :int16,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      features:
+        {:compact_array,
+         [
+           name: :compact_string,
            min_supported_version: :int16,
            max_supported_version: :int16,
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      rack: :string,
-      tag_buffer: %{}
+      rack: :compact_string,
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
-    do: [throttle_time_ms: :int32, error_code: :int16, broker_epoch: :int64, tag_buffer: %{}]
+    do: [
+      throttle_time_ms: :int32,
+      error_code: :int16,
+      broker_epoch: :int64,
+      tag_buffer: {:tag_buffer, %{}}
+    ]
 end

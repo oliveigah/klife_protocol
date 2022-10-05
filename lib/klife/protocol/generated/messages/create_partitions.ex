@@ -49,31 +49,35 @@ defmodule Klife.Protocol.Messages.CreatePartitions do
   defp request_schema(2),
     do: [
       topics:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
            count: :int32,
-           assignments: {:array, [broker_ids: {:array, :int32}, tag_buffer: %{}]},
-           tag_buffer: %{}
+           assignments:
+             {:compact_array,
+              [broker_ids: {:compact_array, :int32}, tag_buffer: {:tag_buffer, %{}}]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       timeout_ms: :int32,
       validate_only: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(3),
     do: [
       topics:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
            count: :int32,
-           assignments: {:array, [broker_ids: {:array, :int32}, tag_buffer: %{}]},
-           tag_buffer: %{}
+           assignments:
+             {:compact_array,
+              [broker_ids: {:compact_array, :int32}, tag_buffer: {:tag_buffer, %{}}]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       timeout_ms: :int32,
       validate_only: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -92,15 +96,27 @@ defmodule Klife.Protocol.Messages.CreatePartitions do
     do: [
       throttle_time_ms: :int32,
       results:
-        {:array, [name: :string, error_code: :int16, error_message: :string, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           name: :compact_string,
+           error_code: :int16,
+           error_message: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(3),
     do: [
       throttle_time_ms: :int32,
       results:
-        {:array, [name: :string, error_code: :int16, error_message: :string, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           name: :compact_string,
+           error_code: :int16,
+           error_message: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

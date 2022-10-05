@@ -31,36 +31,38 @@ defmodule Klife.Protocol.Messages.DescribeQuorum do
   defp request_schema(0),
     do: [
       topics:
-        {:array,
+        {:compact_array,
          [
-           topic_name: :string,
-           partitions: {:array, [partition_index: :int32, tag_buffer: %{}]},
-           tag_buffer: %{}
+           topic_name: :compact_string,
+           partitions:
+             {:compact_array, [partition_index: :int32, tag_buffer: {:tag_buffer, %{}}]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(1),
     do: [
       topics:
-        {:array,
+        {:compact_array,
          [
-           topic_name: :string,
-           partitions: {:array, [partition_index: :int32, tag_buffer: %{}]},
-           tag_buffer: %{}
+           topic_name: :compact_string,
+           partitions:
+             {:compact_array, [partition_index: :int32, tag_buffer: {:tag_buffer, %{}}]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
     do: [
       error_code: :int16,
       topics:
-        {:array,
+        {:compact_array,
          [
-           topic_name: :string,
+           topic_name: :compact_string,
            partitions:
-             {:array,
+             {:compact_array,
               [
                 partition_index: :int32,
                 error_code: :int16,
@@ -68,25 +70,27 @@ defmodule Klife.Protocol.Messages.DescribeQuorum do
                 leader_epoch: :int32,
                 high_watermark: :int64,
                 current_voters:
-                  {:array, [replica_id: :int32, log_end_offset: :int64, tag_buffer: %{}]},
+                  {:compact_array,
+                   [replica_id: :int32, log_end_offset: :int64, tag_buffer: {:tag_buffer, %{}}]},
                 observers:
-                  {:array, [replica_id: :int32, log_end_offset: :int64, tag_buffer: %{}]},
-                tag_buffer: %{}
+                  {:compact_array,
+                   [replica_id: :int32, log_end_offset: :int64, tag_buffer: {:tag_buffer, %{}}]},
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(1),
     do: [
       error_code: :int16,
       topics:
-        {:array,
+        {:compact_array,
          [
-           topic_name: :string,
+           topic_name: :compact_string,
            partitions:
-             {:array,
+             {:compact_array,
               [
                 partition_index: :int32,
                 error_code: :int16,
@@ -94,27 +98,27 @@ defmodule Klife.Protocol.Messages.DescribeQuorum do
                 leader_epoch: :int32,
                 high_watermark: :int64,
                 current_voters:
-                  {:array,
+                  {:compact_array,
                    [
                      replica_id: :int32,
                      log_end_offset: :int64,
                      last_fetch_timestamp: :int64,
                      last_caught_up_timestamp: :int64,
-                     tag_buffer: %{}
+                     tag_buffer: {:tag_buffer, %{}}
                    ]},
                 observers:
-                  {:array,
+                  {:compact_array,
                    [
                      replica_id: :int32,
                      log_end_offset: :int64,
                      last_fetch_timestamp: :int64,
                      last_caught_up_timestamp: :int64,
-                     tag_buffer: %{}
+                     tag_buffer: {:tag_buffer, %{}}
                    ]},
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

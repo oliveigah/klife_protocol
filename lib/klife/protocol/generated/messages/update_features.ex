@@ -32,38 +32,60 @@ defmodule Klife.Protocol.Messages.UpdateFeatures do
     do: [
       timeout_ms: :int32,
       feature_updates:
-        {:array,
-         [feature: :string, max_version_level: :int16, allow_downgrade: :boolean, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           feature: :compact_string,
+           max_version_level: :int16,
+           allow_downgrade: :boolean,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(1),
     do: [
       timeout_ms: :int32,
       feature_updates:
-        {:array,
-         [feature: :string, max_version_level: :int16, upgrade_type: :int8, tag_buffer: %{}]},
+        {:compact_array,
+         [
+           feature: :compact_string,
+           max_version_level: :int16,
+           upgrade_type: :int8,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
       validate_only: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
     do: [
       throttle_time_ms: :int32,
       error_code: :int16,
-      error_message: :string,
+      error_message: :compact_string,
       results:
-        {:array, [feature: :string, error_code: :int16, error_message: :string, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           feature: :compact_string,
+           error_code: :int16,
+           error_message: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(1),
     do: [
       throttle_time_ms: :int32,
       error_code: :int16,
-      error_message: :string,
+      error_message: :compact_string,
       results:
-        {:array, [feature: :string, error_code: :int16, error_message: :string, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           feature: :compact_string,
+           error_code: :int16,
+           error_message: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

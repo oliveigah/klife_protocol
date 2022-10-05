@@ -28,7 +28,8 @@ defmodule Klife.Protocol.Messages.AllocateProducerIds do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0), do: [broker_id: :int32, broker_epoch: :int64, tag_buffer: %{}]
+  defp request_schema(0),
+    do: [broker_id: :int32, broker_epoch: :int64, tag_buffer: {:tag_buffer, %{}}]
 
   defp response_schema(0),
     do: [
@@ -36,6 +37,6 @@ defmodule Klife.Protocol.Messages.AllocateProducerIds do
       error_code: :int16,
       producer_id_start: :int64,
       producer_id_len: :int32,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

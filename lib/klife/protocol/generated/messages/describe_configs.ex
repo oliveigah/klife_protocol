@@ -63,16 +63,16 @@ defmodule Klife.Protocol.Messages.DescribeConfigs do
   defp request_schema(4),
     do: [
       resources:
-        {:array,
+        {:compact_array,
          [
            resource_type: :int8,
-           resource_name: :string,
-           configuration_keys: {:array, :string},
-           tag_buffer: %{}
+           resource_name: :compact_string,
+           configuration_keys: {:compact_array, :compact_string},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       include_synonyms: :boolean,
       include_documentation: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -172,28 +172,34 @@ defmodule Klife.Protocol.Messages.DescribeConfigs do
     do: [
       throttle_time_ms: :int32,
       results:
-        {:array,
+        {:compact_array,
          [
            error_code: :int16,
-           error_message: :string,
+           error_message: :compact_string,
            resource_type: :int8,
-           resource_name: :string,
+           resource_name: :compact_string,
            configs:
-             {:array,
+             {:compact_array,
               [
-                name: :string,
-                value: :string,
+                name: :compact_string,
+                value: :compact_string,
                 read_only: :boolean,
                 config_source: :int8,
                 is_sensitive: :boolean,
                 synonyms:
-                  {:array, [name: :string, value: :string, source: :int8, tag_buffer: %{}]},
+                  {:compact_array,
+                   [
+                     name: :compact_string,
+                     value: :compact_string,
+                     source: :int8,
+                     tag_buffer: {:tag_buffer, %{}}
+                   ]},
                 config_type: :int8,
-                documentation: :string,
-                tag_buffer: %{}
+                documentation: :compact_string,
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

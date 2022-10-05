@@ -44,17 +44,22 @@ defmodule Klife.Protocol.Messages.WriteTxnMarkers do
   defp request_schema(1),
     do: [
       markers:
-        {:array,
+        {:compact_array,
          [
            producer_id: :int64,
            producer_epoch: :int16,
            transaction_result: :boolean,
            topics:
-             {:array, [name: :string, partition_indexes: {:array, :int32}, tag_buffer: %{}]},
+             {:compact_array,
+              [
+                name: :compact_string,
+                partition_indexes: {:compact_array, :int32},
+                tag_buffer: {:tag_buffer, %{}}
+              ]},
            coordinator_epoch: :int32,
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -72,19 +77,20 @@ defmodule Klife.Protocol.Messages.WriteTxnMarkers do
   defp response_schema(1),
     do: [
       markers:
-        {:array,
+        {:compact_array,
          [
            producer_id: :int64,
            topics:
-             {:array,
+             {:compact_array,
               [
-                name: :string,
+                name: :compact_string,
                 partitions:
-                  {:array, [partition_index: :int32, error_code: :int16, tag_buffer: %{}]},
-                tag_buffer: %{}
+                  {:compact_array,
+                   [partition_index: :int32, error_code: :int16, tag_buffer: {:tag_buffer, %{}}]},
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

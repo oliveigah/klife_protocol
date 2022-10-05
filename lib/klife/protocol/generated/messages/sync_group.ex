@@ -63,24 +63,28 @@ defmodule Klife.Protocol.Messages.SyncGroup do
 
   defp request_schema(4),
     do: [
-      group_id: :string,
+      group_id: :compact_string,
       generation_id: :int32,
-      member_id: :string,
-      group_instance_id: :string,
-      assignments: {:array, [member_id: :string, assignment: :bytes, tag_buffer: %{}]},
-      tag_buffer: %{}
+      member_id: :compact_string,
+      group_instance_id: :compact_string,
+      assignments:
+        {:compact_array,
+         [member_id: :compact_string, assignment: :compact_bytes, tag_buffer: {:tag_buffer, %{}}]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp request_schema(5),
     do: [
-      group_id: :string,
+      group_id: :compact_string,
       generation_id: :int32,
-      member_id: :string,
-      group_instance_id: :string,
-      protocol_type: :string,
-      protocol_name: :string,
-      assignments: {:array, [member_id: :string, assignment: :bytes, tag_buffer: %{}]},
-      tag_buffer: %{}
+      member_id: :compact_string,
+      group_instance_id: :compact_string,
+      protocol_type: :compact_string,
+      protocol_name: :compact_string,
+      assignments:
+        {:compact_array,
+         [member_id: :compact_string, assignment: :compact_bytes, tag_buffer: {:tag_buffer, %{}}]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0), do: [error_code: :int16, assignment: :bytes]
@@ -89,15 +93,20 @@ defmodule Klife.Protocol.Messages.SyncGroup do
   defp response_schema(3), do: [throttle_time_ms: :int32, error_code: :int16, assignment: :bytes]
 
   defp response_schema(4),
-    do: [throttle_time_ms: :int32, error_code: :int16, assignment: :bytes, tag_buffer: %{}]
+    do: [
+      throttle_time_ms: :int32,
+      error_code: :int16,
+      assignment: :compact_bytes,
+      tag_buffer: {:tag_buffer, %{}}
+    ]
 
   defp response_schema(5),
     do: [
       throttle_time_ms: :int32,
       error_code: :int16,
-      protocol_type: :string,
-      protocol_name: :string,
-      assignment: :bytes,
-      tag_buffer: %{}
+      protocol_type: :compact_string,
+      protocol_name: :compact_string,
+      assignment: :compact_bytes,
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

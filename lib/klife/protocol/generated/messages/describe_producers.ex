@@ -30,25 +30,31 @@ defmodule Klife.Protocol.Messages.DescribeProducers do
 
   defp request_schema(0),
     do: [
-      topics: {:array, [name: :string, partition_indexes: {:array, :int32}, tag_buffer: %{}]},
-      tag_buffer: %{}
+      topics:
+        {:compact_array,
+         [
+           name: :compact_string,
+           partition_indexes: {:compact_array, :int32},
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
     do: [
       throttle_time_ms: :int32,
       topics:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
            partitions:
-             {:array,
+             {:compact_array,
               [
                 partition_index: :int32,
                 error_code: :int16,
-                error_message: :string,
+                error_message: :compact_string,
                 active_producers:
-                  {:array,
+                  {:compact_array,
                    [
                      producer_id: :int64,
                      producer_epoch: :int32,
@@ -56,12 +62,12 @@ defmodule Klife.Protocol.Messages.DescribeProducers do
                      last_timestamp: :int64,
                      coordinator_epoch: :int32,
                      current_txn_start_offset: :int64,
-                     tag_buffer: %{}
+                     tag_buffer: {:tag_buffer, %{}}
                    ]},
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

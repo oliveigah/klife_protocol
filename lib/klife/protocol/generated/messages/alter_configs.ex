@@ -55,15 +55,17 @@ defmodule Klife.Protocol.Messages.AlterConfigs do
   defp request_schema(2),
     do: [
       resources:
-        {:array,
+        {:compact_array,
          [
            resource_type: :int8,
-           resource_name: :string,
-           configs: {:array, [name: :string, value: :string, tag_buffer: %{}]},
-           tag_buffer: %{}
+           resource_name: :compact_string,
+           configs:
+             {:compact_array,
+              [name: :compact_string, value: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       validate_only: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -96,14 +98,14 @@ defmodule Klife.Protocol.Messages.AlterConfigs do
     do: [
       throttle_time_ms: :int32,
       responses:
-        {:array,
+        {:compact_array,
          [
            error_code: :int16,
-           error_message: :string,
+           error_message: :compact_string,
            resource_type: :int8,
-           resource_name: :string,
-           tag_buffer: %{}
+           resource_name: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

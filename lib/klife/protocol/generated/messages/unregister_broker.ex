@@ -28,8 +28,13 @@ defmodule Klife.Protocol.Messages.UnregisterBroker do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0), do: [broker_id: :int32, tag_buffer: %{}]
+  defp request_schema(0), do: [broker_id: :int32, tag_buffer: {:tag_buffer, %{}}]
 
   defp response_schema(0),
-    do: [throttle_time_ms: :int32, error_code: :int16, error_message: :string, tag_buffer: %{}]
+    do: [
+      throttle_time_ms: :int32,
+      error_code: :int16,
+      error_message: :compact_string,
+      tag_buffer: {:tag_buffer, %{}}
+    ]
 end

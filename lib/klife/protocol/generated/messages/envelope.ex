@@ -30,11 +30,12 @@ defmodule Klife.Protocol.Messages.Envelope do
 
   defp request_schema(0),
     do: [
-      request_data: :bytes,
-      request_principal: :bytes,
-      client_host_address: :bytes,
-      tag_buffer: %{}
+      request_data: :compact_bytes,
+      request_principal: :compact_bytes,
+      client_host_address: :compact_bytes,
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(0), do: [response_data: :bytes, error_code: :int16, tag_buffer: %{}]
+  defp response_schema(0),
+    do: [response_data: :compact_bytes, error_code: :int16, tag_buffer: {:tag_buffer, %{}}]
 end

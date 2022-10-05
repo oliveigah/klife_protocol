@@ -83,29 +83,29 @@ defmodule Klife.Protocol.Messages.TxnOffsetCommit do
 
   defp request_schema(3),
     do: [
-      transactional_id: :string,
-      group_id: :string,
+      transactional_id: :compact_string,
+      group_id: :compact_string,
       producer_id: :int64,
       producer_epoch: :int16,
       generation_id: :int32,
-      member_id: :string,
-      group_instance_id: :string,
+      member_id: :compact_string,
+      group_instance_id: :compact_string,
       topics:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
            partitions:
-             {:array,
+             {:compact_array,
               [
                 partition_index: :int32,
                 committed_offset: :int64,
                 committed_leader_epoch: :int32,
-                committed_metadata: :string,
-                tag_buffer: %{}
+                committed_metadata: :compact_string,
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -136,12 +136,14 @@ defmodule Klife.Protocol.Messages.TxnOffsetCommit do
     do: [
       throttle_time_ms: :int32,
       topics:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
-           partitions: {:array, [partition_index: :int32, error_code: :int16, tag_buffer: %{}]},
-           tag_buffer: %{}
+           name: :compact_string,
+           partitions:
+             {:compact_array,
+              [partition_index: :int32, error_code: :int16, tag_buffer: {:tag_buffer, %{}}]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

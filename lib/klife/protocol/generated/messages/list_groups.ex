@@ -31,8 +31,10 @@ defmodule Klife.Protocol.Messages.ListGroups do
   defp request_schema(0), do: []
   defp request_schema(1), do: []
   defp request_schema(2), do: []
-  defp request_schema(3), do: [tag_buffer: %{}]
-  defp request_schema(4), do: [states_filter: {:array, :string}, tag_buffer: %{}]
+  defp request_schema(3), do: [tag_buffer: {:tag_buffer, %{}}]
+
+  defp request_schema(4),
+    do: [states_filter: {:compact_array, :compact_string}, tag_buffer: {:tag_buffer, %{}}]
 
   defp response_schema(0),
     do: [error_code: :int16, groups: {:array, [group_id: :string, protocol_type: :string]}]
@@ -55,8 +57,14 @@ defmodule Klife.Protocol.Messages.ListGroups do
     do: [
       throttle_time_ms: :int32,
       error_code: :int16,
-      groups: {:array, [group_id: :string, protocol_type: :string, tag_buffer: %{}]},
-      tag_buffer: %{}
+      groups:
+        {:compact_array,
+         [
+           group_id: :compact_string,
+           protocol_type: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(4),
@@ -64,8 +72,13 @@ defmodule Klife.Protocol.Messages.ListGroups do
       throttle_time_ms: :int32,
       error_code: :int16,
       groups:
-        {:array,
-         [group_id: :string, protocol_type: :string, group_state: :string, tag_buffer: %{}]},
-      tag_buffer: %{}
+        {:compact_array,
+         [
+           group_id: :compact_string,
+           protocol_type: :compact_string,
+           group_state: :compact_string,
+           tag_buffer: {:tag_buffer, %{}}
+         ]},
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

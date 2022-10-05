@@ -33,21 +33,22 @@ defmodule Klife.Protocol.Messages.FetchSnapshot do
       replica_id: :int32,
       max_bytes: :int32,
       topics:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
            partitions:
-             {:array,
+             {:compact_array,
               [
                 partition: :int32,
                 current_leader_epoch: :int32,
-                snapshot_id: {:object, [end_offset: :int64, epoch: :int32, tag_buffer: %{}]},
+                snapshot_id:
+                  {:object, [end_offset: :int64, epoch: :int32, tag_buffer: {:tag_buffer, %{}}]},
                 position: :int64,
-                tag_buffer: %{}
+                tag_buffer: {:tag_buffer, %{}}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{cluster_id: {0, :string}}
+      tag_buffer: {:tag_buffer, %{cluster_id: {0, :compact_string}}}
     ]
 
   defp response_schema(0),
@@ -55,26 +56,30 @@ defmodule Klife.Protocol.Messages.FetchSnapshot do
       throttle_time_ms: :int32,
       error_code: :int16,
       topics:
-        {:array,
+        {:compact_array,
          [
-           name: :string,
+           name: :compact_string,
            partitions:
-             {:array,
+             {:compact_array,
               [
                 index: :int32,
                 error_code: :int16,
-                snapshot_id: {:object, [end_offset: :int64, epoch: :int32, tag_buffer: %{}]},
+                snapshot_id:
+                  {:object, [end_offset: :int64, epoch: :int32, tag_buffer: {:tag_buffer, %{}}]},
                 size: :int64,
                 position: :int64,
                 unaligned_records: :records,
-                tag_buffer: %{
-                  0 =>
-                    {:current_leader,
-                     {:object, [leader_id: :int32, leader_epoch: :int32, tag_buffer: %{}]}}
-                }
+                tag_buffer:
+                  {:tag_buffer,
+                   %{
+                     0 =>
+                       {:current_leader,
+                        {:object,
+                         [leader_id: :int32, leader_epoch: :int32, tag_buffer: {:tag_buffer, %{}}]}}
+                   }}
               ]},
-           tag_buffer: %{}
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end

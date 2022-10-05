@@ -42,14 +42,27 @@ defmodule Klife.Protocol.Messages.AlterClientQuotas do
   defp request_schema(1),
     do: [
       entries:
-        {:array,
+        {:compact_array,
          [
-           entity: {:array, [entity_type: :string, entity_name: :string, tag_buffer: %{}]},
-           ops: {:array, [key: :string, value: :float64, remove: :boolean, tag_buffer: %{}]},
-           tag_buffer: %{}
+           entity:
+             {:compact_array,
+              [
+                entity_type: :compact_string,
+                entity_name: :compact_string,
+                tag_buffer: {:tag_buffer, %{}}
+              ]},
+           ops:
+             {:compact_array,
+              [
+                key: :compact_string,
+                value: :float64,
+                remove: :boolean,
+                tag_buffer: {:tag_buffer, %{}}
+              ]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
       validate_only: :boolean,
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 
   defp response_schema(0),
@@ -68,13 +81,19 @@ defmodule Klife.Protocol.Messages.AlterClientQuotas do
     do: [
       throttle_time_ms: :int32,
       entries:
-        {:array,
+        {:compact_array,
          [
            error_code: :int16,
-           error_message: :string,
-           entity: {:array, [entity_type: :string, entity_name: :string, tag_buffer: %{}]},
-           tag_buffer: %{}
+           error_message: :compact_string,
+           entity:
+             {:compact_array,
+              [
+                entity_type: :compact_string,
+                entity_name: :compact_string,
+                tag_buffer: {:tag_buffer, %{}}
+              ]},
+           tag_buffer: {:tag_buffer, %{}}
          ]},
-      tag_buffer: %{}
+      tag_buffer: {:tag_buffer, %{}}
     ]
 end
