@@ -19,4 +19,5 @@ defmodule Klife.Protocol.Header do
 
     def serialize_request(data, version),
     do: Serializer.execute(data, request_schema(version))
+    
 end

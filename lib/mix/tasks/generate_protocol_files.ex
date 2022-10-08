@@ -96,9 +96,6 @@ if Mix.env() == :dev do
         |> Path.relative()
         |> File.read!()
         |> EEx.eval_string(bindings)
-        |> tap(fn e ->
-          if String.contains?(e, [":not_found", "nil"]), do: raise("maluco")
-        end)
         |> Code.format_string!()
 
       file_name = to_snake_case(module_name)

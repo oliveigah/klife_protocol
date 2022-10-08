@@ -24,6 +24,7 @@ defmodule Klife.Protocol.Deserializer do
   defp deserialize_value(<<val::8-signed, rest_data::binary>>, :int8), do: {val, rest_data}
   defp deserialize_value(<<val::16-signed, rest_data::binary>>, :int16), do: {val, rest_data}
   defp deserialize_value(<<val::32-signed, rest_data::binary>>, :int32), do: {val, rest_data}
+  defp deserialize_value(<<val::32-signed, rest_data::binary>>, :int64), do: {val, rest_data}
   defp deserialize_value(<<-1::16-signed, rest_data::binary>>, :string), do: {nil, rest_data}
 
   defp deserialize_value(<<len::16-signed, val::size(len)-binary, rest_data::binary>>, :string),

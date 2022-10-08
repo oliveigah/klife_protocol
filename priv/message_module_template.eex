@@ -80,5 +80,4 @@ defmodule Klife.Protocol.Messages.<%= module_name %> do
         """
     end) %>
 
-
 end
