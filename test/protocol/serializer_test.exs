@@ -1,7 +1,7 @@
-defmodule Klife.Protocol.SerializerTest do
+defmodule KlifeProtocol.SerializerTest do
   use ExUnit.Case
 
-  alias Klife.Protocol.Serializer
+  alias KlifeProtocol.Serializer
 
   test "int16" do
     input = %{a: 31, b: 123, c: 4}

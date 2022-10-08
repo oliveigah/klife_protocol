@@ -1,7 +1,7 @@
-defmodule Klife.Protocol.DeserializerTest do
+defmodule KlifeProtocol.DeserializerTest do
   use ExUnit.Case
 
-  alias Klife.Protocol.Deserializer
+  alias KlifeProtocol.Deserializer
 
   test "int16" do
     assert {%{a: 31, b: 123, c: 4}, <<>>} =

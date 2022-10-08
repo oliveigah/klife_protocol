@@ -1,9 +1,9 @@
-defmodule Klife.MixProject do
+defmodule KlifeProtocol.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :klife,
+      app: :klife_protocol,
       version: "0.1.0",
       elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
@@ -14,8 +14,7 @@ defmodule Klife.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger],
-      mod: {Klife.Application, []}
+      extra_applications: [:logger]
     ]
   end
 

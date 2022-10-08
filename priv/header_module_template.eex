@@ -1,6 +1,6 @@
-defmodule Klife.Protocol.Header do
-    alias Klife.Protocol.Deserializer
-    alias Klife.Protocol.Serializer
+defmodule KlifeProtocol.Header do
+    alias KlifeProtocol.Deserializer
+    alias KlifeProtocol.Serializer
 
     <%= Enum.map(request_schemas, fn {version, schema} -> 
         """

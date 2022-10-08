@@ -1,7 +1,7 @@
-defmodule Klife.Protocol.Messages.<%= module_name %> do
-    alias Klife.Protocol.Deserializer
-    alias Klife.Protocol.Serializer
-    alias Klife.Protocol.Header
+defmodule KlifeProtocol.Messages.<%= module_name %> do
+    alias KlifeProtocol.Deserializer
+    alias KlifeProtocol.Serializer
+    alias KlifeProtocol.Header
 
     @api_key <%= api_key %>
     <%= 
