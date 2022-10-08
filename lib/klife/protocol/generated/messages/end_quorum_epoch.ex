@@ -9,7 +9,7 @@ defmodule Klife.Protocol.Messages.EndQuorumEpoch do
 
   def deserialize_response(data, version) do
     with {headers, rest_data} <- Header.deserialize_response(data, res_header_version(version)),
-         {content, <<>>} <- Deserializer.execute(rest_data, response_schema(version)) do
+         {content, _} <- Deserializer.execute(rest_data, response_schema(version)) do
       %{headers: headers, content: content}
     end
   end
