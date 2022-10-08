@@ -9,7 +9,7 @@ defmodule Klife do
     msg =
       Messages.ApiVersions.serialize_request(
         %{
-          correlation_id: 12345,
+          correlation_id: 123_456,
           client_id: "client",
           client_software_name: "some_software_name",
           client_software_version: "v0.0.0"
@@ -23,6 +23,8 @@ defmodule Klife do
     Messages.ApiVersions.deserialize_response(received_data, api_version_message_v)
     |> IO.inspect(label: "Kafka Response API Versions Request")
 
+    # create_topic_v = 5
+
     # msg =
     #   Messages.CreateTopics.serialize_request(
     #     %{
@@ -30,22 +32,23 @@ defmodule Klife do
     #       client_id: "some_crazy_client",
     #       topics: [
     #         %{
-    #           name: "my_first_topic_abc",
+    #           name: "my_first_topic_abc_new_1",
     #           num_partitions: 3,
     #           replication_factor: 2,
     #           assignments: [],
     #           configs: []
     #         }
     #       ],
-    #       timeout_ms: 2000
+    #       timeout_ms: 2000,
+    #       validate_only: false
     #     },
-    #     0
+    #     create_topic_v
     #   )
 
     # :gen_tcp.send(socket, msg)
     # {:ok, received_data} = :gen_tcp.recv(socket, 0, 1000)
 
-    # Messages.CreateTopics.deserialize_response(received_data, 0)
+    # Messages.CreateTopics.deserialize_response(received_data, create_topic_v)
     # |> IO.inspect(label: "Kafka Response Create Topics Request")
 
     :gen_tcp.close(socket)

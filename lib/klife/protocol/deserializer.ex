@@ -7,13 +7,21 @@ defmodule Klife.Protocol.Deserializer do
 
   defp do_deserialize([], data, result), do: {result, data}
 
+  defp do_deserialize([{_key, {:tag_buffer, _} = schema} | rest_schema], data, acc_result) do
+    {val, rest_data} = deserialize_value(data, schema)
+    new_result = Map.merge(acc_result, val)
+    do_deserialize(rest_schema, rest_data, new_result)
+  end
+
   defp do_deserialize([{key, schema} | rest_schema], data, acc_result) do
-    IO.inspect({key, schema})
     {val, rest_data} = deserialize_value(data, schema)
     new_result = Map.put(acc_result, key, val)
     do_deserialize(rest_schema, rest_data, new_result)
   end
 
+  defp deserialize_value(<<1, rest_data::binary>>, :boolean), do: {true, rest_data}
+  defp deserialize_value(<<0, rest_data::binary>>, :boolean), do: {false, rest_data}
+  defp deserialize_value(<<val::8-signed, rest_data::binary>>, :int8), do: {val, rest_data}
   defp deserialize_value(<<val::16-signed, rest_data::binary>>, :int16), do: {val, rest_data}
   defp deserialize_value(<<val::32-signed, rest_data::binary>>, :int32), do: {val, rest_data}
   defp deserialize_value(<<-1::16-signed, rest_data::binary>>, :string), do: {nil, rest_data}
@@ -30,18 +38,43 @@ defmodule Klife.Protocol.Deserializer do
   defp deserialize_value(<<len::32-signed, rest_data::binary>>, {:array, schema}),
     do: deserialize_array(rest_data, len, schema, [])
 
+  defp deserialize_value(binary, :compact_string) do
+    {len, rest_binary} = deserialize_value(binary, :varint)
+
+    if len > 0 do
+      len = len - 1
+      <<val::binary-size(len), rest_binary::binary>> = rest_binary
+      {val, rest_binary}
+    else
+      {nil, rest_binary}
+    end
+  end
+
+  defp deserialize_value(binary, {:compact_array, schema}) do
+    {len, rest_binary} = deserialize_value(binary, :varint)
+    if len > 0, do: deserialize_array(rest_binary, len - 1, schema, []), else: {nil, rest_binary}
+  end
+
   defp deserialize_value(binary, :varint), do: deserialize_varint(binary)
 
-  # defp deserialize_value(binary_data, {:tag_buffer, schema}) do
-  #   case deserialize_varint(binary_data) do
-  #     {0, rest_data} ->
-  #       {[], binary_data}
+  defp deserialize_value(binary, {:tag_buffer, tagged_fields}) do
+    {len, rest_binary} = deserialize_value(binary, :varint)
 
-  #     {items, rest_data} ->
-  #       IO.inspect(items, label: "asdasudh")
-  #       nil
-  #   end
-  # end
+    if len > 0,
+      do: deserialize_tag_buffer(rest_binary, len, tagged_fields, %{}),
+      else: {%{}, rest_binary}
+  end
+
+  defp deserialize_tag_buffer(rest_data, 0, _tagged_fields, result), do: {result, rest_data}
+
+  defp deserialize_tag_buffer(data, len, tagged_fields, result) do
+    {field_tag, rest_binary} = deserialize_value(data, :varint)
+    {_field_len, rest_binary} = deserialize_value(rest_binary, :varint)
+    {field_name, field_schema} = Map.fetch!(tagged_fields, field_tag)
+    {field_value, rest_binary} = deserialize_value(rest_binary, field_schema)
+    new_result = Map.put(result, field_name, field_value)
+    deserialize_tag_buffer(rest_binary, len - 1, tagged_fields, new_result)
+  end
 
   # TODO: Improve deserialize_array/4 algorithm to insert elements in the array with proper order
   # so we can remove the call to Enum.reverse/1 on return
