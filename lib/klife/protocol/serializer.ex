@@ -8,6 +8,12 @@ defmodule Klife.Protocol.Serializer do
   defp do_serialize([], map, result_data) when is_map(map), do: result_data
   defp do_serialize(_schema, [], result_data), do: result_data
 
+  defp do_serialize([{_key, {:tag_buffer, _} = type} | rest_schema], %{} = input_map, acc_data) do
+    input_map
+    |> serialize_value(type)
+    |> then(&do_serialize(rest_schema, input_map, acc_data <> &1))
+  end
+
   defp do_serialize([{key, type} | rest_schema], %{} = input_map, acc_data) do
     input_map
     |> Map.get(key)
@@ -27,14 +33,6 @@ defmodule Klife.Protocol.Serializer do
     val
     |> serialize_value(schema)
     |> then(&do_serialize(schema, rest_val, acc_data <> &1))
-  end
-
-  # Used in arrays of tag buffers
-  defp do_serialize(schema, [{tag, tag_val}, rest], acc_data) when is_map(schema) do
-    schema
-    |> Map.get(tag)
-    |> then(&serialize_value(tag_val, &1))
-    |> then(&do_serialize(schema, rest, acc_data <> &1))
   end
 
   defp serialize_value(true, :boolean), do: <<1>>
@@ -66,15 +64,26 @@ defmodule Klife.Protocol.Serializer do
   defp serialize_value(val, {:compact_array, schema}),
     do: do_serialize(schema, val, serialize_value(length(val) + 1, :varint))
 
-  defp serialize_value(nil, {:tag_buffer, _tag_schema}), do: serialize_value(0, :varint)
-
-  # defp serialize_value(val, {:tag_buffer, tag_schema}) do
-  #   ordered_tags = Enum.sort(val, fn {k1, _v1}, {k2, _v2} -> k1 < k2 end)
-  #   do_serialize(tag_schema, ordered_tags, serialize_value(length(val), :varint))
-  # end
-
   defp serialize_value(val, :varint) when val <= 127 and val >= 0, do: <<val>>
 
   defp serialize_value(val, :varint) when val > 127,
     do: <<1::1, band(val, 127)::7>> <> serialize_value(bsr(val, 7), :varint)
+
+  defp serialize_value(_input_map, {:tag_buffer, []}), do: serialize_value(0, :varint)
+
+  defp serialize_value(input_map, {:tag_buffer, tag_schema}) do
+    existing_schema = Enum.filter(tag_schema, fn {key, _} -> Map.has_key?(input_map, key) end)
+    len = length(existing_schema)
+    serialize_tag_buffer(existing_schema, input_map, serialize_value(len, :varint))
+  end
+
+  defp serialize_tag_buffer([{key, {tag, type}} | rest_schema], %{} = input_map, acc_data) do
+    input_map
+    |> Map.fetch!(key)
+    |> then(&serialize_tagged_field(tag, type, &1))
+    |> then(&serialize_tag_buffer(rest_schema, input_map, acc_data <> &1))
+  end
+
+  defp serialize_tagged_field(tag, type, val),
+    do: serialize_value(tag, :varint) <> serialize_value(val, type)
 end
