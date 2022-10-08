@@ -285,19 +285,19 @@ defmodule Klife.Protocol.Messages.Fetch do
                 last_fetched_epoch: :int32,
                 log_start_offset: :int64,
                 partition_max_bytes: :int32,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       forgotten_topics_data:
         {:compact_array,
          [
            topic: :compact_string,
            partitions: {:compact_array, :int32},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       rack_id: :compact_string,
-      tag_buffer: {:tag_buffer, %{cluster_id: {0, :compact_string}}}
+      tag_buffer: {:tag_buffer, [cluster_id: {0, :compact_string}]}
     ]
 
   defp request_schema(13),
@@ -322,15 +322,15 @@ defmodule Klife.Protocol.Messages.Fetch do
                 last_fetched_epoch: :int32,
                 log_start_offset: :int64,
                 partition_max_bytes: :int32,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       forgotten_topics_data:
         {:compact_array,
-         [topic_id: :uuid, partitions: {:compact_array, :int32}, tag_buffer: {:tag_buffer, %{}}]},
+         [topic_id: :uuid, partitions: {:compact_array, :int32}, tag_buffer: {:tag_buffer, []}]},
       rack_id: :compact_string,
-      tag_buffer: {:tag_buffer, %{cluster_id: {0, :compact_string}}}
+      tag_buffer: {:tag_buffer, [cluster_id: {0, :compact_string}]}
     ]
 
   defp response_schema(0),

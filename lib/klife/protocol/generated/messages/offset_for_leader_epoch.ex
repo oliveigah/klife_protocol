@@ -78,11 +78,11 @@ defmodule Klife.Protocol.Messages.OffsetForLeaderEpoch do
                 partition: :int32,
                 current_leader_epoch: :int32,
                 leader_epoch: :int32,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

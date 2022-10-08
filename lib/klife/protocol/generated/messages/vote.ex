@@ -43,11 +43,11 @@ defmodule Klife.Protocol.Messages.Vote do
                 candidate_id: :int32,
                 last_offset_epoch: :int32,
                 last_offset: :int64,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

@@ -106,11 +106,11 @@ defmodule Klife.Protocol.Messages.ListOffsets do
                 partition_index: :int32,
                 current_leader_epoch: :int32,
                 timestamp: :int64,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(7),
@@ -127,11 +127,11 @@ defmodule Klife.Protocol.Messages.ListOffsets do
                 partition_index: :int32,
                 current_leader_epoch: :int32,
                 timestamp: :int64,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

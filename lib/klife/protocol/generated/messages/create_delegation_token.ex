@@ -47,10 +47,10 @@ defmodule Klife.Protocol.Messages.CreateDelegationToken do
          [
            principal_type: :compact_string,
            principal_name: :compact_string,
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       max_lifetime_ms: :int64,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(3),
@@ -62,10 +62,10 @@ defmodule Klife.Protocol.Messages.CreateDelegationToken do
          [
            principal_type: :compact_string,
            principal_name: :compact_string,
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       max_lifetime_ms: :int64,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

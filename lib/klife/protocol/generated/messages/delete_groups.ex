@@ -32,7 +32,7 @@ defmodule Klife.Protocol.Messages.DeleteGroups do
   defp request_schema(1), do: [groups_names: {:array, :string}]
 
   defp request_schema(2),
-    do: [groups_names: {:compact_array, :compact_string}, tag_buffer: {:tag_buffer, %{}}]
+    do: [groups_names: {:compact_array, :compact_string}, tag_buffer: {:tag_buffer, []}]
 
   defp response_schema(0),
     do: [throttle_time_ms: :int32, results: {:array, [group_id: :string, error_code: :int16]}]

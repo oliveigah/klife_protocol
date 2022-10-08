@@ -32,7 +32,7 @@ defmodule Klife.Protocol.Messages.ListTransactions do
     do: [
       state_filters: {:compact_array, :compact_string},
       producer_id_filters: {:compact_array, :int64},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

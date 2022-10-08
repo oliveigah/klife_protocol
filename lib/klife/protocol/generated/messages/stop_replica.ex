@@ -55,9 +55,9 @@ defmodule Klife.Protocol.Messages.StopReplica do
          [
            name: :compact_string,
            partition_indexes: {:compact_array, :int32},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(3),
@@ -75,11 +75,11 @@ defmodule Klife.Protocol.Messages.StopReplica do
                 partition_index: :int32,
                 leader_epoch: :int32,
                 delete_partition: :boolean,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

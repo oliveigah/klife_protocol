@@ -32,21 +32,21 @@ defmodule Klife.Protocol.Messages.DeleteTopics do
   defp request_schema(1), do: [timeout_ms: :int32]
   defp request_schema(2), do: [timeout_ms: :int32]
   defp request_schema(3), do: [timeout_ms: :int32]
-  defp request_schema(4), do: [timeout_ms: :int32, tag_buffer: {:tag_buffer, %{}}]
+  defp request_schema(4), do: [timeout_ms: :int32, tag_buffer: {:tag_buffer, []}]
 
   defp request_schema(5),
     do: [
       topic_names: {:compact_array, :compact_string},
       timeout_ms: :int32,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(6),
     do: [
       topics:
-        {:compact_array, [name: :compact_string, topic_id: :uuid, tag_buffer: {:tag_buffer, %{}}]},
+        {:compact_array, [name: :compact_string, topic_id: :uuid, tag_buffer: {:tag_buffer, []}]},
       timeout_ms: :int32,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0), do: [responses: {:array, [name: :string, error_code: :int16]}]

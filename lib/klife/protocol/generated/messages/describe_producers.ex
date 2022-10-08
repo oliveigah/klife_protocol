@@ -35,9 +35,9 @@ defmodule Klife.Protocol.Messages.DescribeProducers do
          [
            name: :compact_string,
            partition_indexes: {:compact_array, :int32},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

@@ -39,7 +39,7 @@ defmodule Klife.Protocol.Messages.OffsetFetch do
   defp request_schema(3), do: []
   defp request_schema(4), do: []
   defp request_schema(5), do: []
-  defp request_schema(6), do: [tag_buffer: {:tag_buffer, %{}}]
+  defp request_schema(6), do: [tag_buffer: {:tag_buffer, []}]
 
   defp request_schema(7),
     do: [
@@ -49,10 +49,10 @@ defmodule Klife.Protocol.Messages.OffsetFetch do
          [
            name: :compact_string,
            partition_indexes: {:compact_array, :int32},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       require_stable: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(8),
@@ -66,12 +66,12 @@ defmodule Klife.Protocol.Messages.OffsetFetch do
               [
                 name: :compact_string,
                 partition_indexes: {:compact_array, :int32},
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       require_stable: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

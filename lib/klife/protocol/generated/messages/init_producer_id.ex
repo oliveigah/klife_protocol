@@ -35,7 +35,7 @@ defmodule Klife.Protocol.Messages.InitProducerId do
     do: [
       transactional_id: :compact_string,
       transaction_timeout_ms: :int32,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(3),
@@ -44,7 +44,7 @@ defmodule Klife.Protocol.Messages.InitProducerId do
       transaction_timeout_ms: :int32,
       producer_id: :int64,
       producer_epoch: :int16,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(4),
@@ -53,7 +53,7 @@ defmodule Klife.Protocol.Messages.InitProducerId do
       transaction_timeout_ms: :int32,
       producer_id: :int64,
       producer_epoch: :int16,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

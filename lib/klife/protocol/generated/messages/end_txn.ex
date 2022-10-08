@@ -58,7 +58,7 @@ defmodule Klife.Protocol.Messages.EndTxn do
       producer_id: :int64,
       producer_epoch: :int16,
       committed: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0), do: [throttle_time_ms: :int32, error_code: :int16]

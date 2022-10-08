@@ -38,9 +38,9 @@ defmodule Klife.Protocol.Messages.DescribeLogDirs do
          [
            topic: :compact_string,
            partitions: {:compact_array, :int32},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(3),
@@ -50,9 +50,9 @@ defmodule Klife.Protocol.Messages.DescribeLogDirs do
          [
            topic: :compact_string,
            partitions: {:compact_array, :int32},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(4),
@@ -62,9 +62,9 @@ defmodule Klife.Protocol.Messages.DescribeLogDirs do
          [
            topic: :compact_string,
            partitions: {:compact_array, :int32},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

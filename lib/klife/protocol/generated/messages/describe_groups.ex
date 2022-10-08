@@ -38,7 +38,7 @@ defmodule Klife.Protocol.Messages.DescribeGroups do
     do: [
       groups: {:compact_array, :compact_string},
       include_authorized_operations: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

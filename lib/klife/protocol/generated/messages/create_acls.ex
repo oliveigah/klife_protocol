@@ -69,9 +69,9 @@ defmodule Klife.Protocol.Messages.CreateAcls do
            host: :compact_string,
            operation: :int8,
            permission_type: :int8,
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(3),
@@ -86,9 +86,9 @@ defmodule Klife.Protocol.Messages.CreateAcls do
            host: :compact_string,
            operation: :int8,
            permission_type: :int8,
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

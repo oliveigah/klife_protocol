@@ -69,8 +69,8 @@ defmodule Klife.Protocol.Messages.SyncGroup do
       group_instance_id: :compact_string,
       assignments:
         {:compact_array,
-         [member_id: :compact_string, assignment: :compact_bytes, tag_buffer: {:tag_buffer, %{}}]},
-      tag_buffer: {:tag_buffer, %{}}
+         [member_id: :compact_string, assignment: :compact_bytes, tag_buffer: {:tag_buffer, []}]},
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(5),
@@ -83,8 +83,8 @@ defmodule Klife.Protocol.Messages.SyncGroup do
       protocol_name: :compact_string,
       assignments:
         {:compact_array,
-         [member_id: :compact_string, assignment: :compact_bytes, tag_buffer: {:tag_buffer, %{}}]},
-      tag_buffer: {:tag_buffer, %{}}
+         [member_id: :compact_string, assignment: :compact_bytes, tag_buffer: {:tag_buffer, []}]},
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0), do: [error_code: :int16, assignment: :bytes]

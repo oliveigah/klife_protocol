@@ -53,12 +53,12 @@ defmodule Klife.Protocol.Messages.IncrementalAlterConfigs do
                 name: :compact_string,
                 config_operation: :int8,
                 value: :compact_string,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       validate_only: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

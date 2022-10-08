@@ -116,10 +116,10 @@ defmodule Klife.Protocol.Messages.Produce do
          [
            name: :compact_string,
            partition_data:
-             {:compact_array, [index: :int32, records: :records, tag_buffer: {:tag_buffer, %{}}]},
-           tag_buffer: {:tag_buffer, %{}}
+             {:compact_array, [index: :int32, records: :records, tag_buffer: {:tag_buffer, []}]},
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

@@ -101,11 +101,11 @@ defmodule Klife.Protocol.Messages.TxnOffsetCommit do
                 committed_offset: :int64,
                 committed_leader_epoch: :int32,
                 committed_metadata: :compact_string,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

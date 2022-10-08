@@ -30,8 +30,8 @@ defmodule Klife.Protocol.Messages.DescribeUserScramCredentials do
 
   defp request_schema(0),
     do: [
-      users: {:compact_array, [name: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
-      tag_buffer: {:tag_buffer, %{}}
+      users: {:compact_array, [name: :compact_string, tag_buffer: {:tag_buffer, []}]},
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

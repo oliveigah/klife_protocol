@@ -34,11 +34,10 @@ defmodule Klife.Protocol.Messages.DescribeQuorum do
         {:compact_array,
          [
            topic_name: :compact_string,
-           partitions:
-             {:compact_array, [partition_index: :int32, tag_buffer: {:tag_buffer, %{}}]},
-           tag_buffer: {:tag_buffer, %{}}
+           partitions: {:compact_array, [partition_index: :int32, tag_buffer: {:tag_buffer, []}]},
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(1),
@@ -47,11 +46,10 @@ defmodule Klife.Protocol.Messages.DescribeQuorum do
         {:compact_array,
          [
            topic_name: :compact_string,
-           partitions:
-             {:compact_array, [partition_index: :int32, tag_buffer: {:tag_buffer, %{}}]},
-           tag_buffer: {:tag_buffer, %{}}
+           partitions: {:compact_array, [partition_index: :int32, tag_buffer: {:tag_buffer, []}]},
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

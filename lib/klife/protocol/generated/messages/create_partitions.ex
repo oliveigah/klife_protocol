@@ -55,12 +55,12 @@ defmodule Klife.Protocol.Messages.CreatePartitions do
            count: :int32,
            assignments:
              {:compact_array,
-              [broker_ids: {:compact_array, :int32}, tag_buffer: {:tag_buffer, %{}}]},
-           tag_buffer: {:tag_buffer, %{}}
+              [broker_ids: {:compact_array, :int32}, tag_buffer: {:tag_buffer, []}]},
+           tag_buffer: {:tag_buffer, []}
          ]},
       timeout_ms: :int32,
       validate_only: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(3),
@@ -72,12 +72,12 @@ defmodule Klife.Protocol.Messages.CreatePartitions do
            count: :int32,
            assignments:
              {:compact_array,
-              [broker_ids: {:compact_array, :int32}, tag_buffer: {:tag_buffer, %{}}]},
-           tag_buffer: {:tag_buffer, %{}}
+              [broker_ids: {:compact_array, :int32}, tag_buffer: {:tag_buffer, []}]},
+           tag_buffer: {:tag_buffer, []}
          ]},
       timeout_ms: :int32,
       validate_only: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

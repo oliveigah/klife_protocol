@@ -62,9 +62,9 @@ defmodule Klife.Protocol.Messages.AddPartitionsToTxn do
          [
            name: :compact_string,
            partitions: {:compact_array, :int32},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

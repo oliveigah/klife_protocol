@@ -165,9 +165,9 @@ defmodule Klife.Protocol.Messages.UpdateMetadata do
                 zk_version: :int32,
                 replicas: {:compact_array, :int32},
                 offline_replicas: {:compact_array, :int32},
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       live_brokers:
         {:compact_array,
@@ -180,12 +180,12 @@ defmodule Klife.Protocol.Messages.UpdateMetadata do
                 host: :compact_string,
                 listener: :compact_string,
                 security_protocol: :int16,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
            rack: :compact_string,
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(7),
@@ -209,9 +209,9 @@ defmodule Klife.Protocol.Messages.UpdateMetadata do
                 zk_version: :int32,
                 replicas: {:compact_array, :int32},
                 offline_replicas: {:compact_array, :int32},
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       live_brokers:
         {:compact_array,
@@ -224,12 +224,12 @@ defmodule Klife.Protocol.Messages.UpdateMetadata do
                 host: :compact_string,
                 listener: :compact_string,
                 security_protocol: :int16,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
            rack: :compact_string,
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0), do: [error_code: :int16]

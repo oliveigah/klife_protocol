@@ -55,38 +55,38 @@ defmodule Klife.Protocol.Messages.Metadata do
 
   defp request_schema(9),
     do: [
-      topics: {:compact_array, [name: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
+      topics: {:compact_array, [name: :compact_string, tag_buffer: {:tag_buffer, []}]},
       allow_auto_topic_creation: :boolean,
       include_topic_authorized_operations: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(10),
     do: [
       topics:
-        {:compact_array, [topic_id: :uuid, name: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
+        {:compact_array, [topic_id: :uuid, name: :compact_string, tag_buffer: {:tag_buffer, []}]},
       allow_auto_topic_creation: :boolean,
       include_cluster_authorized_operations: :boolean,
       include_topic_authorized_operations: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(11),
     do: [
       topics:
-        {:compact_array, [topic_id: :uuid, name: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
+        {:compact_array, [topic_id: :uuid, name: :compact_string, tag_buffer: {:tag_buffer, []}]},
       allow_auto_topic_creation: :boolean,
       include_topic_authorized_operations: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(12),
     do: [
       topics:
-        {:compact_array, [topic_id: :uuid, name: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
+        {:compact_array, [topic_id: :uuid, name: :compact_string, tag_buffer: {:tag_buffer, []}]},
       allow_auto_topic_creation: :boolean,
       include_topic_authorized_operations: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

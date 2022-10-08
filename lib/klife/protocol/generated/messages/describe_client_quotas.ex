@@ -42,10 +42,10 @@ defmodule Klife.Protocol.Messages.DescribeClientQuotas do
            entity_type: :compact_string,
            match_type: :int8,
            match: :compact_string,
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       strict: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

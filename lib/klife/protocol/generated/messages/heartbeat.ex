@@ -41,7 +41,7 @@ defmodule Klife.Protocol.Messages.Heartbeat do
       generation_id: :int32,
       member_id: :compact_string,
       group_instance_id: :compact_string,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0), do: [error_code: :int16]

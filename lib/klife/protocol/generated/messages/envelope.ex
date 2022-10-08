@@ -33,7 +33,7 @@ defmodule Klife.Protocol.Messages.Envelope do
       request_data: :compact_bytes,
       request_principal: :compact_bytes,
       client_host_address: :compact_bytes,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

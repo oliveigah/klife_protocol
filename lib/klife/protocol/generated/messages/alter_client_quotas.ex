@@ -49,7 +49,7 @@ defmodule Klife.Protocol.Messages.AlterClientQuotas do
               [
                 entity_type: :compact_string,
                 entity_name: :compact_string,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
            ops:
              {:compact_array,
@@ -57,12 +57,12 @@ defmodule Klife.Protocol.Messages.AlterClientQuotas do
                 key: :compact_string,
                 value: :float64,
                 remove: :boolean,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       validate_only: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

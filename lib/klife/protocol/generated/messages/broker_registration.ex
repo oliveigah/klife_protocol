@@ -40,7 +40,7 @@ defmodule Klife.Protocol.Messages.BrokerRegistration do
            host: :compact_string,
            port: :uint16,
            security_protocol: :int16,
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       features:
         {:compact_array,
@@ -48,10 +48,10 @@ defmodule Klife.Protocol.Messages.BrokerRegistration do
            name: :compact_string,
            min_supported_version: :int16,
            max_supported_version: :int16,
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       rack: :compact_string,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

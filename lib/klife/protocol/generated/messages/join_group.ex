@@ -98,8 +98,8 @@ defmodule Klife.Protocol.Messages.JoinGroup do
       protocol_type: :compact_string,
       protocols:
         {:compact_array,
-         [name: :compact_string, metadata: :compact_bytes, tag_buffer: {:tag_buffer, %{}}]},
-      tag_buffer: {:tag_buffer, %{}}
+         [name: :compact_string, metadata: :compact_bytes, tag_buffer: {:tag_buffer, []}]},
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(7),
@@ -112,8 +112,8 @@ defmodule Klife.Protocol.Messages.JoinGroup do
       protocol_type: :compact_string,
       protocols:
         {:compact_array,
-         [name: :compact_string, metadata: :compact_bytes, tag_buffer: {:tag_buffer, %{}}]},
-      tag_buffer: {:tag_buffer, %{}}
+         [name: :compact_string, metadata: :compact_bytes, tag_buffer: {:tag_buffer, []}]},
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(8),
@@ -126,9 +126,9 @@ defmodule Klife.Protocol.Messages.JoinGroup do
       protocol_type: :compact_string,
       protocols:
         {:compact_array,
-         [name: :compact_string, metadata: :compact_bytes, tag_buffer: {:tag_buffer, %{}}]},
+         [name: :compact_string, metadata: :compact_bytes, tag_buffer: {:tag_buffer, []}]},
       reason: :compact_string,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(9),
@@ -141,9 +141,9 @@ defmodule Klife.Protocol.Messages.JoinGroup do
       protocol_type: :compact_string,
       protocols:
         {:compact_array,
-         [name: :compact_string, metadata: :compact_bytes, tag_buffer: {:tag_buffer, %{}}]},
+         [name: :compact_string, metadata: :compact_bytes, tag_buffer: {:tag_buffer, []}]},
       reason: :compact_string,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

@@ -29,7 +29,7 @@ defmodule Klife.Protocol.Messages.DescribeTransactions do
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
   defp request_schema(0),
-    do: [transactional_ids: {:compact_array, :compact_string}, tag_buffer: {:tag_buffer, %{}}]
+    do: [transactional_ids: {:compact_array, :compact_string}, tag_buffer: {:tag_buffer, []}]
 
   defp response_schema(0),
     do: [

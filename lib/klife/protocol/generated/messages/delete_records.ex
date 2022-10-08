@@ -50,11 +50,11 @@ defmodule Klife.Protocol.Messages.DeleteRecords do
            name: :compact_string,
            partitions:
              {:compact_array,
-              [partition_index: :int32, offset: :int64, tag_buffer: {:tag_buffer, %{}}]},
-           tag_buffer: {:tag_buffer, %{}}
+              [partition_index: :int32, offset: :int64, tag_buffer: {:tag_buffer, []}]},
+           tag_buffer: {:tag_buffer, []}
          ]},
       timeout_ms: :int32,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

@@ -42,13 +42,13 @@ defmodule Klife.Protocol.Messages.FetchSnapshot do
                 partition: :int32,
                 current_leader_epoch: :int32,
                 snapshot_id:
-                  {:object, [end_offset: :int64, epoch: :int32, tag_buffer: {:tag_buffer, %{}}]},
+                  {:object, [end_offset: :int64, epoch: :int32, tag_buffer: {:tag_buffer, []}]},
                 position: :int64,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{cluster_id: {0, :compact_string}}}
+      tag_buffer: {:tag_buffer, [cluster_id: {0, :compact_string}]}
     ]
 
   defp response_schema(0),

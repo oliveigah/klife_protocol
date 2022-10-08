@@ -29,7 +29,7 @@ defmodule Klife.Protocol.Messages.AllocateProducerIds do
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
   defp request_schema(0),
-    do: [broker_id: :int32, broker_epoch: :int64, tag_buffer: {:tag_buffer, %{}}]
+    do: [broker_id: :int32, broker_epoch: :int64, tag_buffer: {:tag_buffer, []}]
 
   defp response_schema(0),
     do: [

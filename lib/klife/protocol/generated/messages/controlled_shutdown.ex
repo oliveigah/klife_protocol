@@ -36,7 +36,7 @@ defmodule Klife.Protocol.Messages.ControlledShutdown do
   defp request_schema(2), do: [broker_id: :int32, broker_epoch: :int64]
 
   defp request_schema(3),
-    do: [broker_id: :int32, broker_epoch: :int64, tag_buffer: {:tag_buffer, %{}}]
+    do: [broker_id: :int32, broker_epoch: :int64, tag_buffer: {:tag_buffer, []}]
 
   defp response_schema(0),
     do: [

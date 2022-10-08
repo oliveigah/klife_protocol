@@ -43,9 +43,9 @@ defmodule Klife.Protocol.Messages.LeaveGroup do
          [
            member_id: :compact_string,
            group_instance_id: :compact_string,
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(5),
@@ -57,9 +57,9 @@ defmodule Klife.Protocol.Messages.LeaveGroup do
            member_id: :compact_string,
            group_instance_id: :compact_string,
            reason: :compact_string,
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0), do: [error_code: :int16]

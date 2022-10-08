@@ -19,7 +19,7 @@ defmodule Klife.Protocol.Header do
       request_api_version: :int16,
       correlation_id: :int32,
       client_id: :string,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0), do: [correlation_id: :int32]

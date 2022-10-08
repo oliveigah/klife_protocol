@@ -68,11 +68,11 @@ defmodule Klife.Protocol.Messages.DescribeConfigs do
            resource_type: :int8,
            resource_name: :compact_string,
            configuration_keys: {:compact_array, :compact_string},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       include_synonyms: :boolean,
       include_documentation: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

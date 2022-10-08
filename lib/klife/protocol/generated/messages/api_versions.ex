@@ -34,7 +34,7 @@ defmodule Klife.Protocol.Messages.ApiVersions do
     do: [
       client_software_name: :compact_string,
       client_software_version: :compact_string,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

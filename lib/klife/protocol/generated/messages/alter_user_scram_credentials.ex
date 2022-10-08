@@ -31,8 +31,7 @@ defmodule Klife.Protocol.Messages.AlterUserScramCredentials do
   defp request_schema(0),
     do: [
       deletions:
-        {:compact_array,
-         [name: :compact_string, mechanism: :int8, tag_buffer: {:tag_buffer, %{}}]},
+        {:compact_array, [name: :compact_string, mechanism: :int8, tag_buffer: {:tag_buffer, []}]},
       upsertions:
         {:compact_array,
          [
@@ -41,9 +40,9 @@ defmodule Klife.Protocol.Messages.AlterUserScramCredentials do
            iterations: :int32,
            salt: :compact_bytes,
            salted_password: :compact_bytes,
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

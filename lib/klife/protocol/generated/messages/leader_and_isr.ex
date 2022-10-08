@@ -141,9 +141,9 @@ defmodule Klife.Protocol.Messages.LeaderAndIsr do
                 adding_replicas: {:compact_array, :int32},
                 removing_replicas: {:compact_array, :int32},
                 is_new: :boolean,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       live_leaders:
         {:compact_array,
@@ -151,9 +151,9 @@ defmodule Klife.Protocol.Messages.LeaderAndIsr do
            broker_id: :int32,
            host_name: :compact_string,
            port: :int32,
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(5),
@@ -180,9 +180,9 @@ defmodule Klife.Protocol.Messages.LeaderAndIsr do
                 adding_replicas: {:compact_array, :int32},
                 removing_replicas: {:compact_array, :int32},
                 is_new: :boolean,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       live_leaders:
         {:compact_array,
@@ -190,9 +190,9 @@ defmodule Klife.Protocol.Messages.LeaderAndIsr do
            broker_id: :int32,
            host_name: :compact_string,
            port: :int32,
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(6),
@@ -220,9 +220,9 @@ defmodule Klife.Protocol.Messages.LeaderAndIsr do
                 removing_replicas: {:compact_array, :int32},
                 is_new: :boolean,
                 leader_recovery_state: :int8,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       live_leaders:
         {:compact_array,
@@ -230,9 +230,9 @@ defmodule Klife.Protocol.Messages.LeaderAndIsr do
            broker_id: :int32,
            host_name: :compact_string,
            port: :int32,
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

@@ -43,11 +43,11 @@ defmodule Klife.Protocol.Messages.AlterPartition do
                 leader_epoch: :int32,
                 new_isr: {:compact_array, :int32},
                 partition_epoch: :int32,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(1),
@@ -66,11 +66,11 @@ defmodule Klife.Protocol.Messages.AlterPartition do
                 new_isr: {:compact_array, :int32},
                 leader_recovery_state: :int8,
                 partition_epoch: :int32,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(2),
@@ -89,11 +89,11 @@ defmodule Klife.Protocol.Messages.AlterPartition do
                 new_isr: {:compact_array, :int32},
                 leader_recovery_state: :int8,
                 partition_epoch: :int32,
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

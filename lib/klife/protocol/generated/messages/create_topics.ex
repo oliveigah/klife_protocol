@@ -115,16 +115,16 @@ defmodule Klife.Protocol.Messages.CreateTopics do
               [
                 partition_index: :int32,
                 broker_ids: {:compact_array, :int32},
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
            configs:
              {:compact_array,
-              [name: :compact_string, value: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
-           tag_buffer: {:tag_buffer, %{}}
+              [name: :compact_string, value: :compact_string, tag_buffer: {:tag_buffer, []}]},
+           tag_buffer: {:tag_buffer, []}
          ]},
       timeout_ms: :int32,
       validate_only: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(6),
@@ -140,16 +140,16 @@ defmodule Klife.Protocol.Messages.CreateTopics do
               [
                 partition_index: :int32,
                 broker_ids: {:compact_array, :int32},
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
            configs:
              {:compact_array,
-              [name: :compact_string, value: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
-           tag_buffer: {:tag_buffer, %{}}
+              [name: :compact_string, value: :compact_string, tag_buffer: {:tag_buffer, []}]},
+           tag_buffer: {:tag_buffer, []}
          ]},
       timeout_ms: :int32,
       validate_only: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(7),
@@ -165,16 +165,16 @@ defmodule Klife.Protocol.Messages.CreateTopics do
               [
                 partition_index: :int32,
                 broker_ids: {:compact_array, :int32},
-                tag_buffer: {:tag_buffer, %{}}
+                tag_buffer: {:tag_buffer, []}
               ]},
            configs:
              {:compact_array,
-              [name: :compact_string, value: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
-           tag_buffer: {:tag_buffer, %{}}
+              [name: :compact_string, value: :compact_string, tag_buffer: {:tag_buffer, []}]},
+           tag_buffer: {:tag_buffer, []}
          ]},
       timeout_ms: :int32,
       validate_only: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0), do: [topics: {:array, [name: :string, error_code: :int16]}]

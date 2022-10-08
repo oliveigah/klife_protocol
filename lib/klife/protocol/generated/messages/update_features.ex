@@ -37,9 +37,9 @@ defmodule Klife.Protocol.Messages.UpdateFeatures do
            feature: :compact_string,
            max_version_level: :int16,
            allow_downgrade: :boolean,
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp request_schema(1),
@@ -51,10 +51,10 @@ defmodule Klife.Protocol.Messages.UpdateFeatures do
            feature: :compact_string,
            max_version_level: :int16,
            upgrade_type: :int8,
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       validate_only: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

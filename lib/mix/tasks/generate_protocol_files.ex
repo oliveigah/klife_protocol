@@ -169,7 +169,10 @@ if Mix.env() == :dev do
     defp parse_schema(fields, metadata),
       do: do_parse_schema(fields, metadata, [], [])
 
-    defp do_parse_schema([], %{is_flexible: true}, schema, tag_buffer),
+    defp do_parse_schema([], %{type: :request, is_flexible: true}, schema, tag_buffer),
+      do: schema ++ [{:tag_buffer, {:tag_buffer, tag_buffer}}]
+
+    defp do_parse_schema([], %{type: :response, is_flexible: true}, schema, tag_buffer),
       do: schema ++ [{:tag_buffer, {:tag_buffer, Map.new(tag_buffer)}}]
 
     defp do_parse_schema([], %{is_flexible: false}, schema, _tag_buffer),

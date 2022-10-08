@@ -61,11 +61,11 @@ defmodule Klife.Protocol.Messages.AlterConfigs do
            resource_name: :compact_string,
            configs:
              {:compact_array,
-              [name: :compact_string, value: :compact_string, tag_buffer: {:tag_buffer, %{}}]},
-           tag_buffer: {:tag_buffer, %{}}
+              [name: :compact_string, value: :compact_string, tag_buffer: {:tag_buffer, []}]},
+           tag_buffer: {:tag_buffer, []}
          ]},
       validate_only: :boolean,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

@@ -49,10 +49,10 @@ defmodule Klife.Protocol.Messages.ElectLeaders do
          [
            topic: :compact_string,
            partitions: {:compact_array, :int32},
-           tag_buffer: {:tag_buffer, %{}}
+           tag_buffer: {:tag_buffer, []}
          ]},
       timeout_ms: :int32,
-      tag_buffer: {:tag_buffer, %{}}
+      tag_buffer: {:tag_buffer, []}
     ]
 
   defp response_schema(0),

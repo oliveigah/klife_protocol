@@ -31,10 +31,10 @@ defmodule Klife.Protocol.Messages.ListGroups do
   defp request_schema(0), do: []
   defp request_schema(1), do: []
   defp request_schema(2), do: []
-  defp request_schema(3), do: [tag_buffer: {:tag_buffer, %{}}]
+  defp request_schema(3), do: [tag_buffer: {:tag_buffer, []}]
 
   defp request_schema(4),
-    do: [states_filter: {:compact_array, :compact_string}, tag_buffer: {:tag_buffer, %{}}]
+    do: [states_filter: {:compact_array, :compact_string}, tag_buffer: {:tag_buffer, []}]
 
   defp response_schema(0),
     do: [error_code: :int16, groups: {:array, [group_id: :string, protocol_type: :string]}]

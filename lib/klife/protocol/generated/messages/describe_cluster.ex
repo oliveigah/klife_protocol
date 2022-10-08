@@ -29,7 +29,7 @@ defmodule Klife.Protocol.Messages.DescribeCluster do
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
   defp request_schema(0),
-    do: [include_cluster_authorized_operations: :boolean, tag_buffer: {:tag_buffer, %{}}]
+    do: [include_cluster_authorized_operations: :boolean, tag_buffer: {:tag_buffer, []}]
 
   defp response_schema(0),
     do: [
