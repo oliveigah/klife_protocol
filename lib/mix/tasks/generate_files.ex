@@ -9,8 +9,8 @@ if Mix.env() == :dev do
     }
 
     @write_path_by_module %{
-      "Header" => "lib/klife_protocol/generated/",
-      "default" => "lib/klife_protocol/generated/messages/"
+      "Header" => "lib/generated/",
+      "default" => "lib/generated/messages/"
     }
 
     @req_header_exceptions %{
@@ -137,21 +137,25 @@ if Mix.env() == :dev do
         Enum.map(min_version..max_version, fn version ->
           is_flexible = is_flexible_version?(message, version)
 
-          metadata = %{
+          msg_metadata = %{
             type: type,
             version: version,
             is_flexible: is_flexible,
             message_type: message_type
           }
 
-          common_structs = parse_commom_structs(message[:commonStructs] || [], metadata)
+          common_structs = parse_commom_structs(message[:commonStructs] || [], msg_metadata)
 
-          metadata =
-            if length(common_structs) > 0,
-              do: Map.put(metadata, :common_structs, common_structs),
-              else: metadata
+          should_add_common_structs? =
+            (is_flexible and length(common_structs) > 1) or
+              (!is_flexible and length(common_structs) > 0)
 
-          schema = parse_schema(message.fields, metadata)
+          msg_metadata =
+            if should_add_common_structs?,
+              do: Map.put(msg_metadata, :common_structs, common_structs),
+              else: msg_metadata
+
+          schema = parse_schema(message.fields, msg_metadata)
 
           {version, schema}
         end)
@@ -159,15 +163,14 @@ if Mix.env() == :dev do
       schema_array
     end
 
-    defp parse_commom_structs(common_structs, metadata) do
+    defp parse_commom_structs(common_structs, msg_metadata) do
       common_structs
       |> Enum.map(&Map.put_new(&1, :type, &1.name))
-      |> parse_schema(metadata)
-      |> Keyword.delete(:tag_buffer)
+      |> parse_schema(msg_metadata)
     end
 
-    defp parse_schema(fields, metadata),
-      do: do_parse_schema(fields, metadata, [], [])
+    defp parse_schema(fields, msg_metadata),
+      do: do_parse_schema(fields, msg_metadata, [], [])
 
     defp do_parse_schema([], %{type: :request, is_flexible: true}, schema, tag_buffer),
       do: schema ++ [{:tag_buffer, {:tag_buffer, tag_buffer}}]
@@ -180,54 +183,65 @@ if Mix.env() == :dev do
 
     defp do_parse_schema(
            [field | rest_fields],
-           %{version: version} = metadata,
+           %{version: version} = msg_metadata,
            schema,
            tag_buffer
          ) do
       version? = available_in_version?(field, version)
       tagged_field? = is_tagged_field?(field)
 
+      field_metadata = %{
+        is_nullable?: is_nullable?(field, version)
+      }
+
       case {version?, tagged_field?} do
         {false, _} ->
-          do_parse_schema(rest_fields, metadata, schema, tag_buffer)
+          do_parse_schema(rest_fields, msg_metadata, schema, tag_buffer)
 
         {true, false} ->
-          parsed_field = do_parse_schema_field(field, metadata)
-
-          do_parse_schema(rest_fields, metadata, schema ++ [parsed_field], tag_buffer)
+          {name, type} = do_parse_schema_field(field, msg_metadata)
+          parsed_field = {name, {type, field_metadata}}
+          do_parse_schema(rest_fields, msg_metadata, schema ++ [parsed_field], tag_buffer)
 
         {true, true} ->
-          tagged_field = parse_tagged_field(field, metadata)
-          do_parse_schema(rest_fields, metadata, schema, tag_buffer ++ [tagged_field])
+          {name, type} = parse_tagged_field(field, msg_metadata)
+          parsed_field = {name, {type, field_metadata}}
+          do_parse_schema(rest_fields, msg_metadata, schema, tag_buffer ++ [parsed_field])
       end
     end
 
-    defp do_parse_schema_field(field, metadata) do
+    defp do_parse_schema_field(field, msg_metadata) do
       name = field.name |> to_snake_case() |> String.to_atom()
       has_fields? = Map.has_key?(field, :fields)
 
-      case get_type(field.type, metadata, !has_fields?) do
+      case get_type(field.type, msg_metadata, !has_fields?) do
         :array ->
           if has_fields? do
-            {name, {:array, parse_schema(field.fields, metadata)}}
+            {name, {:array, parse_schema(field.fields, msg_metadata)}}
           else
-            {:object, schema} = Keyword.fetch!(metadata.common_structs, get_type_name(field.type))
+            {{:object, schema}, _} =
+              Keyword.fetch!(msg_metadata.common_structs, get_type_name(field.type))
+
             {name, {:array, schema}}
           end
 
         :compact_array ->
           if has_fields? do
-            {name, {:compact_array, parse_schema(field.fields, metadata)}}
+            {name, {:compact_array, parse_schema(field.fields, msg_metadata)}}
           else
-            {:object, schema} = Keyword.fetch!(metadata.common_structs, get_type_name(field.type))
+            {{:object, schema}, _} =
+              Keyword.fetch!(msg_metadata.common_structs, get_type_name(field.type))
+
             {name, {:compact_array, schema}}
           end
 
         :not_found ->
           if has_fields? do
-            {name, {:object, parse_schema(field.fields, metadata)}}
+            {name, {:object, parse_schema(field.fields, msg_metadata)}}
           else
-            {:object, schema} = Keyword.fetch!(metadata.common_structs, get_type_name(field.type))
+            {{:object, schema}, _} =
+              Keyword.fetch!(msg_metadata.common_structs, get_type_name(field.type))
+
             {name, {:object, schema}}
           end
 
@@ -236,13 +250,13 @@ if Mix.env() == :dev do
       end
     end
 
-    defp parse_tagged_field(field, %{type: :response} = metadata) do
-      {name, type} = do_parse_schema_field(field, metadata)
+    defp parse_tagged_field(field, %{type: :response} = msg_metadata) do
+      {name, type} = do_parse_schema_field(field, msg_metadata)
       {field.tag, {name, type}}
     end
 
-    defp parse_tagged_field(field, %{type: :request} = metadata) do
-      {name, type} = do_parse_schema_field(field, metadata)
+    defp parse_tagged_field(field, %{type: :request} = msg_metadata) do
+      {name, type} = do_parse_schema_field(field, msg_metadata)
       {name, {field.tag, type}}
     end
 
@@ -266,6 +280,13 @@ if Mix.env() == :dev do
 
     defp is_flexible_version?(message, current_version) do
       message.flexibleVersions
+      |> parse_versions_string()
+      |> check_version(current_version)
+    end
+
+    defp is_nullable?(field, current_version) do
+      field
+      |> Map.get(:nullableVersions)
       |> parse_versions_string()
       |> check_version(current_version)
     end
@@ -307,26 +328,26 @@ if Mix.env() == :dev do
 
     defp is_tagged_field?(field), do: Map.get(field, :tag) != nil
 
-    defp get_type(string_type, metadata, raise?)
+    defp get_type(string_type, msg_metadata, raise?)
 
-    defp get_type("int8", _metadata, _raise?), do: :int8
-    defp get_type("int16", _metadata, _raise?), do: :int16
-    defp get_type("int32", _metadata, _raise?), do: :int32
-    defp get_type("int64", _metadata, _raise?), do: :int64
+    defp get_type("int8", _msg_metadata, _raise?), do: :int8
+    defp get_type("int16", _msg_metadata, _raise?), do: :int16
+    defp get_type("int32", _msg_metadata, _raise?), do: :int32
+    defp get_type("int64", _msg_metadata, _raise?), do: :int64
     defp get_type("string", %{message_type: :header}, _raise?), do: :string
     defp get_type("string", %{is_flexible: false}, _raise?), do: :string
     defp get_type("string", %{is_flexible: true}, _raise?), do: :compact_string
-    defp get_type("bool", _metadata, _raise?), do: :boolean
-    defp get_type("uuid", _metadata, _raise?), do: :uuid
-    defp get_type("float64", _metadata, _raise?), do: :float64
+    defp get_type("bool", _msg_metadata, _raise?), do: :boolean
+    defp get_type("uuid", _msg_metadata, _raise?), do: :uuid
+    defp get_type("float64", _msg_metadata, _raise?), do: :float64
     defp get_type("bytes", %{message_type: :header}, _raise?), do: :bytes
     defp get_type("bytes", %{is_flexible: false}, _raise?), do: :bytes
     defp get_type("bytes", %{is_flexible: true}, _raise?), do: :compact_bytes
-    defp get_type("uint16", _metadata, _raise?), do: :uint16
-    defp get_type("records", _metadata, _raise?), do: :records
+    defp get_type("uint16", _msg_metadata, _raise?), do: :uint16
+    defp get_type("records", _msg_metadata, _raise?), do: :records
 
-    defp get_type("[]" <> type, %{message_type: :header} = metadata, _raise?) do
-      case get_type(type, metadata, false) do
+    defp get_type("[]" <> type, %{message_type: :header} = msg_metadata, _raise?) do
+      case get_type(type, msg_metadata, false) do
         :not_found ->
           :array
 
@@ -335,8 +356,8 @@ if Mix.env() == :dev do
       end
     end
 
-    defp get_type("[]" <> type, %{is_flexible: false} = metadata, _raise?) do
-      case get_type(type, metadata, false) do
+    defp get_type("[]" <> type, %{is_flexible: false} = msg_metadata, _raise?) do
+      case get_type(type, msg_metadata, false) do
         :not_found ->
           :array
 
@@ -345,8 +366,8 @@ if Mix.env() == :dev do
       end
     end
 
-    defp get_type("[]" <> type, %{is_flexible: true} = metadata, _raise?) do
-      case get_type(type, metadata, false) do
+    defp get_type("[]" <> type, %{is_flexible: true} = msg_metadata, _raise?) do
+      case get_type(type, msg_metadata, false) do
         :not_found ->
           :compact_array
 
