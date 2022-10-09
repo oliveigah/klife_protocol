@@ -41,6 +41,7 @@ defmodule KlifeProtocol.Messages.StopReplica do
       controller_id: :int32,
       controller_epoch: :int32,
       broker_epoch: :int64,
+      delete_partitions: :boolean,
       topics: {:array, [name: :string, partition_indexes: {:array, :int32}]}
     ]
 

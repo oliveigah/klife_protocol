@@ -51,6 +51,18 @@ defmodule KlifeProtocol.Messages.UpdateMetadata do
     do: [
       controller_id: :int32,
       controller_epoch: :int32,
+      ungrouped_partition_states:
+        {:array,
+         [
+           topic_name: :string,
+           partition_index: :int32,
+           controller_epoch: :int32,
+           leader: :int32,
+           leader_epoch: :int32,
+           isr: {:array, :int32},
+           zk_version: :int32,
+           replicas: {:array, :int32}
+         ]},
       live_brokers:
         {:array,
          [
@@ -63,6 +75,18 @@ defmodule KlifeProtocol.Messages.UpdateMetadata do
     do: [
       controller_id: :int32,
       controller_epoch: :int32,
+      ungrouped_partition_states:
+        {:array,
+         [
+           topic_name: :string,
+           partition_index: :int32,
+           controller_epoch: :int32,
+           leader: :int32,
+           leader_epoch: :int32,
+           isr: {:array, :int32},
+           zk_version: :int32,
+           replicas: {:array, :int32}
+         ]},
       live_brokers:
         {:array,
          [
@@ -76,6 +100,18 @@ defmodule KlifeProtocol.Messages.UpdateMetadata do
     do: [
       controller_id: :int32,
       controller_epoch: :int32,
+      ungrouped_partition_states:
+        {:array,
+         [
+           topic_name: :string,
+           partition_index: :int32,
+           controller_epoch: :int32,
+           leader: :int32,
+           leader_epoch: :int32,
+           isr: {:array, :int32},
+           zk_version: :int32,
+           replicas: {:array, :int32}
+         ]},
       live_brokers:
         {:array,
          [

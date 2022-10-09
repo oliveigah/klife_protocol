@@ -57,6 +57,7 @@ defmodule KlifeProtocol.Messages.Metadata do
     do: [
       topics: {:compact_array, [name: :compact_string, tag_buffer: {:tag_buffer, []}]},
       allow_auto_topic_creation: :boolean,
+      include_cluster_authorized_operations: :boolean,
       include_topic_authorized_operations: :boolean,
       tag_buffer: {:tag_buffer, []}
     ]
@@ -341,6 +342,7 @@ defmodule KlifeProtocol.Messages.Metadata do
            topic_authorized_operations: :int32,
            tag_buffer: {:tag_buffer, %{}}
          ]},
+      cluster_authorized_operations: :int32,
       tag_buffer: {:tag_buffer, %{}}
     ]
 

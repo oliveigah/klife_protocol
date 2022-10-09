@@ -29,7 +29,7 @@ defmodule KlifeProtocol.Messages.LeaveGroup do
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
   defp request_schema(0), do: [group_id: :string, member_id: :string]
-  defp request_schema(1), do: [group_id: :string]
+  defp request_schema(1), do: [group_id: :string, member_id: :string]
   defp request_schema(2), do: [group_id: :string, member_id: :string]
 
   defp request_schema(3),

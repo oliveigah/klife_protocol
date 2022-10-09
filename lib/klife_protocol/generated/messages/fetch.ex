@@ -50,6 +50,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       topics:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array, [partition: :int32, fetch_offset: :int64, partition_max_bytes: :int32]}
          ]}
@@ -63,6 +64,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       topics:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array, [partition: :int32, fetch_offset: :int64, partition_max_bytes: :int32]}
          ]}
@@ -77,6 +79,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       topics:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array, [partition: :int32, fetch_offset: :int64, partition_max_bytes: :int32]}
          ]}
@@ -92,6 +95,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       topics:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array, [partition: :int32, fetch_offset: :int64, partition_max_bytes: :int32]}
          ]}
@@ -107,6 +111,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       topics:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [
@@ -128,6 +133,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       topics:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [
@@ -151,6 +157,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       topics:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [
@@ -175,6 +182,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       topics:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [
@@ -184,7 +192,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                 partition_max_bytes: :int32
               ]}
          ]},
-      forgotten_topics_data: {:array, [partitions: {:array, :int32}]}
+      forgotten_topics_data: {:array, [topic: :string, partitions: {:array, :int32}]}
     ]
 
   defp request_schema(9),
@@ -199,6 +207,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       topics:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [
@@ -209,7 +218,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                 partition_max_bytes: :int32
               ]}
          ]},
-      forgotten_topics_data: {:array, [partitions: {:array, :int32}]}
+      forgotten_topics_data: {:array, [topic: :string, partitions: {:array, :int32}]}
     ]
 
   defp request_schema(10),
@@ -224,6 +233,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       topics:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [
@@ -234,7 +244,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                 partition_max_bytes: :int32
               ]}
          ]},
-      forgotten_topics_data: {:array, [partitions: {:array, :int32}]}
+      forgotten_topics_data: {:array, [topic: :string, partitions: {:array, :int32}]}
     ]
 
   defp request_schema(11),
@@ -249,6 +259,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       topics:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [
@@ -259,7 +270,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                 partition_max_bytes: :int32
               ]}
          ]},
-      forgotten_topics_data: {:array, [partitions: {:array, :int32}]},
+      forgotten_topics_data: {:array, [topic: :string, partitions: {:array, :int32}]},
       rack_id: :string
     ]
 
@@ -356,6 +367,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       responses:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [
@@ -373,6 +385,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       responses:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [
@@ -390,6 +403,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       responses:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [
@@ -407,6 +421,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       responses:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [
@@ -426,6 +441,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       responses:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [
@@ -446,6 +462,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       responses:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [
@@ -468,6 +485,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       responses:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [
@@ -490,6 +508,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       responses:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [
@@ -512,6 +531,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       responses:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [
@@ -534,6 +554,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       responses:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [
@@ -556,6 +577,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       responses:
         {:array,
          [
+           topic: :string,
            partitions:
              {:array,
               [

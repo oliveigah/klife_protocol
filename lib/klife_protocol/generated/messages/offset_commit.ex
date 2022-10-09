@@ -82,6 +82,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
       group_id: :string,
       generation_id: :int32,
       member_id: :string,
+      retention_time_ms: :int64,
       topics:
         {:array,
          [

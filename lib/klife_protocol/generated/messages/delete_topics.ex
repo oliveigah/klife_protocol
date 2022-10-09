@@ -29,10 +29,16 @@ defmodule KlifeProtocol.Messages.DeleteTopics do
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
   defp request_schema(0), do: [topic_names: {:array, :string}, timeout_ms: :int32]
-  defp request_schema(1), do: [timeout_ms: :int32]
-  defp request_schema(2), do: [timeout_ms: :int32]
-  defp request_schema(3), do: [timeout_ms: :int32]
-  defp request_schema(4), do: [timeout_ms: :int32, tag_buffer: {:tag_buffer, []}]
+  defp request_schema(1), do: [topic_names: {:array, :string}, timeout_ms: :int32]
+  defp request_schema(2), do: [topic_names: {:array, :string}, timeout_ms: :int32]
+  defp request_schema(3), do: [topic_names: {:array, :string}, timeout_ms: :int32]
+
+  defp request_schema(4),
+    do: [
+      topic_names: {:compact_array, :compact_string},
+      timeout_ms: :int32,
+      tag_buffer: {:tag_buffer, []}
+    ]
 
   defp request_schema(5),
     do: [

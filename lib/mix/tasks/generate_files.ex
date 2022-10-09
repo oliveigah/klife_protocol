@@ -59,13 +59,13 @@ if Mix.env() == :dev do
       write_base_path = @write_path_by_module[module_name] || @write_path_by_module["default"]
 
       req_flex_version =
-        case get_flexible_versions(req_map.flexibleVersions) do
+        case parse_versions_string(req_map.flexibleVersions) do
           {:min, v} -> v
           v -> v
         end
 
       res_flex_version =
-        case get_flexible_versions(res_map.flexibleVersions) do
+        case parse_versions_string(res_map.flexibleVersions) do
           {:min, v} -> v
           v -> v
         end
@@ -259,70 +259,51 @@ if Mix.env() == :dev do
     end
 
     defp available_in_version?(field, current_version) do
-      case get_available_versions(field.versions) do
-        {:min, min_version} ->
-          current_version >= min_version
-
-        {:list, versions} ->
-          Enum.any?(versions, &(&1 == current_version))
-
-        {:exact, verion} ->
-          current_version == verion
-      end
-    end
-
-    defp get_available_versions(field_versions) do
-      cond do
-        String.contains?(field_versions, "+") ->
-          version =
-            field_versions
-            |> String.split("+")
-            |> List.first()
-            |> String.to_integer()
-
-          {:min, version}
-
-        String.contains?(field_versions, "-") ->
-          versions =
-            field_versions
-            |> String.split("-")
-            |> Enum.map(&String.to_integer/1)
-
-          {:list, versions}
-
-        Integer.parse(field_versions) != :error ->
-          {:exact, String.to_integer(field_versions)}
-
-        true ->
-          raise "Unkown available versions #{field_versions}"
-      end
+      field.versions
+      |> parse_versions_string()
+      |> check_version(current_version)
     end
 
     defp is_flexible_version?(message, current_version) do
-      case get_flexible_versions(message.flexibleVersions) do
-        {:min, min_version} -> current_version >= min_version
-        :none -> false
-      end
+      message.flexibleVersions
+      |> parse_versions_string()
+      |> check_version(current_version)
     end
 
-    defp get_flexible_versions(flexible_versions) do
+    defp parse_versions_string(versions) do
       cond do
-        String.contains?(flexible_versions, "+") ->
+        versions in [nil, "none"] ->
+          :none
+
+        String.contains?(versions, "+") ->
           version =
-            flexible_versions
+            versions
             |> String.split("+")
             |> List.first()
             |> String.to_integer()
 
           {:min, version}
 
-        flexible_versions == "none" ->
-          :none
+        String.contains?(versions, "-") ->
+          [min, max] =
+            versions
+            |> String.split("-")
+            |> Enum.map(&String.to_integer/1)
+
+          {:list, min..max}
+
+        Integer.parse(versions) != :error ->
+          {:exact, String.to_integer(versions)}
 
         true ->
-          raise "Unkown flexible versions #{flexible_versions}"
+          raise "Unkown versions string #{versions}"
       end
     end
+
+    defp check_version(:none, _current), do: false
+    defp check_version({:min, version}, current), do: current >= version
+    defp check_version({:exact, version}, current), do: current == version
+    defp check_version({:list, versions}, current), do: Enum.any?(versions, &(&1 == current))
 
     defp is_tagged_field?(field), do: Map.get(field, :tag) != nil
 

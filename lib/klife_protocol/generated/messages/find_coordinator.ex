@@ -29,8 +29,8 @@ defmodule KlifeProtocol.Messages.FindCoordinator do
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
   defp request_schema(0), do: [key: :string]
-  defp request_schema(1), do: [key_type: :int8]
-  defp request_schema(2), do: [key_type: :int8]
+  defp request_schema(1), do: [key: :string, key_type: :int8]
+  defp request_schema(2), do: [key: :string, key_type: :int8]
 
   defp request_schema(3),
     do: [key: :compact_string, key_type: :int8, tag_buffer: {:tag_buffer, []}]
@@ -43,8 +43,26 @@ defmodule KlifeProtocol.Messages.FindCoordinator do
     ]
 
   defp response_schema(0), do: [error_code: :int16, node_id: :int32, host: :string, port: :int32]
-  defp response_schema(1), do: [throttle_time_ms: :int32, error_message: :string]
-  defp response_schema(2), do: [throttle_time_ms: :int32]
+
+  defp response_schema(1),
+    do: [
+      throttle_time_ms: :int32,
+      error_code: :int16,
+      error_message: :string,
+      node_id: :int32,
+      host: :string,
+      port: :int32
+    ]
+
+  defp response_schema(2),
+    do: [
+      throttle_time_ms: :int32,
+      error_code: :int16,
+      error_message: :string,
+      node_id: :int32,
+      host: :string,
+      port: :int32
+    ]
 
   defp response_schema(3),
     do: [

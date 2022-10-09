@@ -242,9 +242,26 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
         {:array, [topic_name: :string, partition_index: :int32, error_code: :int16]}
     ]
 
-  defp response_schema(1), do: [error_code: :int16]
-  defp response_schema(2), do: [error_code: :int16]
-  defp response_schema(3), do: [error_code: :int16]
+  defp response_schema(1),
+    do: [
+      error_code: :int16,
+      partition_errors:
+        {:array, [topic_name: :string, partition_index: :int32, error_code: :int16]}
+    ]
+
+  defp response_schema(2),
+    do: [
+      error_code: :int16,
+      partition_errors:
+        {:array, [topic_name: :string, partition_index: :int32, error_code: :int16]}
+    ]
+
+  defp response_schema(3),
+    do: [
+      error_code: :int16,
+      partition_errors:
+        {:array, [topic_name: :string, partition_index: :int32, error_code: :int16]}
+    ]
 
   defp response_schema(4),
     do: [
