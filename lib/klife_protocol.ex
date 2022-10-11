@@ -2,7 +2,7 @@ defmodule KlifeProtocol do
   alias KlifeProtocol.Messages
 
   def test do
-    {:ok, socket} = :gen_tcp.connect('localhost', 19092, [:binary, active: false, packet: 4])
+    {:ok, socket} = :gen_tcp.connect('localhost', 39092, [:binary, active: false, packet: 4])
 
     api_version_message_v = 3
 
@@ -10,8 +10,8 @@ defmodule KlifeProtocol do
       Messages.ApiVersions.serialize_request(
         %{
           correlation_id: 123_456,
-          client_id: "client",
-          client_software_name: "client",
+          client_id: nil,
+          client_software_name: nil,
           client_software_version: "1"
         },
         api_version_message_v
@@ -32,7 +32,7 @@ defmodule KlifeProtocol do
           client_id: "some_crazy_client",
           topics: [
             %{
-              name: "my_first_topic_abc_new_1",
+              name: "my_first_topic_abc_new_2",
               num_partitions: 3,
               replication_factor: 2,
               assignments: [],

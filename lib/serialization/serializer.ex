@@ -19,6 +19,15 @@ defmodule KlifeProtocol.Serializer do
     |> Map.get(key)
     |> serialize_value(type)
     |> then(&do_serialize(rest_schema, input_map, acc_data <> &1))
+  rescue
+    e in RuntimeError ->
+      raise """
+      Serialization error:
+
+      field: #{inspect({key, type})}
+
+      reason: #{e.message}
+      """
   end
 
   # Used in arrays of complex data types
@@ -35,33 +44,40 @@ defmodule KlifeProtocol.Serializer do
     |> then(&do_serialize(schema, rest_val, acc_data <> &1))
   end
 
-  defp serialize_value(true, :boolean), do: <<1>>
-  defp serialize_value(false, :boolean), do: <<0>>
+  defp serialize_value(nil, {_, %{is_nullable?: false}}), do: raise("must not be null")
 
-  defp serialize_value(val, :int16), do: <<val::16-signed>>
-  defp serialize_value(val, :int32), do: <<val::32-signed>>
-  defp serialize_value(nil, :string), do: <<-1::16-signed>>
-  defp serialize_value(val, :string) when is_binary(val), do: <<byte_size(val)::16-signed>> <> val
+  defp serialize_value(true, {:boolean, _metadata}), do: <<1>>
+  defp serialize_value(false, {:boolean, _metadata}), do: <<0>>
 
-  defp serialize_value(nil, {:array, _schema}), do: <<-1::32-signed>>
+  defp serialize_value(val, {:int8, _metadata}), do: <<val::8-signed>>
+  defp serialize_value(val, {:int16, _metadata}), do: <<val::16-signed>>
+  defp serialize_value(val, {:int32, _metadata}), do: <<val::32-signed>>
+  defp serialize_value(val, {:int64, _metadata}), do: <<val::64-signed>>
 
-  defp serialize_value(val, {:array, schema}) do
-    do_serialize(schema, val, <<length(val)::32-signed>>)
-  end
+  defp serialize_value(nil, {:string, _metadata}), do: <<-1::16-signed>>
 
-  defp serialize_value(nil, :compact_bytes), do: serialize_value(0, :varint)
+  defp serialize_value(val, {:string, _metadata}) when is_binary(val),
+    do: <<byte_size(val)::16-signed>> <> val
 
-  defp serialize_value(val, :compact_bytes),
+  defp serialize_value(nil, {{:array, _schema}, _metadata}), do: <<-1::32-signed>>
+
+  defp serialize_value(val, {{:array, schema}, _metadata}),
+    do: do_serialize(schema, val, <<length(val)::32-signed>>)
+
+  defp serialize_value(nil, {:compact_bytes, _metadata}), do: serialize_value(0, :varint)
+
+  defp serialize_value(val, {:compact_bytes, _metadata}),
     do: serialize_value(byte_size(val) + 1, :varint) <> val
 
-  defp serialize_value(nil, :compact_string), do: serialize_value(0, :varint)
+  defp serialize_value(nil, {:compact_string, _metadata}), do: serialize_value(0, :varint)
 
-  defp serialize_value(val, :compact_string),
+  defp serialize_value(val, {:compact_string, _metadata}),
     do: serialize_value(byte_size(val) + 1, :varint) <> val
 
-  defp serialize_value(nil, {:compact_array, _schema}), do: serialize_value(0, :varint)
+  defp serialize_value(nil, {{:compact_array, _schema}, _metadata}),
+    do: serialize_value(0, :varint)
 
-  defp serialize_value(val, {:compact_array, schema}),
+  defp serialize_value(val, {{:compact_array, schema}, _metadata}),
     do: do_serialize(schema, val, serialize_value(length(val) + 1, :varint))
 
   defp serialize_value(val, :varint) when val <= 127 and val >= 0, do: <<val>>
@@ -77,11 +93,26 @@ defmodule KlifeProtocol.Serializer do
     serialize_tag_buffer(existing_schema, input_map, serialize_value(len, :varint))
   end
 
-  defp serialize_tag_buffer([{key, {tag, type}} | rest_schema], %{} = input_map, acc_data) do
+  defp serialize_tag_buffer([], _input_map, acc_data), do: acc_data
+
+  defp serialize_tag_buffer(
+         [{key, {{tag, type}, metadata}} | rest_schema],
+         %{} = input_map,
+         acc_data
+       ) do
     input_map
     |> Map.fetch!(key)
-    |> then(&serialize_tagged_field(tag, type, &1))
+    |> then(&serialize_tagged_field(tag, {type, metadata}, &1))
     |> then(&serialize_tag_buffer(rest_schema, input_map, acc_data <> &1))
+  rescue
+    e in RuntimeError ->
+      raise """
+      Serialization error:
+
+      field: #{inspect({key, type})}
+
+      reason: #{e.message}
+      """
   end
 
   defp serialize_tagged_field(tag, type, val),

@@ -13,7 +13,7 @@ defmodule KlifeProtocol.Deserializer do
     do_deserialize(rest_schema, rest_data, new_result)
   end
 
-  defp do_deserialize([{key, schema} | rest_schema], data, acc_result) do
+  defp do_deserialize([{key, {schema, _}} | rest_schema], data, acc_result) do
     {val, rest_data} = deserialize_value(data, schema)
     new_result = Map.put(acc_result, key, val)
     do_deserialize(rest_schema, rest_data, new_result)
@@ -71,7 +71,7 @@ defmodule KlifeProtocol.Deserializer do
   defp deserialize_tag_buffer(data, len, tagged_fields, result) do
     {field_tag, rest_binary} = deserialize_value(data, :varint)
     {_field_len, rest_binary} = deserialize_value(rest_binary, :varint)
-    {field_name, field_schema} = Map.fetch!(tagged_fields, field_tag)
+    {{field_name, field_schema}, _} = Map.fetch!(tagged_fields, field_tag)
     {field_value, rest_binary} = deserialize_value(rest_binary, field_schema)
     new_result = Map.put(result, field_name, field_value)
     deserialize_tag_buffer(rest_binary, len - 1, tagged_fields, new_result)
