@@ -5,19 +5,37 @@ defmodule KlifeProtocol.SerializerTest do
 
   test "int16" do
     input = %{a: 31, b: 123, c: 4}
-    schema = [a: :int16, b: :int16, c: :int16]
+
+    schema = [
+      a: {:int16, %{is_nullable?: false}},
+      b: {:int16, %{is_nullable?: false}},
+      c: {:int16, %{is_nullable?: false}}
+    ]
+
     assert <<31::16-signed, 123::16-signed, 4::16-signed>> = Serializer.execute(input, schema)
   end
 
   test "int32" do
     input = %{a: 31, b: 123, c: 4}
-    schema = [a: :int32, b: :int32, c: :int32]
+
+    schema = [
+      a: {:int32, %{is_nullable?: false}},
+      b: {:int32, %{is_nullable?: false}},
+      c: {:int32, %{is_nullable?: false}}
+    ]
+
     assert <<31::32-signed, 123::32-signed, 4::32-signed>> = Serializer.execute(input, schema)
   end
 
   test "string" do
     input = %{a: "abc", b: "defgh", d: "ij"}
-    schema = [a: :string, b: :string, c: :string, d: :string]
+
+    schema = [
+      a: {:string, %{is_nullable?: false}},
+      b: {:string, %{is_nullable?: false}},
+      c: {:string, %{is_nullable?: true}},
+      d: {:string, %{is_nullable?: false}}
+    ]
 
     [size_a, size_b, size_d] = [byte_size(input.a), byte_size(input.b), byte_size(input.d)]
 
@@ -31,7 +49,11 @@ defmodule KlifeProtocol.SerializerTest do
 
   test "array - simple" do
     input = %{a: [10, 20], b: ["a", "b", "c"]}
-    schema = [a: {:array, :int16}, b: {:array, :string}]
+
+    schema = [
+      a: {{:array, {:int16, %{is_nullable?: false}}}, %{is_nullable?: false}},
+      b: {{:array, {:string, %{is_nullable?: false}}}, %{is_nullable?: false}}
+    ]
 
     size_a = byte_size("a")
     size_b = byte_size("b")
@@ -64,10 +86,21 @@ defmodule KlifeProtocol.SerializerTest do
     }
 
     schema = [
-      a: {:array, [a_a: :int16, a_b: :int32]},
-      b: {:array, [b_a: {:array, [b_b: :string, b_c: :int16]}]},
-      c: {:array, [c_a: :int16]},
-      d: {:array, [d_a: :int16]}
+      a:
+        {{:array, [a_a: {:int16, %{is_nullable?: false}}, a_b: {:int32, %{is_nullable?: false}}]},
+         %{is_nullable?: false}},
+      b:
+        {{:array,
+          [
+            b_a:
+              {{:array,
+                [
+                  b_b: {:string, %{is_nullable?: false}},
+                  b_c: {:int16, %{is_nullable?: false}}
+                ]}, %{is_nullable?: false}}
+          ]}, %{is_nullable?: false}},
+      c: {{:array, [c_a: {:int16, %{is_nullable?: false}}]}, %{is_nullable?: true}},
+      d: {{:array, [d_a: {:int16, %{is_nullable?: false}}]}, %{is_nullable?: false}}
     ]
 
     size_a = byte_size("a")

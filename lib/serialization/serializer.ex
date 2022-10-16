@@ -21,13 +21,20 @@ defmodule KlifeProtocol.Serializer do
     |> then(&do_serialize(rest_schema, input_map, acc_data <> &1))
   rescue
     e in RuntimeError ->
-      raise """
-      Serialization error:
+      # Because the tail recursive nature of the code, in order to provide a
+      # useful error message we neeed to know which field start the raise,
+      # so we are doing it here by matching on the errror message
+      if String.starts_with?(e.message, "Serialization error:") do
+        reraise e, __STACKTRACE__
+      else
+        raise """
+        Serialization error:
 
-      field: #{inspect({key, type})}
+        field: #{inspect({key, type})}
 
-      reason: #{e.message}
-      """
+        reason: #{e.message}
+        """
+      end
   end
 
   # Used in arrays of complex data types
@@ -38,7 +45,7 @@ defmodule KlifeProtocol.Serializer do
   end
 
   # Used in arrays of simple data types
-  defp do_serialize(schema, [val | rest_val], acc_data) when is_atom(schema) do
+  defp do_serialize({type, _} = schema, [val | rest_val], acc_data) when is_atom(type) do
     val
     |> serialize_value(schema)
     |> then(&do_serialize(schema, rest_val, acc_data <> &1))
@@ -104,17 +111,10 @@ defmodule KlifeProtocol.Serializer do
     |> Map.fetch!(key)
     |> then(&serialize_tagged_field(tag, {type, metadata}, &1))
     |> then(&serialize_tag_buffer(rest_schema, input_map, acc_data <> &1))
-  rescue
-    e in RuntimeError ->
-      raise """
-      Serialization error:
-
-      field: #{inspect({key, type})}
-
-      reason: #{e.message}
-      """
   end
 
-  defp serialize_tagged_field(tag, type, val),
-    do: serialize_value(tag, :varint) <> serialize_value(val, type)
+  defp serialize_tagged_field(tag, type, val) do
+    value = serialize_value(val, type)
+    serialize_value(tag, :varint) <> byte_size(value) <> value
+  end
 end

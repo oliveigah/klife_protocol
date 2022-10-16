@@ -11,7 +11,7 @@ defmodule KlifeProtocol do
         %{
           correlation_id: 123_456,
           client_id: nil,
-          client_software_name: nil,
+          client_software_name: "nil",
           client_software_version: "1"
         },
         api_version_message_v

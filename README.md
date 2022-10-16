@@ -22,8 +22,6 @@ be found at <https://hexdocs.pm/klife_protocol>.
 
 ## Todos
 
-- Model nullable and ignorable fields
-- Skip unkown tagged fields
-- Standardize serialization (defaults and nil values)
-- Add documentation on generator
 - Add tests
+- Add documentation on generator
+

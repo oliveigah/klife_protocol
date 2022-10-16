@@ -6,13 +6,21 @@ defmodule KlifeProtocol.DeserializerTest do
   test "int16" do
     assert {%{a: 31, b: 123, c: 4}, <<>>} =
              <<31::16-signed, 123::16-signed, 4::16-signed>>
-             |> Deserializer.execute(a: :int16, b: :int16, c: :int16)
+             |> Deserializer.execute(
+               a: {:int16, %{is_nullable?: false}},
+               b: {:int16, %{is_nullable?: false}},
+               c: {:int16, %{is_nullable?: false}}
+             )
   end
 
   test "int32" do
     assert {%{a: 31, b: 123, c: 4}, <<>>} =
              <<31::32-signed, 123::32-signed, 4::32-signed>>
-             |> Deserializer.execute(a: :int32, b: :int32, c: :int32)
+             |> Deserializer.execute(
+               a: {:int32, %{is_nullable?: false}},
+               b: {:int32, %{is_nullable?: false}},
+               c: {:int32, %{is_nullable?: false}}
+             )
   end
 
   test "string" do
@@ -23,7 +31,12 @@ defmodule KlifeProtocol.DeserializerTest do
                 "defgh" <>
                 <<-1::16-signed>> <>
                 <<byte_size("ij")::16-signed>> <> "ij")
-             |> Deserializer.execute(a: :string, b: :string, c: :string, d: :string)
+             |> Deserializer.execute(
+               a: {:string, %{is_nullable?: false}},
+               b: {:string, %{is_nullable?: false}},
+               c: {:string, %{is_nullable?: false}},
+               d: {:string, %{is_nullable?: false}}
+             )
   end
 
   test "array - simple" do
@@ -38,7 +51,10 @@ defmodule KlifeProtocol.DeserializerTest do
                 "b" <>
                 <<byte_size("c")::16-signed>> <>
                 "c")
-             |> Deserializer.execute(a: {:array, :int16}, b: {:array, :string})
+             |> Deserializer.execute(
+               a: {{:array, {:int16, %{is_nullable?: false}}}, %{is_nullable?: false}},
+               b: {{:array, {:string, %{is_nullable?: false}}}, %{is_nullable?: false}}
+             )
   end
 
   test "array - nested" do
@@ -76,10 +92,22 @@ defmodule KlifeProtocol.DeserializerTest do
                 <<-1::32-signed>> <>
                 <<0::32-signed>>)
              |> Deserializer.execute(
-               a: {:array, [a_a: :int16, a_b: :int32]},
-               b: {:array, [b_a: {:array, [b_b: :string, b_c: :int16]}]},
-               c: {:array, [c_a: :int32]},
-               d: {:array, [d_a: :int32]}
+               a:
+                 {{:array,
+                   [a_a: {:int16, %{is_nullable?: false}}, a_b: {:int32, %{is_nullable?: false}}]},
+                  %{is_nullable?: false}},
+               b:
+                 {{:array,
+                   [
+                     b_a:
+                       {{:array,
+                         [
+                           b_b: {:string, %{is_nullable?: false}},
+                           b_c: {:int16, %{is_nullable?: false}}
+                         ]}, %{is_nullable?: false}}
+                   ]}, %{is_nullable?: false}},
+               c: {{:array, [c_a: {:int32, %{is_nullable?: false}}]}, %{is_nullable?: false}},
+               d: {{:array, [d_a: {:int32, %{is_nullable?: false}}]}, %{is_nullable?: false}}
              )
   end
 end
