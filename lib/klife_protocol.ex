@@ -2,7 +2,7 @@ defmodule KlifeProtocol do
   alias KlifeProtocol.Messages
 
   def test do
-    {:ok, socket} = :gen_tcp.connect('localhost', 39092, [:binary, active: false, packet: 4])
+    {:ok, socket} = :gen_tcp.connect('localhost', 19092, [:binary, active: false, packet: 4])
 
     api_version_message_v = 3
 
@@ -40,7 +40,7 @@ defmodule KlifeProtocol do
             }
           ],
           timeout_ms: 2000,
-          validate_only: true
+          validate_only: false
         },
         create_topic_v
       )
