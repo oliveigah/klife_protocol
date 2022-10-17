@@ -57,6 +57,19 @@ defmodule KlifeProtocol.DeserializerTest do
     assert %{a: 31, b: 123, c: 4} = response
   end
 
+  test "int64" do
+    input = <<31::64-signed, 123::64-signed, 4::64-signed>>
+
+    schema = [
+      a: {:int64, @default_metadata},
+      b: {:int64, @default_metadata},
+      c: {:int64, @default_metadata}
+    ]
+
+    assert {response, <<>>} = Deserializer.execute(input, schema)
+    assert %{a: 31, b: 123, c: 4} = response
+  end
+
   test "string" do
     input = <<
       byte_size("abc")::16-signed,
