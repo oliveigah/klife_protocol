@@ -3,13 +3,39 @@ defmodule KlifeProtocol.SerializerTest do
 
   alias KlifeProtocol.Serializer
 
+  @default_metadata %{is_nullable?: false}
+
+  test "boolean" do
+    input = %{a: true, b: false, c: true}
+
+    schema = [
+      a: {:boolean, @default_metadata},
+      b: {:boolean, @default_metadata},
+      c: {:boolean, @default_metadata}
+    ]
+
+    assert <<1, 0, 1>> = Serializer.execute(input, schema)
+  end
+
+  test "int8" do
+    input = %{a: 31, b: 123, c: 4}
+
+    schema = [
+      a: {:int8, @default_metadata},
+      b: {:int8, @default_metadata},
+      c: {:int8, @default_metadata}
+    ]
+
+    assert <<31, 123, 4>> = Serializer.execute(input, schema)
+  end
+
   test "int16" do
     input = %{a: 31, b: 123, c: 4}
 
     schema = [
-      a: {:int16, %{is_nullable?: false}},
-      b: {:int16, %{is_nullable?: false}},
-      c: {:int16, %{is_nullable?: false}}
+      a: {:int16, @default_metadata},
+      b: {:int16, @default_metadata},
+      c: {:int16, @default_metadata}
     ]
 
     assert <<31::16-signed, 123::16-signed, 4::16-signed>> = Serializer.execute(input, schema)
@@ -19,22 +45,34 @@ defmodule KlifeProtocol.SerializerTest do
     input = %{a: 31, b: 123, c: 4}
 
     schema = [
-      a: {:int32, %{is_nullable?: false}},
-      b: {:int32, %{is_nullable?: false}},
-      c: {:int32, %{is_nullable?: false}}
+      a: {:int32, @default_metadata},
+      b: {:int32, @default_metadata},
+      c: {:int32, @default_metadata}
     ]
 
     assert <<31::32-signed, 123::32-signed, 4::32-signed>> = Serializer.execute(input, schema)
+  end
+
+  test "int64" do
+    input = %{a: 31, b: 123, c: 4}
+
+    schema = [
+      a: {:int64, @default_metadata},
+      b: {:int64, @default_metadata},
+      c: {:int64, @default_metadata}
+    ]
+
+    assert <<31::64-signed, 123::64-signed, 4::64-signed>> = Serializer.execute(input, schema)
   end
 
   test "string" do
     input = %{a: "abc", b: "defgh", d: "ij"}
 
     schema = [
-      a: {:string, %{is_nullable?: false}},
-      b: {:string, %{is_nullable?: false}},
+      a: {:string, @default_metadata},
+      b: {:string, @default_metadata},
       c: {:string, %{is_nullable?: true}},
-      d: {:string, %{is_nullable?: false}}
+      d: {:string, @default_metadata}
     ]
 
     [size_a, size_b, size_d] = [byte_size(input.a), byte_size(input.b), byte_size(input.d)]
@@ -51,8 +89,8 @@ defmodule KlifeProtocol.SerializerTest do
     input = %{a: [10, 20], b: ["a", "b", "c"]}
 
     schema = [
-      a: {{:array, {:int16, %{is_nullable?: false}}}, %{is_nullable?: false}},
-      b: {{:array, {:string, %{is_nullable?: false}}}, %{is_nullable?: false}}
+      a: {{:array, {:int16, @default_metadata}}, @default_metadata},
+      b: {{:array, {:string, @default_metadata}}, @default_metadata}
     ]
 
     size_a = byte_size("a")
@@ -87,20 +125,20 @@ defmodule KlifeProtocol.SerializerTest do
 
     schema = [
       a:
-        {{:array, [a_a: {:int16, %{is_nullable?: false}}, a_b: {:int32, %{is_nullable?: false}}]},
-         %{is_nullable?: false}},
+        {{:array, [a_a: {:int16, @default_metadata}, a_b: {:int32, @default_metadata}]},
+         @default_metadata},
       b:
         {{:array,
           [
             b_a:
               {{:array,
                 [
-                  b_b: {:string, %{is_nullable?: false}},
-                  b_c: {:int16, %{is_nullable?: false}}
-                ]}, %{is_nullable?: false}}
-          ]}, %{is_nullable?: false}},
-      c: {{:array, [c_a: {:int16, %{is_nullable?: false}}]}, %{is_nullable?: true}},
-      d: {{:array, [d_a: {:int16, %{is_nullable?: false}}]}, %{is_nullable?: false}}
+                  b_b: {:string, @default_metadata},
+                  b_c: {:int16, @default_metadata}
+                ]}, @default_metadata}
+          ]}, @default_metadata},
+      c: {{:array, [c_a: {:int16, @default_metadata}]}, %{is_nullable?: true}},
+      d: {{:array, [d_a: {:int16, @default_metadata}]}, @default_metadata}
     ]
 
     size_a = byte_size("a")
@@ -126,5 +164,103 @@ defmodule KlifeProtocol.SerializerTest do
              <<3::16-signed>> <>
              <<-1::32-signed>> <>
              <<0::32-signed>> = Serializer.execute(input, schema)
+  end
+
+  test "compact_bytes" do
+    input = %{a: <<1, 2, 3>>, b: nil, c: <<7, 8, 9, 10>>}
+
+    schema = [
+      a: {:compact_bytes, @default_metadata},
+      b: {:compact_bytes, %{is_nullable?: true}},
+      c: {:compact_bytes, @default_metadata}
+    ]
+
+    assert <<4, 1, 2, 3, 0, 5, 7, 8, 9, 10>> = Serializer.execute(input, schema)
+  end
+
+  test "compact_string" do
+    input = %{a: "aaa", b: nil, c: "abcabcabc"}
+
+    schema = [
+      a: {:compact_string, @default_metadata},
+      b: {:compact_string, %{is_nullable?: true}},
+      c: {:compact_string, @default_metadata}
+    ]
+
+    assert <<4, "aaa", 0, 10, "abcabcabc">> = Serializer.execute(input, schema)
+  end
+
+  test "compact_array - simple" do
+    input = %{a: [10, 20], b: ["a", "b", "c"], c: nil}
+
+    schema = [
+      a: {{:compact_array, {:int16, @default_metadata}}, @default_metadata},
+      b: {{:compact_array, {:compact_string, @default_metadata}}, @default_metadata},
+      c: {{:compact_array, {:string, @default_metadata}}, %{is_nullable?: true}}
+    ]
+
+    assert <<3, 10::16-signed, 20::16-signed>> <>
+             <<4, 2, "a", 2, "b", 2, "c">> <>
+             <<0>> = Serializer.execute(input, schema)
+  end
+
+  test "compact_array - nested" do
+    input = %{
+      a: [[10], [20, 30]],
+      b: [%{b_1: ["a", "bb", "ccc"]}, %{b_1: ["d", "ee"]}]
+    }
+
+    schema = [
+      a:
+        {{:compact_array,
+          {
+            {:compact_array,
+             {
+               :int16,
+               @default_metadata
+             }},
+            @default_metadata
+          }}, @default_metadata},
+      b:
+        {{:compact_array,
+          [
+            b_1: {
+              {:compact_array, {:compact_string, @default_metadata}},
+              @default_metadata
+            }
+          ]}, @default_metadata}
+    ]
+
+    assert <<3, 2, 10::16-signed, 3, 20::16-signed, 30::16-signed>> <>
+             <<3, 4, 2, "a", 3, "bb", 4, "ccc", 3, 2, "d", 3, "ee">> =
+             Serializer.execute(input, schema)
+  end
+
+  test "varint" do
+    input = %{a: 10, b: 120, c: 300}
+
+    schema = [
+      a: {:varint, @default_metadata},
+      b: {:varint, @default_metadata},
+      c: {:varint, @default_metadata}
+    ]
+
+    assert <<10, 120, 172, 2>> = Serializer.execute(input, schema)
+  end
+
+  test "tag_buffer" do
+    input = %{a: "aaa", c: 123}
+
+    schema = [
+      tag_buffer:
+        {:tag_buffer,
+         [
+           a: {{0, :compact_string}, @default_metadata},
+           b: {{1, :int16}, @default_metadata},
+           c: {{2, :int16}, @default_metadata}
+         ]}
+    ]
+
+    assert <<2, 0, 5, 4, "aaa", 2, 3, 123::16-signed>> = Serializer.execute(input, schema)
   end
 end
