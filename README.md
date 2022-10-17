@@ -22,7 +22,8 @@ be found at <https://hexdocs.pm/klife_protocol>.
 
 ## Todos
 
-- Add tests 
+- Add tests for kafka messages
 - Add documentation on generator
-- Improve error messages on seriliazation errors
+- Benchmark serialization
+- Improve error message on seriliazation errors
 
