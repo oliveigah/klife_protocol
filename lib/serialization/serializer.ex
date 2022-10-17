@@ -41,7 +41,7 @@ defmodule KlifeProtocol.Serializer do
 
     field: #{inspect({key, type})}
 
-    reason: is not nullable
+    reason: field is not nullable
     """
   end
 
@@ -53,7 +53,7 @@ defmodule KlifeProtocol.Serializer do
 
     field: #{inspect(type)}
 
-    reason: is not nullable
+    reason: field is not nullable
     """
   end
 

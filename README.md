@@ -22,6 +22,7 @@ be found at <https://hexdocs.pm/klife_protocol>.
 
 ## Todos
 
-- Add tests
+- Add tests 
 - Add documentation on generator
+- Improve error messages on seriliazation errors
 

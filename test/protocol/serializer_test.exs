@@ -263,4 +263,48 @@ defmodule KlifeProtocol.SerializerTest do
 
     assert <<2, 0, 5, 4, "aaa", 2, 3, 123::16-signed>> = Serializer.execute(input, schema)
   end
+
+  test "empty tag_buffer" do
+    input = %{}
+
+    schema = [tag_buffer: {:tag_buffer, []}]
+
+    assert <<0>> = Serializer.execute(input, schema)
+  end
+
+  test "raise not null exception with key" do
+    input = %{a: nil}
+
+    schema = [
+      a: {:boolean, %{is_nullable?: false}}
+    ]
+
+    assert_raise RuntimeError,
+                 """
+                 Serialization error:
+
+                 field: {:a, {:boolean, %{is_nullable?: false}}}
+
+                 reason: field is not nullable
+                 """,
+                 fn -> Serializer.execute(input, schema) end
+  end
+
+  test "raise not null exception without key" do
+    input = %{a: [1, 2, 3, nil, 4]}
+
+    schema = [
+      a: {{:array, {:int16, %{is_nullable?: false}}}, @default_metadata}
+    ]
+
+    assert_raise RuntimeError,
+                 """
+                 Serialization error:
+
+                 field: :int16
+
+                 reason: field is not nullable
+                 """,
+                 fn -> Serializer.execute(input, schema) end
+  end
 end

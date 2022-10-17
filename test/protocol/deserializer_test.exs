@@ -283,4 +283,14 @@ defmodule KlifeProtocol.DeserializerTest do
 
     assert %{a: "aaa", c: 123} = response
   end
+
+  test "empty tag_buffer" do
+    input = <<0>>
+
+    schema = [tag_buffer: {:tag_buffer, %{}}]
+
+    assert {response, <<>>} = Deserializer.execute(input, schema)
+
+    assert %{} = response
+  end
 end
