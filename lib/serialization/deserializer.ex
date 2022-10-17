@@ -46,7 +46,17 @@ defmodule KlifeProtocol.Deserializer do
   defp do_deserialize_value(<<len::32-signed, rest_data::binary>>, {:array, schema}),
     do: deserialize_array(rest_data, len, schema, [])
 
-  # TODO: Compact bytes
+  defp do_deserialize_value(binary, :compact_bytes) do
+    {len, rest_binary} = do_deserialize_value(binary, :varint)
+
+    if len > 0 do
+      len = len - 1
+      <<val::binary-size(len), rest_binary::binary>> = rest_binary
+      {val, rest_binary}
+    else
+      {nil, rest_binary}
+    end
+  end
 
   defp do_deserialize_value(binary, :compact_string) do
     {len, rest_binary} = do_deserialize_value(binary, :varint)
@@ -80,6 +90,7 @@ defmodule KlifeProtocol.Deserializer do
   defp deserialize_tag_buffer(data, len, tagged_fields, result) do
     {field_tag, rest_binary} = do_deserialize_value(data, :varint)
     {field_len, rest_binary} = do_deserialize_value(rest_binary, :varint)
+    field_len = field_len - 1
 
     case Map.get(tagged_fields, field_tag) do
       nil ->
@@ -102,7 +113,7 @@ defmodule KlifeProtocol.Deserializer do
     deserialize_array(rest_data, len - 1, schema, [new_result | acc_result])
   end
 
-  defp deserialize_array(data, len, {type, _} = schema, acc_result) when is_atom(type) do
+  defp deserialize_array(data, len, {type, _} = schema, acc_result) do
     {new_result, rest_data} = do_deserialize_value(data, type)
     deserialize_array(rest_data, len - 1, schema, [new_result | acc_result])
   end
