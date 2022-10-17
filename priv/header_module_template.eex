@@ -14,10 +14,10 @@ defmodule KlifeProtocol.Header do
         """
     end) %>
 
-    def deserialize_response(data, version),
-    do: Deserializer.execute(data, response_schema(version))
-
     def serialize_request(data, version),
     do: Serializer.execute(data, request_schema(version))
+
+    def deserialize_response(data, version),
+    do: Deserializer.execute(data, response_schema(version))
     
 end

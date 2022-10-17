@@ -31,9 +31,9 @@ defmodule KlifeProtocol.Header do
   defp response_schema(1),
     do: [correlation_id: {:int32, %{is_nullable?: false}}, tag_buffer: {:tag_buffer, %{}}]
 
-  def deserialize_response(data, version),
-    do: Deserializer.execute(data, response_schema(version))
-
   def serialize_request(data, version),
     do: Serializer.execute(data, request_schema(version))
+
+  def deserialize_response(data, version),
+    do: Deserializer.execute(data, response_schema(version))
 end

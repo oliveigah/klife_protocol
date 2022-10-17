@@ -7,19 +7,19 @@ defmodule KlifeProtocol.Messages.SaslAuthenticate do
   @min_flexible_version_req 2
   @min_flexible_version_res 2
 
-  def deserialize_response(data, version) do
-    with {headers, rest_data} <- Header.deserialize_response(data, res_header_version(version)),
-         {content, _} <- Deserializer.execute(rest_data, response_schema(version)) do
-      %{headers: headers, content: content}
-    end
-  end
-
   def serialize_request(input, version) do
     input
     |> Map.put(:request_api_key, @api_key)
     |> Map.put(:request_api_version, version)
     |> Header.serialize_request(req_header_version(version))
     |> then(&Serializer.execute(input, request_schema(version), &1))
+  end
+
+  def deserialize_response(data, version) do
+    with {headers, rest_data} <- Header.deserialize_response(data, res_header_version(version)),
+         {content, <<>>} <- Deserializer.execute(rest_data, response_schema(version)) do
+      %{headers: headers, content: content}
+    end
   end
 
   defp req_header_version(msg_version),
