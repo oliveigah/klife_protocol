@@ -9,8 +9,8 @@ if Mix.env() == :dev do
     }
 
     @write_path_by_module %{
-      "Header" => "lib/generated/",
-      "default" => "lib/generated/messages/"
+      "Header" => "lib/klife_protocol/generated/",
+      "default" => "lib/klife_protocol/generated/messages/"
     }
 
     @req_header_exceptions %{

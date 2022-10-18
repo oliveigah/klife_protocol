@@ -19,6 +19,15 @@ Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_do
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at <https://hexdocs.pm/klife_protocol>.
 
+## Running Tests
+
+```
+docker-compose -f ./test/compose_files docker-compose-latest.yml up --force-recreate
+
+mix test
+```
+
+
 
 ## Todos
 
