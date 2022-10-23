@@ -107,8 +107,8 @@ defmodule KlifeProtocol.DeserializerTest do
     >>
 
     schema = [
-      a: {{:array, {:int16, %{is_nullable?: false}}}, %{is_nullable?: false}},
-      b: {{:array, {:string, %{is_nullable?: false}}}, %{is_nullable?: false}}
+      a: {{:array, :int16}, %{is_nullable?: false}},
+      b: {{:array, :string}, %{is_nullable?: false}}
     ]
 
     assert {response, <<>>} = Deserializer.execute(input, schema)
@@ -208,9 +208,9 @@ defmodule KlifeProtocol.DeserializerTest do
         <<0>>
 
     schema = [
-      a: {{:compact_array, {:int16, @default_metadata}}, @default_metadata},
-      b: {{:compact_array, {:compact_string, @default_metadata}}, @default_metadata},
-      c: {{:compact_array, {:string, @default_metadata}}, %{is_nullable?: true}}
+      a: {{:compact_array, :int16}, @default_metadata},
+      b: {{:compact_array, :compact_string}, @default_metadata},
+      c: {{:compact_array, :string}, %{is_nullable?: true}}
     ]
 
     assert {response, <<>>} = Deserializer.execute(input, schema)
@@ -221,26 +221,18 @@ defmodule KlifeProtocol.DeserializerTest do
   test "compact_array - nested" do
     input =
       <<3, 2, 10::16-signed, 3, 20::16-signed, 30::16-signed>> <>
-        <<3, 4, 2, "a", 3, "bb", 4, "ccc", 3, 2, "d", 3, "ee">>
+        <<3, 4, 2, "a", 3, "bb", 4, "ccc", 40::32-signed, 3, 2, "d", 3, "ee", 50::32-signed>>
 
     schema = [
-      a:
-        {{:compact_array,
-          {
-            {:compact_array,
-             {
-               :int16,
-               @default_metadata
-             }},
-            @default_metadata
-          }}, @default_metadata},
+      a: {{:compact_array, {:compact_array, :int16}}, @default_metadata},
       b:
         {{:compact_array,
           [
             b_1: {
-              {:compact_array, {:compact_string, @default_metadata}},
+              {:compact_array, :compact_string},
               @default_metadata
-            }
+            },
+            b_2: {:int32, %{is_nullable?: false}}
           ]}, @default_metadata}
     ]
 
@@ -248,7 +240,7 @@ defmodule KlifeProtocol.DeserializerTest do
 
     assert %{
              a: [[10], [20, 30]],
-             b: [%{b_1: ["a", "bb", "ccc"]}, %{b_1: ["d", "ee"]}]
+             b: [%{b_1: ["a", "bb", "ccc"], b_2: 40}, %{b_1: ["d", "ee"], b_2: 50}]
            } = response
   end
 

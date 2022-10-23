@@ -113,9 +113,9 @@ defmodule KlifeProtocol.Deserializer do
     deserialize_array(rest_data, len - 1, schema, [new_result | acc_result])
   end
 
-  defp deserialize_array(data, len, {type, _} = schema, acc_result) do
+  defp deserialize_array(data, len, type, acc_result) do
     {new_result, rest_data} = do_deserialize_value(data, type)
-    deserialize_array(rest_data, len - 1, schema, [new_result | acc_result])
+    deserialize_array(rest_data, len - 1, type, [new_result | acc_result])
   end
 
   def deserialize_varint(binary, acc \\ 0, counter \\ 0) do

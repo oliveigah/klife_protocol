@@ -89,8 +89,8 @@ defmodule KlifeProtocol.SerializerTest do
     input = %{a: [10, 20], b: ["a", "b", "c"]}
 
     schema = [
-      a: {{:array, {:int16, @default_metadata}}, @default_metadata},
-      b: {{:array, {:string, @default_metadata}}, @default_metadata}
+      a: {{:array, :int16}, @default_metadata},
+      b: {{:array, :string}, @default_metadata}
     ]
 
     size_a = byte_size("a")
@@ -194,9 +194,9 @@ defmodule KlifeProtocol.SerializerTest do
     input = %{a: [10, 20], b: ["a", "b", "c"], c: nil}
 
     schema = [
-      a: {{:compact_array, {:int16, @default_metadata}}, @default_metadata},
-      b: {{:compact_array, {:compact_string, @default_metadata}}, @default_metadata},
-      c: {{:compact_array, {:string, @default_metadata}}, %{is_nullable?: true}}
+      a: {{:compact_array, :int16}, @default_metadata},
+      b: {{:compact_array, :compact_string}, @default_metadata},
+      c: {{:compact_array, :string}, %{is_nullable?: true}}
     ]
 
     assert <<3, 10::16-signed, 20::16-signed>> <>
@@ -211,23 +211,11 @@ defmodule KlifeProtocol.SerializerTest do
     }
 
     schema = [
-      a:
-        {{:compact_array,
-          {
-            {:compact_array,
-             {
-               :int16,
-               @default_metadata
-             }},
-            @default_metadata
-          }}, @default_metadata},
+      a: {{:compact_array, {:compact_array, :int16}}, @default_metadata},
       b:
         {{:compact_array,
           [
-            b_1: {
-              {:compact_array, {:compact_string, @default_metadata}},
-              @default_metadata
-            }
+            b_1: {{:compact_array, :compact_string}, @default_metadata}
           ]}, @default_metadata}
     ]
 
@@ -273,35 +261,18 @@ defmodule KlifeProtocol.SerializerTest do
   end
 
   test "raise not null exception with key" do
-    input = %{a: nil}
+    input = %{a: true, b: nil}
 
     schema = [
-      a: {:boolean, %{is_nullable?: false}}
+      a: {:boolean, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, [b: {{0, :string}, %{is_nullable?: false}}]}
     ]
 
     assert_raise RuntimeError,
                  """
                  Serialization error:
 
-                 field: {:a, {:boolean, %{is_nullable?: false}}}
-
-                 reason: field is not nullable
-                 """,
-                 fn -> Serializer.execute(input, schema) end
-  end
-
-  test "raise not null exception without key" do
-    input = %{a: [1, 2, 3, nil, 4]}
-
-    schema = [
-      a: {{:array, {:int16, %{is_nullable?: false}}}, @default_metadata}
-    ]
-
-    assert_raise RuntimeError,
-                 """
-                 Serialization error:
-
-                 field: :int16
+                 field: {:b, {:string, %{is_nullable?: false}}}
 
                  reason: field is not nullable
                  """,

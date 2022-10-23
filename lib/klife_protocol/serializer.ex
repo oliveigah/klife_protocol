@@ -8,34 +8,36 @@ defmodule KlifeProtocol.Serializer do
   defp do_serialize([], map, result_data) when is_map(map), do: result_data
   defp do_serialize(_schema, [], result_data), do: result_data
 
+  # Used for tag buffer
   defp do_serialize([{_key, {:tag_buffer, _} = type} | rest_schema], %{} = input_map, acc_data) do
     input_map
-    |> serialize_value(type)
+    |> do_serialize_value(type)
     |> then(&do_serialize(rest_schema, input_map, acc_data <> &1))
   end
 
+  # Main function
   defp do_serialize([{key, type} | rest_schema], %{} = input_map, acc_data) do
     input_map
     |> Map.get(key)
-    |> serialize_value_with_key({key, type})
+    |> serialize_value({key, type})
     |> then(&do_serialize(rest_schema, input_map, acc_data <> &1))
   end
 
-  # Used in arrays of complex data types
+  # Used for arrays of complex data types
   defp do_serialize(schema, [val | rest_val], acc_data) when is_list(schema) do
     schema
     |> do_serialize(val, acc_data)
     |> then(&do_serialize(schema, rest_val, &1))
   end
 
-  # Used in arrays of simple data types
-  defp do_serialize({_, _} = schema, [val | rest_val], acc_data) do
+  # Used for arrays of simple data types
+  defp do_serialize(type, [val | rest_val], acc_data) do
     val
-    |> serialize_value(schema)
-    |> then(&do_serialize(schema, rest_val, acc_data <> &1))
+    |> do_serialize_value(type)
+    |> then(&do_serialize(type, rest_val, acc_data <> &1))
   end
 
-  defp serialize_value_with_key(nil, {key, {_, %{is_nullable?: false}} = type}) do
+  defp serialize_value(nil, {key, {_, %{is_nullable?: false}} = type}) do
     raise """
     Serialization error:
 
@@ -45,22 +47,7 @@ defmodule KlifeProtocol.Serializer do
     """
   end
 
-  defp serialize_value_with_key(val, {_key, {type, _metadata}}), do: do_serialize_value(val, type)
-
-  defp serialize_value(nil, {type, %{is_nullable?: false}}) do
-    raise """
-    Serialization error:
-
-    field: #{inspect(type)}
-
-    reason: field is not nullable
-    """
-  end
-
-  defp serialize_value(val, {:tag_buffer, schema} = type) when is_list(schema),
-    do: do_serialize_value(val, type)
-
-  defp serialize_value(val, {type, _metadata}), do: do_serialize_value(val, type)
+  defp serialize_value(val, {_key, {type, _metadata}}), do: do_serialize_value(val, type)
 
   defp do_serialize_value(true, :boolean), do: <<1>>
   defp do_serialize_value(false, :boolean), do: <<0>>
@@ -116,16 +103,14 @@ defmodule KlifeProtocol.Serializer do
          %{} = input_map,
          acc_data
        ) do
-    input_map
-    |> Map.fetch!(key)
-    |> then(&serialize_tagged_field(tag, {type, metadata}, &1))
-    |> then(&serialize_tag_buffer(rest_schema, input_map, acc_data <> &1))
-  end
+    raw_value = Map.fetch!(input_map, key)
 
-  defp serialize_tagged_field(tag, type, val) do
-    value = serialize_value(val, type)
+    value = serialize_value(raw_value, {key, {type, metadata}})
     size = do_serialize_value(byte_size(value) + 1, :varint)
     tag = do_serialize_value(tag, :varint)
-    tag <> size <> value
+
+    final_val = tag <> size <> value
+
+    serialize_tag_buffer(rest_schema, input_map, acc_data <> final_val)
   end
 end

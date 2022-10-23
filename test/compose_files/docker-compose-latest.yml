@@ -10,6 +10,7 @@ services:
 
   kafka1:
     image: bitnami/kafka:3.3.1
+    hostname: broker1
     ports:
       - 19092:9092
     environment:
@@ -21,6 +22,7 @@ services:
 
   kafka2:
     image: bitnami/kafka:3.3.1
+    hostname: broker2
     ports:
       - 29092:9092
     environment:
@@ -32,6 +34,7 @@ services:
 
   kafka3:
     image: bitnami/kafka:3.3.1
+    hostname: broker3
     ports:
       - 39092:9092
     environment:
