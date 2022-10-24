@@ -28,7 +28,7 @@ defmodule KlifeProtocol.Messages.Heartbeat do
   @min_flexible_version_res 4
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - group_id: The group id. (string | versions 0+)
   - generation_id: The generation of the group. (int32 | versions 0+)
@@ -45,7 +45,7 @@ defmodule KlifeProtocol.Messages.Heartbeat do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 1+)
   - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)

@@ -29,7 +29,7 @@ defmodule KlifeProtocol.Messages.FindCoordinator do
   @min_flexible_version_res 3
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - key: The coordinator key. (string | versions 0-3)
   - key_type: The coordinator key type. (Group, transaction, etc.) (int8 | versions 1+)
@@ -45,7 +45,7 @@ defmodule KlifeProtocol.Messages.FindCoordinator do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 1+)
   - error_code: The error code, or 0 if there was no error. (int16 | versions 0-3)

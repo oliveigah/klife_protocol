@@ -23,12 +23,12 @@ defmodule KlifeProtocol.Messages.DescribeClientQuotas do
   @min_flexible_version_res 1
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - components: Filter components to apply to quota entities. ([]ComponentData | versions 0+)
-  - entity_type: The entity type that the filter component applies to. (string | versions 0+) 
-  - match_type: How to match the entity {0 = exact name, 1 = default name, 2 = any specified name}. (int8 | versions 0+) 
-  - match: The string to match against, or null if unused for the match type. (string | versions 0+) 
+      - entity_type: The entity type that the filter component applies to. (string | versions 0+)
+      - match_type: How to match the entity {0 = exact name, 1 = default name, 2 = any specified name}. (int8 | versions 0+)
+      - match: The string to match against, or null if unused for the match type. (string | versions 0+)
   - strict: Whether the match is strict, i.e. should exclude entities with unspecified entity types. (bool | versions 0+)
 
   """
@@ -41,7 +41,7 @@ defmodule KlifeProtocol.Messages.DescribeClientQuotas do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code: The error code, or `0` if the quota description succeeded. (int16 | versions 0+)

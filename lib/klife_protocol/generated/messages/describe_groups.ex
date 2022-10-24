@@ -30,7 +30,7 @@ defmodule KlifeProtocol.Messages.DescribeGroups do
   @min_flexible_version_res 5
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - groups: The names of the groups to describe ([]string | versions 0+)
   - include_authorized_operations: Whether to include authorized operations. (bool | versions 3+)
@@ -45,7 +45,7 @@ defmodule KlifeProtocol.Messages.DescribeGroups do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 1+)
   - groups: Each described group. ([]DescribedGroup | versions 0+)

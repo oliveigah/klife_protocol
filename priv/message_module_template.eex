@@ -45,17 +45,18 @@ defmodule KlifeProtocol.Messages.<%= module_name %> do
     %>
 
     @doc """
-    Valid fields:
+    Content fields:
     
     <%= Enum.map(req_field_comments, fn {line, depth} ->
         if depth == 0 do
             line <>  "\n"
         else
-            leading_spaces = 
-            Enum.map(1..depth, fn _ -> "  " end) 
+            base_space = "    "
+            extra_space = 
+            Enum.map(1..depth, fn _ -> base_space end) 
             |> Enum.join()
-
-            leading_spaces  <> line <> " \n"
+            
+            base_space <> extra_space <> line <> "\n"
         end
     end) %>
     """
@@ -68,17 +69,18 @@ defmodule KlifeProtocol.Messages.<%= module_name %> do
     end
 
     @doc """
-    Valid fields:
+    Content fields:
 
     <%= Enum.map(res_field_comments, fn {line, depth} ->
         if depth == 0 do
             line <>  "\n"
         else
-            leading_spaces = 
-            Enum.map(0..depth, fn _ -> "    " end) 
+            base_space = "    "
+            extra_space = 
+            Enum.map(1..depth, fn _ -> base_space end) 
             |> Enum.join()
             
-            leading_spaces  <> line <> "\n"
+            base_space <> extra_space <> line <> "\n"
         end
     end) %>
     """

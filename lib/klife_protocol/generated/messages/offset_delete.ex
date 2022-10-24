@@ -21,13 +21,13 @@ defmodule KlifeProtocol.Messages.OffsetDelete do
   @min_flexible_version_res :none
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - group_id: The unique group identifier. (string | versions 0+)
   - topics: The topics to delete offsets for ([]OffsetDeleteRequestTopic | versions 0+)
-  - name: The topic name. (string | versions 0+) 
-  - partitions: Each partition to delete offsets for. ([]OffsetDeleteRequestPartition | versions 0+) 
-  - partition_index: The partition index. (int32 | versions 0+) 
+      - name: The topic name. (string | versions 0+)
+      - partitions: Each partition to delete offsets for. ([]OffsetDeleteRequestPartition | versions 0+)
+          - partition_index: The partition index. (int32 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -39,7 +39,7 @@ defmodule KlifeProtocol.Messages.OffsetDelete do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - error_code: The top-level error code, or 0 if there was no error. (int16 | versions 0+)
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)

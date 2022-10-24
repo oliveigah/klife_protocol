@@ -26,19 +26,19 @@ defmodule KlifeProtocol.Messages.AlterPartition do
   @min_flexible_version_res 0
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - broker_id: The ID of the requesting broker (int32 | versions 0+)
   - broker_epoch: The epoch of the requesting broker (int64 | versions 0+)
   - topics:  ([]TopicData | versions 0+)
-  - topic_name: The name of the topic to alter ISRs for (string | versions 0-1) 
-  - topic_id: The ID of the topic to alter ISRs for (uuid | versions 2+) 
-  - partitions:  ([]PartitionData | versions 0+) 
-  - partition_index: The partition index (int32 | versions 0+) 
-  - leader_epoch: The leader epoch of this partition (int32 | versions 0+) 
-  - new_isr: The ISR for this partition ([]int32 | versions 0+) 
-  - leader_recovery_state: 1 if the partition is recovering from an unclean leader election; 0 otherwise. (int8 | versions 1+) 
-  - partition_epoch: The expected epoch of the partition which is being updated. For legacy cluster this is the ZkVersion in the LeaderAndIsr request. (int32 | versions 0+) 
+      - topic_name: The name of the topic to alter ISRs for (string | versions 0-1)
+      - topic_id: The ID of the topic to alter ISRs for (uuid | versions 2+)
+      - partitions:  ([]PartitionData | versions 0+)
+          - partition_index: The partition index (int32 | versions 0+)
+          - leader_epoch: The leader epoch of this partition (int32 | versions 0+)
+          - new_isr: The ISR for this partition ([]int32 | versions 0+)
+          - leader_recovery_state: 1 if the partition is recovering from an unclean leader election; 0 otherwise. (int8 | versions 1+)
+          - partition_epoch: The expected epoch of the partition which is being updated. For legacy cluster this is the ZkVersion in the LeaderAndIsr request. (int32 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -50,7 +50,7 @@ defmodule KlifeProtocol.Messages.AlterPartition do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code: The top level response error code (int16 | versions 0+)

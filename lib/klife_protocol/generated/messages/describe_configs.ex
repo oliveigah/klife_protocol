@@ -27,12 +27,12 @@ defmodule KlifeProtocol.Messages.DescribeConfigs do
   @min_flexible_version_res 4
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - resources: The resources whose configurations we want to describe. ([]DescribeConfigsResource | versions 0+)
-  - resource_type: The resource type. (int8 | versions 0+) 
-  - resource_name: The resource name. (string | versions 0+) 
-  - configuration_keys: The configuration keys to list, or null to list all configuration keys. ([]string | versions 0+) 
+      - resource_type: The resource type. (int8 | versions 0+)
+      - resource_name: The resource name. (string | versions 0+)
+      - configuration_keys: The configuration keys to list, or null to list all configuration keys. ([]string | versions 0+)
   - include_synonyms: True if we should include all synonyms. (bool | versions 1+)
   - include_documentation: True if we should include configuration documentation. (bool | versions 3+)
 
@@ -46,7 +46,7 @@ defmodule KlifeProtocol.Messages.DescribeConfigs do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - results: The results for each resource. ([]DescribeConfigsResult | versions 0+)

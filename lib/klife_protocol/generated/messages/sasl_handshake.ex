@@ -29,7 +29,7 @@ defmodule KlifeProtocol.Messages.SaslHandshake do
   @min_flexible_version_res :none
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - mechanism: The SASL mechanism chosen by the client. (string | versions 0+)
 
@@ -43,7 +43,7 @@ defmodule KlifeProtocol.Messages.SaslHandshake do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
   - mechanisms: The mechanisms enabled in the server. ([]string | versions 0+)

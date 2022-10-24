@@ -31,15 +31,15 @@ defmodule KlifeProtocol.Messages.OffsetForLeaderEpoch do
   @min_flexible_version_res 4
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - replica_id: The broker ID of the follower, of -1 if this request is from a consumer. (int32 | versions 3+)
   - topics: Each topic to get offsets for. ([]OffsetForLeaderTopic | versions 0+)
-  - topic: The topic name. (string | versions 0+) 
-  - partitions: Each partition to get offsets for. ([]OffsetForLeaderPartition | versions 0+) 
-  - partition: The partition index. (int32 | versions 0+) 
-  - current_leader_epoch: An epoch used to fence consumers/replicas with old metadata. If the epoch provided by the client is larger than the current epoch known to the broker, then the UNKNOWN_LEADER_EPOCH error code will be returned. If the provided epoch is smaller, then the FENCED_LEADER_EPOCH error code will be returned. (int32 | versions 2+) 
-  - leader_epoch: The epoch to look up an offset for. (int32 | versions 0+) 
+      - topic: The topic name. (string | versions 0+)
+      - partitions: Each partition to get offsets for. ([]OffsetForLeaderPartition | versions 0+)
+          - partition: The partition index. (int32 | versions 0+)
+          - current_leader_epoch: An epoch used to fence consumers/replicas with old metadata. If the epoch provided by the client is larger than the current epoch known to the broker, then the UNKNOWN_LEADER_EPOCH error code will be returned. If the provided epoch is smaller, then the FENCED_LEADER_EPOCH error code will be returned. (int32 | versions 2+)
+          - leader_epoch: The epoch to look up an offset for. (int32 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -51,7 +51,7 @@ defmodule KlifeProtocol.Messages.OffsetForLeaderEpoch do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 2+)
   - topics: Each topic we fetched offsets for. ([]OffsetForLeaderTopicResult | versions 0+)

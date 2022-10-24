@@ -21,10 +21,10 @@ defmodule KlifeProtocol.Messages.DescribeUserScramCredentials do
   @min_flexible_version_res 0
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - users: The users to describe, or null/empty to describe all users. ([]UserName | versions 0+)
-  - name: The user name. (string | versions 0+) 
+      - name: The user name. (string | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -36,7 +36,7 @@ defmodule KlifeProtocol.Messages.DescribeUserScramCredentials do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code: The message-level error code, 0 except for user authorization or infrastructure issues. (int16 | versions 0+)

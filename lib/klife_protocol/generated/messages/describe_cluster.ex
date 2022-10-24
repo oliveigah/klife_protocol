@@ -21,7 +21,7 @@ defmodule KlifeProtocol.Messages.DescribeCluster do
   @min_flexible_version_res 0
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - include_cluster_authorized_operations: Whether to include cluster authorized operations. (bool | versions 0+)
 
@@ -35,7 +35,7 @@ defmodule KlifeProtocol.Messages.DescribeCluster do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code: The top-level error code, or 0 if there was no error (int16 | versions 0+)

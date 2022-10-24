@@ -37,17 +37,17 @@ defmodule KlifeProtocol.Messages.ListOffsets do
   @min_flexible_version_res 6
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - replica_id: The broker ID of the requestor, or -1 if this request is being made by a normal consumer. (int32 | versions 0+)
   - isolation_level: This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records (int8 | versions 2+)
   - topics: Each topic in the request. ([]ListOffsetsTopic | versions 0+)
-  - name: The topic name. (string | versions 0+) 
-  - partitions: Each partition in the request. ([]ListOffsetsPartition | versions 0+) 
-  - partition_index: The partition index. (int32 | versions 0+) 
-  - current_leader_epoch: The current leader epoch. (int32 | versions 4+) 
-  - timestamp: The current timestamp. (int64 | versions 0+) 
-  - max_num_offsets: The maximum number of offsets to report. (int32 | versions 0) 
+      - name: The topic name. (string | versions 0+)
+      - partitions: Each partition in the request. ([]ListOffsetsPartition | versions 0+)
+          - partition_index: The partition index. (int32 | versions 0+)
+          - current_leader_epoch: The current leader epoch. (int32 | versions 4+)
+          - timestamp: The current timestamp. (int64 | versions 0+)
+          - max_num_offsets: The maximum number of offsets to report. (int32 | versions 0)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -59,7 +59,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 2+)
   - topics: Each topic in the response. ([]ListOffsetsTopicResponse | versions 0+)

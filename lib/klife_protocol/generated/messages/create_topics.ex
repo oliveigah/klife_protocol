@@ -37,18 +37,18 @@ defmodule KlifeProtocol.Messages.CreateTopics do
   @min_flexible_version_res 5
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - topics: The topics to create. ([]CreatableTopic | versions 0+)
-  - name: The topic name. (string | versions 0+) 
-  - num_partitions: The number of partitions to create in the topic, or -1 if we are either specifying a manual partition assignment or using the default partitions. (int32 | versions 0+) 
-  - replication_factor: The number of replicas to create for each partition in the topic, or -1 if we are either specifying a manual partition assignment or using the default replication factor. (int16 | versions 0+) 
-  - assignments: The manual partition assignment, or the empty array if we are using automatic assignment. ([]CreatableReplicaAssignment | versions 0+) 
-  - partition_index: The partition index. (int32 | versions 0+) 
-  - broker_ids: The brokers to place the partition on. ([]int32 | versions 0+) 
-  - configs: The custom topic configurations to set. ([]CreateableTopicConfig | versions 0+) 
-  - name: The configuration name. (string | versions 0+) 
-  - value: The configuration value. (string | versions 0+) 
+      - name: The topic name. (string | versions 0+)
+      - num_partitions: The number of partitions to create in the topic, or -1 if we are either specifying a manual partition assignment or using the default partitions. (int32 | versions 0+)
+      - replication_factor: The number of replicas to create for each partition in the topic, or -1 if we are either specifying a manual partition assignment or using the default replication factor. (int16 | versions 0+)
+      - assignments: The manual partition assignment, or the empty array if we are using automatic assignment. ([]CreatableReplicaAssignment | versions 0+)
+          - partition_index: The partition index. (int32 | versions 0+)
+          - broker_ids: The brokers to place the partition on. ([]int32 | versions 0+)
+      - configs: The custom topic configurations to set. ([]CreateableTopicConfig | versions 0+)
+          - name: The configuration name. (string | versions 0+)
+          - value: The configuration value. (string | versions 0+)
   - timeout_ms: How long to wait in milliseconds before timing out the request. (int32 | versions 0+)
   - validate_only: If true, check that the topics can be created as specified, but don't create anything. (bool | versions 1+)
 
@@ -62,7 +62,7 @@ defmodule KlifeProtocol.Messages.CreateTopics do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 2+)
   - topics: Results for each topic we tried to create. ([]CreatableTopicResult | versions 0+)

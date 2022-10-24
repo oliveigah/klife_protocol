@@ -29,13 +29,13 @@ defmodule KlifeProtocol.Messages.CreatePartitions do
   @min_flexible_version_res 2
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - topics: Each topic that we want to create new partitions inside. ([]CreatePartitionsTopic | versions 0+)
-  - name: The topic name. (string | versions 0+) 
-  - count: The new partition count. (int32 | versions 0+) 
-  - assignments: The new partition assignments. ([]CreatePartitionsAssignment | versions 0+) 
-  - broker_ids: The assigned broker IDs. ([]int32 | versions 0+) 
+      - name: The topic name. (string | versions 0+)
+      - count: The new partition count. (int32 | versions 0+)
+      - assignments: The new partition assignments. ([]CreatePartitionsAssignment | versions 0+)
+          - broker_ids: The assigned broker IDs. ([]int32 | versions 0+)
   - timeout_ms: The time in ms to wait for the partitions to be created. (int32 | versions 0+)
   - validate_only: If true, then validate the request, but don't actually increase the number of partitions. (bool | versions 0+)
 
@@ -49,7 +49,7 @@ defmodule KlifeProtocol.Messages.CreatePartitions do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - results: The partition creation results for each topic. ([]CreatePartitionsTopicResult | versions 0+)

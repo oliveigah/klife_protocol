@@ -21,11 +21,11 @@ defmodule KlifeProtocol.Messages.DescribeProducers do
   @min_flexible_version_res 0
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - topics:  ([]TopicRequest | versions 0+)
-  - name: The topic name. (string | versions 0+) 
-  - partition_indexes: The indexes of the partitions to list producers for. ([]int32 | versions 0+) 
+      - name: The topic name. (string | versions 0+)
+      - partition_indexes: The indexes of the partitions to list producers for. ([]int32 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -37,7 +37,7 @@ defmodule KlifeProtocol.Messages.DescribeProducers do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - topics: Each topic in the response. ([]TopicResponse | versions 0+)

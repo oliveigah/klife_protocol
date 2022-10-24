@@ -27,7 +27,7 @@ defmodule KlifeProtocol.Messages.AddOffsetsToTxn do
   @min_flexible_version_res 3
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - transactional_id: The transactional id corresponding to the transaction. (string | versions 0+)
   - producer_id: Current producer id in use by the transactional id. (int64 | versions 0+)
@@ -44,7 +44,7 @@ defmodule KlifeProtocol.Messages.AddOffsetsToTxn do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code: The response error code, or 0 if there was no error. (int16 | versions 0+)

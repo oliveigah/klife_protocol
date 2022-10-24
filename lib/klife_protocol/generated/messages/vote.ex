@@ -21,17 +21,17 @@ defmodule KlifeProtocol.Messages.Vote do
   @min_flexible_version_res 0
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - cluster_id:  (string | versions 0+)
   - topics:  ([]TopicData | versions 0+)
-  - topic_name: The topic name. (string | versions 0+) 
-  - partitions:  ([]PartitionData | versions 0+) 
-  - partition_index: The partition index. (int32 | versions 0+) 
-  - candidate_epoch: The bumped epoch of the candidate sending the request (int32 | versions 0+) 
-  - candidate_id: The ID of the voter sending the request (int32 | versions 0+) 
-  - last_offset_epoch: The epoch of the last record written to the metadata log (int32 | versions 0+) 
-  - last_offset: The offset of the last record written to the metadata log (int64 | versions 0+) 
+      - topic_name: The topic name. (string | versions 0+)
+      - partitions:  ([]PartitionData | versions 0+)
+          - partition_index: The partition index. (int32 | versions 0+)
+          - candidate_epoch: The bumped epoch of the candidate sending the request (int32 | versions 0+)
+          - candidate_id: The ID of the voter sending the request (int32 | versions 0+)
+          - last_offset_epoch: The epoch of the last record written to the metadata log (int32 | versions 0+)
+          - last_offset: The offset of the last record written to the metadata log (int64 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -43,7 +43,7 @@ defmodule KlifeProtocol.Messages.Vote do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - error_code: The top level error code. (int16 | versions 0+)
   - topics:  ([]TopicData | versions 0+)

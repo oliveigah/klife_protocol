@@ -21,7 +21,7 @@ defmodule KlifeProtocol.Messages.ListTransactions do
   @min_flexible_version_res 0
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - state_filters: The transaction states to filter by: if empty, all transactions are returned; if non-empty, then only transactions matching one of the filtered states will be returned ([]string | versions 0+)
   - producer_id_filters: The producerIds to filter by: if empty, all transactions will be returned; if non-empty, only transactions which match one of the filtered producerIds will be returned ([]int64 | versions 0+)
@@ -36,7 +36,7 @@ defmodule KlifeProtocol.Messages.ListTransactions do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code:  (int16 | versions 0+)

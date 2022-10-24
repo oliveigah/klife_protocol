@@ -54,7 +54,7 @@ defmodule KlifeProtocol.Messages.Fetch do
   @min_flexible_version_res 12
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - cluster_id: The clusterId if known. This is used to validate metadata fetches prior to broker registration. (string | versions 12+)
   - replica_id: The broker ID of the follower, of -1 if this request is from a consumer. (int32 | versions 0+)
@@ -65,19 +65,19 @@ defmodule KlifeProtocol.Messages.Fetch do
   - session_id: The fetch session ID. (int32 | versions 7+)
   - session_epoch: The fetch session epoch, which is used for ordering requests in a session. (int32 | versions 7+)
   - topics: The topics to fetch. ([]FetchTopic | versions 0+)
-  - topic: The name of the topic to fetch. (string | versions 0-12) 
-  - topic_id: The unique topic ID (uuid | versions 13+) 
-  - partitions: The partitions to fetch. ([]FetchPartition | versions 0+) 
-  - partition: The partition index. (int32 | versions 0+) 
-  - current_leader_epoch: The current leader epoch of the partition. (int32 | versions 9+) 
-  - fetch_offset: The message offset. (int64 | versions 0+) 
-  - last_fetched_epoch: The epoch of the last fetched record or -1 if there is none (int32 | versions 12+) 
-  - log_start_offset: The earliest available offset of the follower replica.  The field is only used when the request is sent by the follower. (int64 | versions 5+) 
-  - partition_max_bytes: The maximum bytes to fetch from this partition.  See KIP-74 for cases where this limit may not be honored. (int32 | versions 0+) 
+      - topic: The name of the topic to fetch. (string | versions 0-12)
+      - topic_id: The unique topic ID (uuid | versions 13+)
+      - partitions: The partitions to fetch. ([]FetchPartition | versions 0+)
+          - partition: The partition index. (int32 | versions 0+)
+          - current_leader_epoch: The current leader epoch of the partition. (int32 | versions 9+)
+          - fetch_offset: The message offset. (int64 | versions 0+)
+          - last_fetched_epoch: The epoch of the last fetched record or -1 if there is none (int32 | versions 12+)
+          - log_start_offset: The earliest available offset of the follower replica.  The field is only used when the request is sent by the follower. (int64 | versions 5+)
+          - partition_max_bytes: The maximum bytes to fetch from this partition.  See KIP-74 for cases where this limit may not be honored. (int32 | versions 0+)
   - forgotten_topics_data: In an incremental fetch request, the partitions to remove. ([]ForgottenTopic | versions 7+)
-  - topic: The topic name. (string | versions 7-12) 
-  - topic_id: The unique topic ID (uuid | versions 13+) 
-  - partitions: The partitions indexes to forget. ([]int32 | versions 7+) 
+      - topic: The topic name. (string | versions 7-12)
+      - topic_id: The unique topic ID (uuid | versions 13+)
+      - partitions: The partitions indexes to forget. ([]int32 | versions 7+)
   - rack_id: Rack ID of the consumer making this request (string | versions 11+)
 
   """
@@ -90,7 +90,7 @@ defmodule KlifeProtocol.Messages.Fetch do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 1+)
   - error_code: The top level response error code. (int16 | versions 7+)

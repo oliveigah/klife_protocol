@@ -35,11 +35,11 @@ defmodule KlifeProtocol.Messages.DeleteTopics do
   @min_flexible_version_res 4
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - topics: The name or topic ID of the topic ([]DeleteTopicState | versions 6+)
-  - name: The topic name (string | versions 6+) 
-  - topic_id: The unique topic ID (uuid | versions 6+) 
+      - name: The topic name (string | versions 6+)
+      - topic_id: The unique topic ID (uuid | versions 6+)
   - topic_names: The names of the topics to delete ([]string | versions 0-5)
   - timeout_ms: The length of time in milliseconds to wait for the deletions to complete. (int32 | versions 0+)
 
@@ -53,7 +53,7 @@ defmodule KlifeProtocol.Messages.DeleteTopics do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 1+)
   - responses: The results for each topic we tried to delete. ([]DeletableTopicResult | versions 0+)

@@ -28,44 +28,44 @@ defmodule KlifeProtocol.Messages.UpdateMetadata do
   @min_flexible_version_res 6
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - controller_id: The controller id. (int32 | versions 0+)
   - controller_epoch: The controller epoch. (int32 | versions 0+)
   - broker_epoch: The broker epoch. (int64 | versions 5+)
   - ungrouped_partition_states: In older versions of this RPC, each partition that we would like to update. ([]UpdateMetadataPartitionState | versions 0-4)
-  - topic_name: In older versions of this RPC, the topic name. (string | versions 0-4) 
-  - partition_index: The partition index. (int32 | versions 0+) 
-  - controller_epoch: The controller epoch. (int32 | versions 0+) 
-  - leader: The ID of the broker which is the current partition leader. (int32 | versions 0+) 
-  - leader_epoch: The leader epoch of this partition. (int32 | versions 0+) 
-  - isr: The brokers which are in the ISR for this partition. ([]int32 | versions 0+) 
-  - zk_version: The Zookeeper version. (int32 | versions 0+) 
-  - replicas: All the replicas of this partition. ([]int32 | versions 0+) 
-  - offline_replicas: The replicas of this partition which are offline. ([]int32 | versions 4+) 
+      - topic_name: In older versions of this RPC, the topic name. (string | versions 0-4)
+      - partition_index: The partition index. (int32 | versions 0+)
+      - controller_epoch: The controller epoch. (int32 | versions 0+)
+      - leader: The ID of the broker which is the current partition leader. (int32 | versions 0+)
+      - leader_epoch: The leader epoch of this partition. (int32 | versions 0+)
+      - isr: The brokers which are in the ISR for this partition. ([]int32 | versions 0+)
+      - zk_version: The Zookeeper version. (int32 | versions 0+)
+      - replicas: All the replicas of this partition. ([]int32 | versions 0+)
+      - offline_replicas: The replicas of this partition which are offline. ([]int32 | versions 4+)
   - topic_states: In newer versions of this RPC, each topic that we would like to update. ([]UpdateMetadataTopicState | versions 5+)
-  - topic_name: The topic name. (string | versions 5+) 
-  - topic_id: The topic id. (uuid | versions 7+) 
-  - partition_states: The partition that we would like to update. ([]UpdateMetadataPartitionState | versions 5+) 
-  - topic_name: In older versions of this RPC, the topic name. (string | versions 0-4) 
-  - partition_index: The partition index. (int32 | versions 0+) 
-  - controller_epoch: The controller epoch. (int32 | versions 0+) 
-  - leader: The ID of the broker which is the current partition leader. (int32 | versions 0+) 
-  - leader_epoch: The leader epoch of this partition. (int32 | versions 0+) 
-  - isr: The brokers which are in the ISR for this partition. ([]int32 | versions 0+) 
-  - zk_version: The Zookeeper version. (int32 | versions 0+) 
-  - replicas: All the replicas of this partition. ([]int32 | versions 0+) 
-  - offline_replicas: The replicas of this partition which are offline. ([]int32 | versions 4+) 
+      - topic_name: The topic name. (string | versions 5+)
+      - topic_id: The topic id. (uuid | versions 7+)
+      - partition_states: The partition that we would like to update. ([]UpdateMetadataPartitionState | versions 5+)
+          - topic_name: In older versions of this RPC, the topic name. (string | versions 0-4)
+          - partition_index: The partition index. (int32 | versions 0+)
+          - controller_epoch: The controller epoch. (int32 | versions 0+)
+          - leader: The ID of the broker which is the current partition leader. (int32 | versions 0+)
+          - leader_epoch: The leader epoch of this partition. (int32 | versions 0+)
+          - isr: The brokers which are in the ISR for this partition. ([]int32 | versions 0+)
+          - zk_version: The Zookeeper version. (int32 | versions 0+)
+          - replicas: All the replicas of this partition. ([]int32 | versions 0+)
+          - offline_replicas: The replicas of this partition which are offline. ([]int32 | versions 4+)
   - live_brokers:  ([]UpdateMetadataBroker | versions 0+)
-  - id: The broker id. (int32 | versions 0+) 
-  - v0_host: The broker hostname. (string | versions 0) 
-  - v0_port: The broker port. (int32 | versions 0) 
-  - endpoints: The broker endpoints. ([]UpdateMetadataEndpoint | versions 1+) 
-  - port: The port of this endpoint (int32 | versions 1+) 
-  - host: The hostname of this endpoint (string | versions 1+) 
-  - listener: The listener name. (string | versions 3+) 
-  - security_protocol: The security protocol type. (int16 | versions 1+) 
-  - rack: The rack which this broker belongs to. (string | versions 2+) 
+      - id: The broker id. (int32 | versions 0+)
+      - v0_host: The broker hostname. (string | versions 0)
+      - v0_port: The broker port. (int32 | versions 0)
+      - endpoints: The broker endpoints. ([]UpdateMetadataEndpoint | versions 1+)
+          - port: The port of this endpoint (int32 | versions 1+)
+          - host: The hostname of this endpoint (string | versions 1+)
+          - listener: The listener name. (string | versions 3+)
+          - security_protocol: The security protocol type. (int16 | versions 1+)
+      - rack: The rack which this broker belongs to. (string | versions 2+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -77,7 +77,7 @@ defmodule KlifeProtocol.Messages.UpdateMetadata do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
 

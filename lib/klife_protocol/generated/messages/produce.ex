@@ -39,16 +39,16 @@ defmodule KlifeProtocol.Messages.Produce do
   @min_flexible_version_res 9
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - transactional_id: The transactional ID, or null if the producer is not transactional. (string | versions 3+)
   - acks: The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments, 1 for only the leader and -1 for the full ISR. (int16 | versions 0+)
   - timeout_ms: The timeout to await a response in milliseconds. (int32 | versions 0+)
   - topic_data: Each topic to produce to. ([]TopicProduceData | versions 0+)
-  - name: The topic name. (string | versions 0+) 
-  - partition_data: Each partition to produce to. ([]PartitionProduceData | versions 0+) 
-  - index: The partition index. (int32 | versions 0+) 
-  - records: The record data to be produced. (records | versions 0+) 
+      - name: The topic name. (string | versions 0+)
+      - partition_data: Each partition to produce to. ([]PartitionProduceData | versions 0+)
+          - index: The partition index. (int32 | versions 0+)
+          - records: The record data to be produced. (records | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -60,7 +60,7 @@ defmodule KlifeProtocol.Messages.Produce do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - responses: Each produce response ([]TopicProduceResponse | versions 0+)
       - name: The topic name (string | versions 0+)

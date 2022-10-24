@@ -23,15 +23,15 @@ defmodule KlifeProtocol.Messages.IncrementalAlterConfigs do
   @min_flexible_version_res 1
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - resources: The incremental updates for each resource. ([]AlterConfigsResource | versions 0+)
-  - resource_type: The resource type. (int8 | versions 0+) 
-  - resource_name: The resource name. (string | versions 0+) 
-  - configs: The configurations. ([]AlterableConfig | versions 0+) 
-  - name: The configuration key name. (string | versions 0+) 
-  - config_operation: The type (Set, Delete, Append, Subtract) of operation. (int8 | versions 0+) 
-  - value: The value to set for the configuration key. (string | versions 0+) 
+      - resource_type: The resource type. (int8 | versions 0+)
+      - resource_name: The resource name. (string | versions 0+)
+      - configs: The configurations. ([]AlterableConfig | versions 0+)
+          - name: The configuration key name. (string | versions 0+)
+          - config_operation: The type (Set, Delete, Append, Subtract) of operation. (int8 | versions 0+)
+          - value: The value to set for the configuration key. (string | versions 0+)
   - validate_only: True if we should validate the request, but not change the configurations. (bool | versions 0+)
 
   """
@@ -44,7 +44,7 @@ defmodule KlifeProtocol.Messages.IncrementalAlterConfigs do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - responses: The responses for each resource. ([]AlterConfigsResourceResponse | versions 0+)

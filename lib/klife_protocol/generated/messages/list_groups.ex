@@ -28,7 +28,7 @@ defmodule KlifeProtocol.Messages.ListGroups do
   @min_flexible_version_res 3
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - states_filter: The states of the groups we want to list. If empty all groups are returned with their state. ([]string | versions 4+)
 
@@ -42,7 +42,7 @@ defmodule KlifeProtocol.Messages.ListGroups do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 1+)
   - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)

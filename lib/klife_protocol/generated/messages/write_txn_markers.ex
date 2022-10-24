@@ -22,16 +22,16 @@ defmodule KlifeProtocol.Messages.WriteTxnMarkers do
   @min_flexible_version_res 1
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - markers: The transaction markers to be written. ([]WritableTxnMarker | versions 0+)
-  - producer_id: The current producer ID. (int64 | versions 0+) 
-  - producer_epoch: The current epoch associated with the producer ID. (int16 | versions 0+) 
-  - transaction_result: The result of the transaction to write to the partitions (false = ABORT, true = COMMIT). (bool | versions 0+) 
-  - topics: Each topic that we want to write transaction marker(s) for. ([]WritableTxnMarkerTopic | versions 0+) 
-  - name: The topic name. (string | versions 0+) 
-  - partition_indexes: The indexes of the partitions to write transaction markers for. ([]int32 | versions 0+) 
-  - coordinator_epoch: Epoch associated with the transaction state partition hosted by this transaction coordinator (int32 | versions 0+) 
+      - producer_id: The current producer ID. (int64 | versions 0+)
+      - producer_epoch: The current epoch associated with the producer ID. (int16 | versions 0+)
+      - transaction_result: The result of the transaction to write to the partitions (false = ABORT, true = COMMIT). (bool | versions 0+)
+      - topics: Each topic that we want to write transaction marker(s) for. ([]WritableTxnMarkerTopic | versions 0+)
+          - name: The topic name. (string | versions 0+)
+          - partition_indexes: The indexes of the partitions to write transaction markers for. ([]int32 | versions 0+)
+      - coordinator_epoch: Epoch associated with the transaction state partition hosted by this transaction coordinator (int32 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -43,7 +43,7 @@ defmodule KlifeProtocol.Messages.WriteTxnMarkers do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - markers: The results for writing makers. ([]WritableTxnMarkerResult | versions 0+)
       - producer_id: The current producer ID in use by the transactional ID. (int64 | versions 0+)

@@ -27,14 +27,14 @@ defmodule KlifeProtocol.Messages.AddPartitionsToTxn do
   @min_flexible_version_res 3
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - transactional_id: The transactional id corresponding to the transaction. (string | versions 0+)
   - producer_id: Current producer id in use by the transactional id. (int64 | versions 0+)
   - producer_epoch: Current epoch associated with the producer id. (int16 | versions 0+)
   - topics: The partitions to add to the transaction. ([]AddPartitionsToTxnTopic | versions 0+)
-  - name: The name of the topic. (string | versions 0+) 
-  - partitions: The partition indexes to add to the transaction ([]int32 | versions 0+) 
+      - name: The name of the topic. (string | versions 0+)
+      - partitions: The partition indexes to add to the transaction ([]int32 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -46,7 +46,7 @@ defmodule KlifeProtocol.Messages.AddPartitionsToTxn do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - results: The results for each topic. ([]AddPartitionsToTxnTopicResult | versions 0+)

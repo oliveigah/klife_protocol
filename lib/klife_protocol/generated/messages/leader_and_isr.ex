@@ -33,45 +33,45 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
   @min_flexible_version_res 4
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - controller_id: The current controller ID. (int32 | versions 0+)
   - controller_epoch: The current controller epoch. (int32 | versions 0+)
   - broker_epoch: The current broker epoch. (int64 | versions 2+)
   - type: The type that indicates whether all topics are included in the request (int8 | versions 5+)
   - ungrouped_partition_states: The state of each partition, in a v0 or v1 message. ([]LeaderAndIsrPartitionState | versions 0-1)
-  - topic_name: The topic name.  This is only present in v0 or v1. (string | versions 0-1) 
-  - partition_index: The partition index. (int32 | versions 0+) 
-  - controller_epoch: The controller epoch. (int32 | versions 0+) 
-  - leader: The broker ID of the leader. (int32 | versions 0+) 
-  - leader_epoch: The leader epoch. (int32 | versions 0+) 
-  - isr: The in-sync replica IDs. ([]int32 | versions 0+) 
-  - partition_epoch: The current epoch for the partition. The epoch is a monotonically increasing value which is incremented after every partition change. (Since the LeaderAndIsr request is only used by the legacy controller, this corresponds to the zkVersion) (int32 | versions 0+) 
-  - replicas: The replica IDs. ([]int32 | versions 0+) 
-  - adding_replicas: The replica IDs that we are adding this partition to, or null if no replicas are being added. ([]int32 | versions 3+) 
-  - removing_replicas: The replica IDs that we are removing this partition from, or null if no replicas are being removed. ([]int32 | versions 3+) 
-  - is_new: Whether the replica should have existed on the broker or not. (bool | versions 1+) 
-  - leader_recovery_state: 1 if the partition is recovering from an unclean leader election; 0 otherwise. (int8 | versions 6+) 
+      - topic_name: The topic name.  This is only present in v0 or v1. (string | versions 0-1)
+      - partition_index: The partition index. (int32 | versions 0+)
+      - controller_epoch: The controller epoch. (int32 | versions 0+)
+      - leader: The broker ID of the leader. (int32 | versions 0+)
+      - leader_epoch: The leader epoch. (int32 | versions 0+)
+      - isr: The in-sync replica IDs. ([]int32 | versions 0+)
+      - partition_epoch: The current epoch for the partition. The epoch is a monotonically increasing value which is incremented after every partition change. (Since the LeaderAndIsr request is only used by the legacy controller, this corresponds to the zkVersion) (int32 | versions 0+)
+      - replicas: The replica IDs. ([]int32 | versions 0+)
+      - adding_replicas: The replica IDs that we are adding this partition to, or null if no replicas are being added. ([]int32 | versions 3+)
+      - removing_replicas: The replica IDs that we are removing this partition from, or null if no replicas are being removed. ([]int32 | versions 3+)
+      - is_new: Whether the replica should have existed on the broker or not. (bool | versions 1+)
+      - leader_recovery_state: 1 if the partition is recovering from an unclean leader election; 0 otherwise. (int8 | versions 6+)
   - topic_states: Each topic. ([]LeaderAndIsrTopicState | versions 2+)
-  - topic_name: The topic name. (string | versions 2+) 
-  - topic_id: The unique topic ID. (uuid | versions 5+) 
-  - partition_states: The state of each partition ([]LeaderAndIsrPartitionState | versions 2+) 
-  - topic_name: The topic name.  This is only present in v0 or v1. (string | versions 0-1) 
-  - partition_index: The partition index. (int32 | versions 0+) 
-  - controller_epoch: The controller epoch. (int32 | versions 0+) 
-  - leader: The broker ID of the leader. (int32 | versions 0+) 
-  - leader_epoch: The leader epoch. (int32 | versions 0+) 
-  - isr: The in-sync replica IDs. ([]int32 | versions 0+) 
-  - partition_epoch: The current epoch for the partition. The epoch is a monotonically increasing value which is incremented after every partition change. (Since the LeaderAndIsr request is only used by the legacy controller, this corresponds to the zkVersion) (int32 | versions 0+) 
-  - replicas: The replica IDs. ([]int32 | versions 0+) 
-  - adding_replicas: The replica IDs that we are adding this partition to, or null if no replicas are being added. ([]int32 | versions 3+) 
-  - removing_replicas: The replica IDs that we are removing this partition from, or null if no replicas are being removed. ([]int32 | versions 3+) 
-  - is_new: Whether the replica should have existed on the broker or not. (bool | versions 1+) 
-  - leader_recovery_state: 1 if the partition is recovering from an unclean leader election; 0 otherwise. (int8 | versions 6+) 
+      - topic_name: The topic name. (string | versions 2+)
+      - topic_id: The unique topic ID. (uuid | versions 5+)
+      - partition_states: The state of each partition ([]LeaderAndIsrPartitionState | versions 2+)
+          - topic_name: The topic name.  This is only present in v0 or v1. (string | versions 0-1)
+          - partition_index: The partition index. (int32 | versions 0+)
+          - controller_epoch: The controller epoch. (int32 | versions 0+)
+          - leader: The broker ID of the leader. (int32 | versions 0+)
+          - leader_epoch: The leader epoch. (int32 | versions 0+)
+          - isr: The in-sync replica IDs. ([]int32 | versions 0+)
+          - partition_epoch: The current epoch for the partition. The epoch is a monotonically increasing value which is incremented after every partition change. (Since the LeaderAndIsr request is only used by the legacy controller, this corresponds to the zkVersion) (int32 | versions 0+)
+          - replicas: The replica IDs. ([]int32 | versions 0+)
+          - adding_replicas: The replica IDs that we are adding this partition to, or null if no replicas are being added. ([]int32 | versions 3+)
+          - removing_replicas: The replica IDs that we are removing this partition from, or null if no replicas are being removed. ([]int32 | versions 3+)
+          - is_new: Whether the replica should have existed on the broker or not. (bool | versions 1+)
+          - leader_recovery_state: 1 if the partition is recovering from an unclean leader election; 0 otherwise. (int8 | versions 6+)
   - live_leaders: The current live leaders. ([]LeaderAndIsrLiveLeader | versions 0+)
-  - broker_id: The leader's broker ID. (int32 | versions 0+) 
-  - host_name: The leader's hostname. (string | versions 0+) 
-  - port: The leader's port. (int32 | versions 0+) 
+      - broker_id: The leader's broker ID. (int32 | versions 0+)
+      - host_name: The leader's hostname. (string | versions 0+)
+      - port: The leader's port. (int32 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -83,7 +83,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
   - partition_errors: Each partition in v0 to v4 message. ([]LeaderAndIsrPartitionError | versions 0-4)

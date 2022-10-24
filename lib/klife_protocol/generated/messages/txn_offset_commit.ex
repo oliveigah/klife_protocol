@@ -27,7 +27,7 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
   @min_flexible_version_res 3
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - transactional_id: The ID of the transaction. (string | versions 0+)
   - group_id: The ID of the group. (string | versions 0+)
@@ -37,12 +37,12 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
   - member_id: The member ID assigned by the group coordinator. (string | versions 3+)
   - group_instance_id: The unique identifier of the consumer instance provided by end user. (string | versions 3+)
   - topics: Each topic that we want to commit offsets for. ([]TxnOffsetCommitRequestTopic | versions 0+)
-  - name: The topic name. (string | versions 0+) 
-  - partitions: The partitions inside the topic that we want to committ offsets for. ([]TxnOffsetCommitRequestPartition | versions 0+) 
-  - partition_index: The index of the partition within the topic. (int32 | versions 0+) 
-  - committed_offset: The message offset to be committed. (int64 | versions 0+) 
-  - committed_leader_epoch: The leader epoch of the last consumed record. (int32 | versions 2+) 
-  - committed_metadata: Any associated metadata the client wants to keep. (string | versions 0+) 
+      - name: The topic name. (string | versions 0+)
+      - partitions: The partitions inside the topic that we want to committ offsets for. ([]TxnOffsetCommitRequestPartition | versions 0+)
+          - partition_index: The index of the partition within the topic. (int32 | versions 0+)
+          - committed_offset: The message offset to be committed. (int64 | versions 0+)
+          - committed_leader_epoch: The leader epoch of the last consumed record. (int32 | versions 2+)
+          - committed_metadata: Any associated metadata the client wants to keep. (string | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -54,7 +54,7 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - topics: The responses for each topic. ([]TxnOffsetCommitResponseTopic | versions 0+)

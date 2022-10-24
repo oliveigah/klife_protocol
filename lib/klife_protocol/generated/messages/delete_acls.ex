@@ -28,16 +28,16 @@ defmodule KlifeProtocol.Messages.DeleteAcls do
   @min_flexible_version_res 2
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - filters: The filters to use when deleting ACLs. ([]DeleteAclsFilter | versions 0+)
-  - resource_type_filter: The resource type. (int8 | versions 0+) 
-  - resource_name_filter: The resource name. (string | versions 0+) 
-  - pattern_type_filter: The pattern type. (int8 | versions 1+) 
-  - principal_filter: The principal filter, or null to accept all principals. (string | versions 0+) 
-  - host_filter: The host filter, or null to accept all hosts. (string | versions 0+) 
-  - operation: The ACL operation. (int8 | versions 0+) 
-  - permission_type: The permission type. (int8 | versions 0+) 
+      - resource_type_filter: The resource type. (int8 | versions 0+)
+      - resource_name_filter: The resource name. (string | versions 0+)
+      - pattern_type_filter: The pattern type. (int8 | versions 1+)
+      - principal_filter: The principal filter, or null to accept all principals. (string | versions 0+)
+      - host_filter: The host filter, or null to accept all hosts. (string | versions 0+)
+      - operation: The ACL operation. (int8 | versions 0+)
+      - permission_type: The permission type. (int8 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -49,7 +49,7 @@ defmodule KlifeProtocol.Messages.DeleteAcls do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - filter_results: The results for each filter. ([]DeleteAclsFilterResult | versions 0+)

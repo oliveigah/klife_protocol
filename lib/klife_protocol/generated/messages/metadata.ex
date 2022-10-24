@@ -36,11 +36,11 @@ defmodule KlifeProtocol.Messages.Metadata do
   @min_flexible_version_res 9
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - topics: The topics to fetch metadata for. ([]MetadataRequestTopic | versions 0+)
-  - topic_id: The topic id. (uuid | versions 10+) 
-  - name: The topic name. (string | versions 0+) 
+      - topic_id: The topic id. (uuid | versions 10+)
+      - name: The topic name. (string | versions 0+)
   - allow_auto_topic_creation: If this is true, the broker may auto-create topics that we requested which do not already exist, if it is configured to do so. (bool | versions 4+)
   - include_cluster_authorized_operations: Whether to include cluster authorized operations. (bool | versions 8-10)
   - include_topic_authorized_operations: Whether to include topic authorized operations. (bool | versions 8+)
@@ -55,7 +55,7 @@ defmodule KlifeProtocol.Messages.Metadata do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 3+)
   - brokers: Each broker in the response. ([]MetadataResponseBroker | versions 0+)

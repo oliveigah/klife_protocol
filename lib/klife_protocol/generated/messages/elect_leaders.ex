@@ -25,12 +25,12 @@ defmodule KlifeProtocol.Messages.ElectLeaders do
   @min_flexible_version_res 2
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - election_type: Type of elections to conduct for the partition. A value of '0' elects the preferred replica. A value of '1' elects the first live replica if there are no in-sync replica. (int8 | versions 1+)
   - topic_partitions: The topic partitions to elect leaders. ([]TopicPartitions | versions 0+)
-  - topic: The name of a topic. (string | versions 0+) 
-  - partitions: The partitions of this topic whose leader should be elected. ([]int32 | versions 0+) 
+      - topic: The name of a topic. (string | versions 0+)
+      - partitions: The partitions of this topic whose leader should be elected. ([]int32 | versions 0+)
   - timeout_ms: The time in ms to wait for the election to complete. (int32 | versions 0+)
 
   """
@@ -43,7 +43,7 @@ defmodule KlifeProtocol.Messages.ElectLeaders do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code: The top level response error code. (int16 | versions 1+)

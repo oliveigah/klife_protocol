@@ -21,20 +21,20 @@ defmodule KlifeProtocol.Messages.FetchSnapshot do
   @min_flexible_version_res 0
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - cluster_id: The clusterId if known, this is used to validate metadata fetches prior to broker registration (string | versions 0+)
   - replica_id: The broker ID of the follower (int32 | versions 0+)
   - max_bytes: The maximum bytes to fetch from all of the snapshots (int32 | versions 0+)
   - topics: The topics to fetch ([]TopicSnapshot | versions 0+)
-  - name: The name of the topic to fetch (string | versions 0+) 
-  - partitions: The partitions to fetch ([]PartitionSnapshot | versions 0+) 
-  - partition: The partition index (int32 | versions 0+) 
-  - current_leader_epoch: The current leader epoch of the partition, -1 for unknown leader epoch (int32 | versions 0+) 
-  - snapshot_id: The snapshot endOffset and epoch to fetch (SnapshotId | versions 0+) 
-    - end_offset:  (int64 | versions 0+) 
-    - epoch:  (int32 | versions 0+) 
-  - position: The byte position within the snapshot to start fetching from (int64 | versions 0+) 
+      - name: The name of the topic to fetch (string | versions 0+)
+      - partitions: The partitions to fetch ([]PartitionSnapshot | versions 0+)
+          - partition: The partition index (int32 | versions 0+)
+          - current_leader_epoch: The current leader epoch of the partition, -1 for unknown leader epoch (int32 | versions 0+)
+          - snapshot_id: The snapshot endOffset and epoch to fetch (SnapshotId | versions 0+)
+              - end_offset:  (int64 | versions 0+)
+              - epoch:  (int32 | versions 0+)
+          - position: The byte position within the snapshot to start fetching from (int64 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -46,7 +46,7 @@ defmodule KlifeProtocol.Messages.FetchSnapshot do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code: The top level response error code. (int16 | versions 0+)

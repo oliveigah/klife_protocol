@@ -28,24 +28,24 @@ defmodule KlifeProtocol.Messages.StopReplica do
   @min_flexible_version_res 2
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - controller_id: The controller id. (int32 | versions 0+)
   - controller_epoch: The controller epoch. (int32 | versions 0+)
   - broker_epoch: The broker epoch. (int64 | versions 1+)
   - delete_partitions: Whether these partitions should be deleted. (bool | versions 0-2)
   - ungrouped_partitions: The partitions to stop. ([]StopReplicaPartitionV0 | versions 0)
-  - topic_name: The topic name. (string | versions 0) 
-  - partition_index: The partition index. (int32 | versions 0) 
+      - topic_name: The topic name. (string | versions 0)
+      - partition_index: The partition index. (int32 | versions 0)
   - topics: The topics to stop. ([]StopReplicaTopicV1 | versions 1-2)
-  - name: The topic name. (string | versions 1-2) 
-  - partition_indexes: The partition indexes. ([]int32 | versions 1-2) 
+      - name: The topic name. (string | versions 1-2)
+      - partition_indexes: The partition indexes. ([]int32 | versions 1-2)
   - topic_states: Each topic. ([]StopReplicaTopicState | versions 3+)
-  - topic_name: The topic name. (string | versions 3+) 
-  - partition_states: The state of each partition ([]StopReplicaPartitionState | versions 3+) 
-  - partition_index: The partition index. (int32 | versions 3+) 
-  - leader_epoch: The leader epoch. (int32 | versions 3+) 
-  - delete_partition: Whether this partition should be deleted. (bool | versions 3+) 
+      - topic_name: The topic name. (string | versions 3+)
+      - partition_states: The state of each partition ([]StopReplicaPartitionState | versions 3+)
+          - partition_index: The partition index. (int32 | versions 3+)
+          - leader_epoch: The leader epoch. (int32 | versions 3+)
+          - delete_partition: Whether this partition should be deleted. (bool | versions 3+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -57,7 +57,7 @@ defmodule KlifeProtocol.Messages.StopReplica do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - error_code: The top-level error code, or 0 if there was no top-level error. (int16 | versions 0+)
   - partition_errors: The responses for each partition. ([]StopReplicaPartitionError | versions 0+)

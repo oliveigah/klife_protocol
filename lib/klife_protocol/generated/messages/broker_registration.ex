@@ -21,20 +21,20 @@ defmodule KlifeProtocol.Messages.BrokerRegistration do
   @min_flexible_version_res 0
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - broker_id: The broker ID. (int32 | versions 0+)
   - cluster_id: The cluster id of the broker process. (string | versions 0+)
   - incarnation_id: The incarnation id of the broker process. (uuid | versions 0+)
   - listeners: The listeners of this broker ([]Listener | versions 0+)
-  - name: The name of the endpoint. (string | versions 0+) 
-  - host: The hostname. (string | versions 0+) 
-  - port: The port. (uint16 | versions 0+) 
-  - security_protocol: The security protocol. (int16 | versions 0+) 
+      - name: The name of the endpoint. (string | versions 0+)
+      - host: The hostname. (string | versions 0+)
+      - port: The port. (uint16 | versions 0+)
+      - security_protocol: The security protocol. (int16 | versions 0+)
   - features: The features on this broker ([]Feature | versions 0+)
-  - name: The feature name. (string | versions 0+) 
-  - min_supported_version: The minimum supported feature level. (int16 | versions 0+) 
-  - max_supported_version: The maximum supported feature level. (int16 | versions 0+) 
+      - name: The feature name. (string | versions 0+)
+      - min_supported_version: The minimum supported feature level. (int16 | versions 0+)
+      - max_supported_version: The maximum supported feature level. (int16 | versions 0+)
   - rack: The rack which this broker is in. (string | versions 0+)
 
   """
@@ -47,7 +47,7 @@ defmodule KlifeProtocol.Messages.BrokerRegistration do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)

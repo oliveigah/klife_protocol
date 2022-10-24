@@ -27,11 +27,11 @@ defmodule KlifeProtocol.Messages.DescribeDelegationToken do
   @min_flexible_version_res 2
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - owners: Each owner that we want to describe delegation tokens for, or null to describe all tokens. ([]DescribeDelegationTokenOwner | versions 0+)
-  - principal_type: The owner principal type. (string | versions 0+) 
-  - principal_name: The owner principal name. (string | versions 0+) 
+      - principal_type: The owner principal type. (string | versions 0+)
+      - principal_name: The owner principal name. (string | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -43,7 +43,7 @@ defmodule KlifeProtocol.Messages.DescribeDelegationToken do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
   - tokens: The tokens. ([]DescribedDelegationToken | versions 0+)

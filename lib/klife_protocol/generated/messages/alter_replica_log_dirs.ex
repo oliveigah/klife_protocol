@@ -25,13 +25,13 @@ defmodule KlifeProtocol.Messages.AlterReplicaLogDirs do
   @min_flexible_version_res 2
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - dirs: The alterations to make for each directory. ([]AlterReplicaLogDir | versions 0+)
-  - path: The absolute directory path. (string | versions 0+) 
-  - topics: The topics to add to the directory. ([]AlterReplicaLogDirTopic | versions 0+) 
-  - name: The topic name. (string | versions 0+) 
-  - partitions: The partition indexes. ([]int32 | versions 0+) 
+      - path: The absolute directory path. (string | versions 0+)
+      - topics: The topics to add to the directory. ([]AlterReplicaLogDirTopic | versions 0+)
+          - name: The topic name. (string | versions 0+)
+          - partitions: The partition indexes. ([]int32 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -43,7 +43,7 @@ defmodule KlifeProtocol.Messages.AlterReplicaLogDirs do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - results: The results for each topic. ([]AlterReplicaLogDirTopicResult | versions 0+)

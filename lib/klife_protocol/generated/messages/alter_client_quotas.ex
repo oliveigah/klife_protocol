@@ -22,16 +22,16 @@ defmodule KlifeProtocol.Messages.AlterClientQuotas do
   @min_flexible_version_res 1
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - entries: The quota configuration entries to alter. ([]EntryData | versions 0+)
-  - entity: The quota entity to alter. ([]EntityData | versions 0+) 
-  - entity_type: The entity type. (string | versions 0+) 
-  - entity_name: The name of the entity, or null if the default. (string | versions 0+) 
-  - ops: An individual quota configuration entry to alter. ([]OpData | versions 0+) 
-  - key: The quota configuration key. (string | versions 0+) 
-  - value: The value to set, otherwise ignored if the value is to be removed. (float64 | versions 0+) 
-  - remove: Whether the quota configuration value should be removed, otherwise set. (bool | versions 0+) 
+      - entity: The quota entity to alter. ([]EntityData | versions 0+)
+          - entity_type: The entity type. (string | versions 0+)
+          - entity_name: The name of the entity, or null if the default. (string | versions 0+)
+      - ops: An individual quota configuration entry to alter. ([]OpData | versions 0+)
+          - key: The quota configuration key. (string | versions 0+)
+          - value: The value to set, otherwise ignored if the value is to be removed. (float64 | versions 0+)
+          - remove: Whether the quota configuration value should be removed, otherwise set. (bool | versions 0+)
   - validate_only: Whether the alteration should be validated, but not performed. (bool | versions 0+)
 
   """
@@ -44,7 +44,7 @@ defmodule KlifeProtocol.Messages.AlterClientQuotas do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - entries: The quota configuration entries to alter. ([]EntryData | versions 0+)

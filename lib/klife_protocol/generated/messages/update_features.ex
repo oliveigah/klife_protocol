@@ -21,14 +21,14 @@ defmodule KlifeProtocol.Messages.UpdateFeatures do
   @min_flexible_version_res 0
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - timeout_ms: How long to wait in milliseconds before timing out the request. (int32 | versions 0+)
   - feature_updates: The list of updates to finalized features. ([]FeatureUpdateKey | versions 0+)
-  - feature: The name of the finalized feature to be updated. (string | versions 0+) 
-  - max_version_level: The new maximum version level for the finalized feature. A value >= 1 is valid. A value < 1, is special, and can be used to request the deletion of the finalized feature. (int16 | versions 0+) 
-  - allow_downgrade: DEPRECATED in version 1 (see DowngradeType). When set to true, the finalized feature version level is allowed to be downgraded/deleted. The downgrade request will fail if the new maximum version level is a value that's not lower than the existing maximum finalized version level. (bool | versions 0) 
-  - upgrade_type: Determine which type of upgrade will be performed: 1 will perform an upgrade only (default), 2 is safe downgrades only (lossless), 3 is unsafe downgrades (lossy). (int8 | versions 1+) 
+      - feature: The name of the finalized feature to be updated. (string | versions 0+)
+      - max_version_level: The new maximum version level for the finalized feature. A value >= 1 is valid. A value < 1, is special, and can be used to request the deletion of the finalized feature. (int16 | versions 0+)
+      - allow_downgrade: DEPRECATED in version 1 (see DowngradeType). When set to true, the finalized feature version level is allowed to be downgraded/deleted. The downgrade request will fail if the new maximum version level is a value that's not lower than the existing maximum finalized version level. (bool | versions 0)
+      - upgrade_type: Determine which type of upgrade will be performed: 1 will perform an upgrade only (default), 2 is safe downgrades only (lossless), 3 is unsafe downgrades (lossy). (int8 | versions 1+)
   - validate_only: True if we should validate the request, but not perform the upgrade or downgrade. (bool | versions 1+)
 
   """
@@ -41,7 +41,7 @@ defmodule KlifeProtocol.Messages.UpdateFeatures do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code: The top-level error code, or `0` if there was no top-level error. (int16 | versions 0+)

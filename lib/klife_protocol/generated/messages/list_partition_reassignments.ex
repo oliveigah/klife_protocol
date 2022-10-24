@@ -21,12 +21,12 @@ defmodule KlifeProtocol.Messages.ListPartitionReassignments do
   @min_flexible_version_res 0
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - timeout_ms: The time in ms to wait for the request to complete. (int32 | versions 0+)
   - topics: The topics to list partition reassignments for, or null to list everything. ([]ListPartitionReassignmentsTopics | versions 0+)
-  - name: The topic name (string | versions 0+) 
-  - partition_indexes: The partitions to list partition reassignments for. ([]int32 | versions 0+) 
+      - name: The topic name (string | versions 0+)
+      - partition_indexes: The partitions to list partition reassignments for. ([]int32 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -38,7 +38,7 @@ defmodule KlifeProtocol.Messages.ListPartitionReassignments do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code: The top-level error code, or 0 if there was no error (int16 | versions 0+)

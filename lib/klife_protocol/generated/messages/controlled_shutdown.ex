@@ -27,7 +27,7 @@ defmodule KlifeProtocol.Messages.ControlledShutdown do
   @min_flexible_version_res 3
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - broker_id: The id of the broker for which controlled shutdown has been requested. (int32 | versions 0+)
   - broker_epoch: The broker epoch. (int64 | versions 2+)
@@ -42,7 +42,7 @@ defmodule KlifeProtocol.Messages.ControlledShutdown do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - error_code: The top-level error code. (int16 | versions 0+)
   - remaining_partitions: The partitions that the broker still leads. ([]RemainingPartition | versions 0+)

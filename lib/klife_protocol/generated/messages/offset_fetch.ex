@@ -38,17 +38,17 @@ defmodule KlifeProtocol.Messages.OffsetFetch do
   @min_flexible_version_res 6
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - group_id: The group to fetch offsets for. (string | versions 0-7)
   - topics: Each topic we would like to fetch offsets for, or null to fetch offsets for all topics. ([]OffsetFetchRequestTopic | versions 0-7)
-  - name: The topic name. (string | versions 0-7) 
-  - partition_indexes: The partition indexes we would like to fetch offsets for. ([]int32 | versions 0-7) 
+      - name: The topic name. (string | versions 0-7)
+      - partition_indexes: The partition indexes we would like to fetch offsets for. ([]int32 | versions 0-7)
   - groups: Each group we would like to fetch offsets for ([]OffsetFetchRequestGroup | versions 8+)
-  - group_id: The group ID. (string | versions 8+) 
-  - topics: Each topic we would like to fetch offsets for, or null to fetch offsets for all topics. ([]OffsetFetchRequestTopics | versions 8+) 
-  - name: The topic name. (string | versions 8+) 
-  - partition_indexes: The partition indexes we would like to fetch offsets for. ([]int32 | versions 8+) 
+      - group_id: The group ID. (string | versions 8+)
+      - topics: Each topic we would like to fetch offsets for, or null to fetch offsets for all topics. ([]OffsetFetchRequestTopics | versions 8+)
+          - name: The topic name. (string | versions 8+)
+          - partition_indexes: The partition indexes we would like to fetch offsets for. ([]int32 | versions 8+)
   - require_stable: Whether broker should hold on returning unstable offsets but set a retriable error code for the partitions. (bool | versions 7+)
 
   """
@@ -61,7 +61,7 @@ defmodule KlifeProtocol.Messages.OffsetFetch do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 3+)
   - topics: The responses per topic. ([]OffsetFetchResponseTopic | versions 0-7)

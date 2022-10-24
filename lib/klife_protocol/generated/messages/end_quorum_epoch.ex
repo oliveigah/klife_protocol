@@ -21,16 +21,16 @@ defmodule KlifeProtocol.Messages.EndQuorumEpoch do
   @min_flexible_version_res :none
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - cluster_id:  (string | versions 0+)
   - topics:  ([]TopicData | versions 0+)
-  - topic_name: The topic name. (string | versions 0+) 
-  - partitions:  ([]PartitionData | versions 0+) 
-  - partition_index: The partition index. (int32 | versions 0+) 
-  - leader_id: The current leader ID that is resigning (int32 | versions 0+) 
-  - leader_epoch: The current epoch (int32 | versions 0+) 
-  - preferred_successors: A sorted list of preferred successors to start the election ([]int32 | versions 0+) 
+      - topic_name: The topic name. (string | versions 0+)
+      - partitions:  ([]PartitionData | versions 0+)
+          - partition_index: The partition index. (int32 | versions 0+)
+          - leader_id: The current leader ID that is resigning (int32 | versions 0+)
+          - leader_epoch: The current epoch (int32 | versions 0+)
+          - preferred_successors: A sorted list of preferred successors to start the election ([]int32 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -42,7 +42,7 @@ defmodule KlifeProtocol.Messages.EndQuorumEpoch do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - error_code: The top level error code. (int16 | versions 0+)
   - topics:  ([]TopicData | versions 0+)

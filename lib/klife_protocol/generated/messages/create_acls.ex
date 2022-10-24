@@ -27,16 +27,16 @@ defmodule KlifeProtocol.Messages.CreateAcls do
   @min_flexible_version_res 2
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - creations: The ACLs that we want to create. ([]AclCreation | versions 0+)
-  - resource_type: The type of the resource. (int8 | versions 0+) 
-  - resource_name: The resource name for the ACL. (string | versions 0+) 
-  - resource_pattern_type: The pattern type for the ACL. (int8 | versions 1+) 
-  - principal: The principal for the ACL. (string | versions 0+) 
-  - host: The host for the ACL. (string | versions 0+) 
-  - operation: The operation type for the ACL (read, write, etc.). (int8 | versions 0+) 
-  - permission_type: The permission type for the ACL (allow, deny, etc.). (int8 | versions 0+) 
+      - resource_type: The type of the resource. (int8 | versions 0+)
+      - resource_name: The resource name for the ACL. (string | versions 0+)
+      - resource_pattern_type: The pattern type for the ACL. (int8 | versions 1+)
+      - principal: The principal for the ACL. (string | versions 0+)
+      - host: The host for the ACL. (string | versions 0+)
+      - operation: The operation type for the ACL (read, write, etc.). (int8 | versions 0+)
+      - permission_type: The permission type for the ACL (allow, deny, etc.). (int8 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -48,7 +48,7 @@ defmodule KlifeProtocol.Messages.CreateAcls do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - results: The results for each ACL creation. ([]AclCreationResult | versions 0+)

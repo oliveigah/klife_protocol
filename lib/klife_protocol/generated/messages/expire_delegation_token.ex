@@ -25,7 +25,7 @@ defmodule KlifeProtocol.Messages.ExpireDelegationToken do
   @min_flexible_version_res 2
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - hmac: The HMAC of the delegation token to be expired. (bytes | versions 0+)
   - expiry_time_period_ms: The expiry time period in milliseconds. (int64 | versions 0+)
@@ -40,7 +40,7 @@ defmodule KlifeProtocol.Messages.ExpireDelegationToken do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
   - expiry_timestamp_ms: The timestamp in milliseconds at which this token expires. (int64 | versions 0+)

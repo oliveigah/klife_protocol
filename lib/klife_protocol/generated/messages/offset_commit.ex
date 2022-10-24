@@ -34,7 +34,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   @min_flexible_version_res 8
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - group_id: The unique group identifier. (string | versions 0+)
   - generation_id: The generation of the group. (int32 | versions 1+)
@@ -42,13 +42,13 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   - group_instance_id: The unique identifier of the consumer instance provided by end user. (string | versions 7+)
   - retention_time_ms: The time period in ms to retain the offset. (int64 | versions 2-4)
   - topics: The topics to commit offsets for. ([]OffsetCommitRequestTopic | versions 0+)
-  - name: The topic name. (string | versions 0+) 
-  - partitions: Each partition to commit offsets for. ([]OffsetCommitRequestPartition | versions 0+) 
-  - partition_index: The partition index. (int32 | versions 0+) 
-  - committed_offset: The message offset to be committed. (int64 | versions 0+) 
-  - committed_leader_epoch: The leader epoch of this partition. (int32 | versions 6+) 
-  - commit_timestamp: The timestamp of the commit. (int64 | versions 1) 
-  - committed_metadata: Any associated metadata the client wants to keep. (string | versions 0+) 
+      - name: The topic name. (string | versions 0+)
+      - partitions: Each partition to commit offsets for. ([]OffsetCommitRequestPartition | versions 0+)
+          - partition_index: The partition index. (int32 | versions 0+)
+          - committed_offset: The message offset to be committed. (int64 | versions 0+)
+          - committed_leader_epoch: The leader epoch of this partition. (int32 | versions 6+)
+          - commit_timestamp: The timestamp of the commit. (int64 | versions 1)
+          - committed_metadata: Any associated metadata the client wants to keep. (string | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -60,7 +60,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 3+)
   - topics: The responses for each topic. ([]OffsetCommitResponseTopic | versions 0+)

@@ -29,7 +29,7 @@ defmodule KlifeProtocol.Messages.ApiVersions do
   @min_flexible_version_req 3
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - client_software_name: The name of the client. (string | versions 3+)
   - client_software_version: The version of the client. (string | versions 3+)
@@ -44,7 +44,7 @@ defmodule KlifeProtocol.Messages.ApiVersions do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - error_code: The top-level error code. (int16 | versions 0+)
   - api_keys: The APIs supported by the broker. ([]ApiVersion | versions 0+)

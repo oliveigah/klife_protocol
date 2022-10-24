@@ -23,12 +23,12 @@ defmodule KlifeProtocol.Messages.DescribeQuorum do
   @min_flexible_version_res 0
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - topics:  ([]TopicData | versions 0+)
-  - topic_name: The topic name. (string | versions 0+) 
-  - partitions:  ([]PartitionData | versions 0+) 
-  - partition_index: The partition index. (int32 | versions 0+) 
+      - topic_name: The topic name. (string | versions 0+)
+      - partitions:  ([]PartitionData | versions 0+)
+          - partition_index: The partition index. (int32 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -40,7 +40,7 @@ defmodule KlifeProtocol.Messages.DescribeQuorum do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - error_code: The top level error code. (int16 | versions 0+)
   - topics:  ([]TopicData | versions 0+)

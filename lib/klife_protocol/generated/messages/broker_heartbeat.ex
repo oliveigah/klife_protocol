@@ -21,7 +21,7 @@ defmodule KlifeProtocol.Messages.BrokerHeartbeat do
   @min_flexible_version_res 0
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - broker_id: The broker ID. (int32 | versions 0+)
   - broker_epoch: The broker epoch. (int64 | versions 0+)
@@ -39,7 +39,7 @@ defmodule KlifeProtocol.Messages.BrokerHeartbeat do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)

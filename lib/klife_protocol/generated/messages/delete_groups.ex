@@ -25,7 +25,7 @@ defmodule KlifeProtocol.Messages.DeleteGroups do
   @min_flexible_version_res 2
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - groups_names: The group names to delete. ([]string | versions 0+)
 
@@ -39,7 +39,7 @@ defmodule KlifeProtocol.Messages.DeleteGroups do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - results: The deletion results ([]DeletableGroupResult | versions 0+)

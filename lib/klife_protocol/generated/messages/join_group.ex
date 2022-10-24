@@ -40,7 +40,7 @@ defmodule KlifeProtocol.Messages.JoinGroup do
   @min_flexible_version_res 6
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - group_id: The group identifier. (string | versions 0+)
   - session_timeout_ms: The coordinator considers the consumer dead if it receives no heartbeat after this timeout in milliseconds. (int32 | versions 0+)
@@ -49,8 +49,8 @@ defmodule KlifeProtocol.Messages.JoinGroup do
   - group_instance_id: The unique identifier of the consumer instance provided by end user. (string | versions 5+)
   - protocol_type: The unique name the for class of protocols implemented by the group we want to join. (string | versions 0+)
   - protocols: The list of protocols that the member supports. ([]JoinGroupRequestProtocol | versions 0+)
-  - name: The protocol name. (string | versions 0+) 
-  - metadata: The protocol metadata. (bytes | versions 0+) 
+      - name: The protocol name. (string | versions 0+)
+      - metadata: The protocol metadata. (bytes | versions 0+)
   - reason: The reason why the member (re-)joins the group. (string | versions 8+)
 
   """
@@ -63,7 +63,7 @@ defmodule KlifeProtocol.Messages.JoinGroup do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 2+)
   - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)

@@ -27,13 +27,13 @@ defmodule KlifeProtocol.Messages.CreateDelegationToken do
   @min_flexible_version_res 2
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - owner_principal_type: The principal type of the owner of the token. If it's null it defaults to the token request principal. (string | versions 3+)
   - owner_principal_name: The principal name of the owner of the token. If it's null it defaults to the token request principal. (string | versions 3+)
   - renewers: A list of those who are allowed to renew this token before it expires. ([]CreatableRenewers | versions 0+)
-  - principal_type: The type of the Kafka principal. (string | versions 0+) 
-  - principal_name: The name of the Kafka principal. (string | versions 0+) 
+      - principal_type: The type of the Kafka principal. (string | versions 0+)
+      - principal_name: The name of the Kafka principal. (string | versions 0+)
   - max_lifetime_ms: The maximum lifetime of the token in milliseconds, or -1 to use the server side default. (int64 | versions 0+)
 
   """
@@ -46,7 +46,7 @@ defmodule KlifeProtocol.Messages.CreateDelegationToken do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - error_code: The top-level error, or zero if there was no error. (int16 | versions 0+)
   - principal_type: The principal type of the token owner. (string | versions 0+)

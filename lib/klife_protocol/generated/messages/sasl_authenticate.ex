@@ -25,7 +25,7 @@ defmodule KlifeProtocol.Messages.SaslAuthenticate do
   @min_flexible_version_res 2
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - auth_bytes: The SASL authentication bytes from the client, as defined by the SASL mechanism. (bytes | versions 0+)
 
@@ -39,7 +39,7 @@ defmodule KlifeProtocol.Messages.SaslAuthenticate do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
   - error_message: The error message, or null if there was no error. (string | versions 0+)

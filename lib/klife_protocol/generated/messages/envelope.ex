@@ -23,7 +23,7 @@ defmodule KlifeProtocol.Messages.Envelope do
   @min_flexible_version_res 0
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - request_data: The embedded request header and data. (bytes | versions 0+)
   - request_principal: Value of the initial client principal when the request is redirected by a broker. (bytes | versions 0+)
@@ -39,7 +39,7 @@ defmodule KlifeProtocol.Messages.Envelope do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - response_data: The embedded response header and data. (bytes | versions 0+)
   - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)

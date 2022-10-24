@@ -21,15 +21,15 @@ defmodule KlifeProtocol.Messages.BeginQuorumEpoch do
   @min_flexible_version_res :none
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - cluster_id:  (string | versions 0+)
   - topics:  ([]TopicData | versions 0+)
-  - topic_name: The topic name. (string | versions 0+) 
-  - partitions:  ([]PartitionData | versions 0+) 
-  - partition_index: The partition index. (int32 | versions 0+) 
-  - leader_id: The ID of the newly elected leader (int32 | versions 0+) 
-  - leader_epoch: The epoch of the newly elected leader (int32 | versions 0+) 
+      - topic_name: The topic name. (string | versions 0+)
+      - partitions:  ([]PartitionData | versions 0+)
+          - partition_index: The partition index. (int32 | versions 0+)
+          - leader_id: The ID of the newly elected leader (int32 | versions 0+)
+          - leader_epoch: The epoch of the newly elected leader (int32 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -41,7 +41,7 @@ defmodule KlifeProtocol.Messages.BeginQuorumEpoch do
   end
 
   @doc """
-  Valid fields:
+  Content fields:
 
   - error_code: The top level error code. (int16 | versions 0+)
   - topics:  ([]TopicData | versions 0+)
