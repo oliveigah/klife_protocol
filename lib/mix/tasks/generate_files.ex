@@ -81,7 +81,11 @@ if Mix.env() == :dev do
               req_flexible_version: req_flex_version,
               res_flexible_version: res_flex_version,
               req_header_exceptions: Map.get(@req_header_exceptions, module_name),
-              res_header_exceptions: Map.get(@res_header_exceptions, module_name)
+              res_header_exceptions: Map.get(@res_header_exceptions, module_name),
+              req_versions_comments: get_versions_comments(req_file_path),
+              res_versions_comments: get_versions_comments(res_file_path),
+              req_field_comments: get_fields_comments(req_map),
+              res_field_comments: get_fields_comments(res_map)
             ]
 
           "priv/header_module_template.eex" ->
@@ -120,6 +124,67 @@ if Mix.env() == :dev do
       |> Enum.filter(fn line -> !String.contains?(line, "//") end)
       |> Enum.join()
       |> Jason.decode!(keys: :atoms)
+    end
+
+    defp get_versions_comments(path) do
+      path
+      |> File.read!()
+      |> String.split("{", parts: 2)
+      |> List.last()
+      |> String.split("validVersions", parts: 2)
+      |> List.first()
+      |> String.split("\n")
+      |> Enum.filter(fn line -> String.contains?(line, "//") end)
+      |> Enum.map(fn line -> String.replace(line, "//", "") end)
+      |> Enum.map(&String.trim/1)
+      |> Enum.chunk_by(fn e -> e == "" end)
+      |> Enum.filter(fn e -> e != [""] end)
+    end
+
+    defp get_fields_comments(map) do
+      common_structs =
+        Enum.map(map[:commonStructs] || [], fn struct ->
+          {struct.name, parse_field_comments(struct.fields, %{common_structs: %{}}, 0, [])}
+        end)
+        |> Map.new()
+
+      metadata = %{common_structs: common_structs}
+
+      parse_field_comments(map.fields, metadata, 0, [])
+    end
+
+    defp parse_field_comments([], _metadata, _depth, acc), do: acc
+
+    defp parse_field_comments([field | rest], metadata, depth, acc) do
+      append_data =
+        if(Map.has_key?(field, :fields)) do
+          line = build_field_comment_line(field)
+          base = [{line, depth}]
+          parse_field_comments(field.fields, metadata, depth + 1, base)
+        else
+          if String.starts_with?(field.type, "[]") do
+            "[]" <> type = field.type
+
+            case Map.get(metadata.common_structs, type) do
+              nil ->
+                [{build_field_comment_line(field), depth}]
+
+              append_data ->
+                append_data = Enum.map(append_data, fn {line, _} -> {line, depth + 1} end)
+
+                [{build_field_comment_line(field), depth}] ++ append_data
+            end
+          else
+            [{build_field_comment_line(field), depth}]
+          end
+        end
+
+      parse_field_comments(rest, metadata, depth, acc ++ append_data)
+    end
+
+    defp build_field_comment_line(field) do
+      name = to_snake_case(field.name)
+      "- #{name}: #{field[:about] || ""} (#{field.type} | versions #{field.versions})"
     end
 
     defp parse_message_schema(message) do
