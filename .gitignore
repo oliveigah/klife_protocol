@@ -27,3 +27,4 @@ klife_protocol-*.tar
 
 # Kafka commom message JSON files
 priv/kafka_commons/*
+priv/test_kafka_commons/*

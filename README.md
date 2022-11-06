@@ -31,8 +31,6 @@ mix test
 
 ## Todos
 
-- Add tests for kafka messages
-- Add documentation on generator
+- Add tests for most used kafka messages
+- Add records serialization
 - Benchmark serialization
-- Improve error message on seriliazation errors
-
