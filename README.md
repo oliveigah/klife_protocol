@@ -27,6 +27,11 @@ docker-compose -f ./test/compose_files docker-compose-latest.yml up --force-recr
 mix test
 ```
 
+## Generating auto generate files
+
+```
+mix generate_files PATH_TO_KAFKA_COMMONS_FOLDER
+```
 
 
 ## Todos
