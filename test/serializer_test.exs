@@ -224,8 +224,20 @@ defmodule KlifeProtocol.SerializerTest do
              Serializer.execute(input, schema)
   end
 
-  test "varint" do
+  test "unsigned_varint" do
     input = %{a: 10, b: 120, c: 300}
+
+    schema = [
+      a: {:unsigned_varint, @default_metadata},
+      b: {:unsigned_varint, @default_metadata},
+      c: {:unsigned_varint, @default_metadata}
+    ]
+
+    assert <<10, 120, 172, 2>> = Serializer.execute(input, schema)
+  end
+
+  test "varint" do
+    input = %{a: -10, b: -120, c: -300}
 
     schema = [
       a: {:varint, @default_metadata},
@@ -233,7 +245,7 @@ defmodule KlifeProtocol.SerializerTest do
       c: {:varint, @default_metadata}
     ]
 
-    assert <<10, 120, 172, 2>> = Serializer.execute(input, schema)
+    assert <<19, 239, 1, 215, 4>> = Serializer.execute(input, schema)
   end
 
   test "tag_buffer" do

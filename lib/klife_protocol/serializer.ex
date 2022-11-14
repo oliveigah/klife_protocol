@@ -67,33 +67,50 @@ defmodule KlifeProtocol.Serializer do
   defp do_serialize_value(val, {:array, schema}),
     do: do_serialize(schema, val, <<length(val)::32-signed>>)
 
-  defp do_serialize_value(nil, :compact_bytes), do: do_serialize_value(0, :varint)
+  defp do_serialize_value(nil, :bytes), do: <<-1::32-signed>>
+
+  defp do_serialize_value(val, :bytes), do: <<byte_size(val)::32-signed>> <> val
+
+  defp do_serialize_value(nil, :compact_bytes), do: do_serialize_value(0, :unsigned_varint)
 
   defp do_serialize_value(val, :compact_bytes),
-    do: do_serialize_value(byte_size(val) + 1, :varint) <> val
+    do: do_serialize_value(byte_size(val) + 1, :unsigned_varint) <> val
 
-  defp do_serialize_value(nil, :compact_string), do: do_serialize_value(0, :varint)
+  defp do_serialize_value(nil, :compact_string), do: do_serialize_value(0, :unsigned_varint)
 
   defp do_serialize_value(val, :compact_string),
-    do: do_serialize_value(byte_size(val) + 1, :varint) <> val
+    do: do_serialize_value(byte_size(val) + 1, :unsigned_varint) <> val
 
   defp do_serialize_value(nil, {:compact_array, _schema}),
-    do: do_serialize_value(0, :varint)
+    do: do_serialize_value(0, :unsigned_varint)
 
   defp do_serialize_value(val, {:compact_array, schema}),
-    do: do_serialize(schema, val, do_serialize_value(length(val) + 1, :varint))
+    do: do_serialize(schema, val, do_serialize_value(length(val) + 1, :unsigned_varint))
 
-  defp do_serialize_value(val, :varint) when val <= 127 and val >= 0, do: <<val>>
+  defp do_serialize_value(val, :record_batch), do: KlifeProtocol.RecordBatch.serialize(val)
 
-  defp do_serialize_value(val, :varint) when val > 127,
-    do: <<1::1, band(val, 127)::7>> <> do_serialize_value(bsr(val, 7), :varint)
+  defp do_serialize_value(val, {:records, schema}) do
+    do_serialize(schema, val, <<>>)
+  end
 
-  defp do_serialize_value(_input_map, {:tag_buffer, []}), do: do_serialize_value(0, :varint)
+  defp do_serialize_value(val, :unsigned_varint) when val <= 127, do: <<val>>
+
+  defp do_serialize_value(val, :unsigned_varint),
+    do: <<1::1, val::7, do_serialize_value(bsr(val, 7), :unsigned_varint)::binary>>
+
+  defp do_serialize_value(val, :varint) when val >= 0,
+    do: do_serialize_value(2 * val, :unsigned_varint)
+
+  defp do_serialize_value(val, :varint) when val < 0,
+    do: do_serialize_value(-2 * val - 1, :unsigned_varint)
+
+  defp do_serialize_value(_input_map, {:tag_buffer, []}),
+    do: do_serialize_value(0, :unsigned_varint)
 
   defp do_serialize_value(input_map, {:tag_buffer, tag_schema}) do
     existing_schema = Enum.filter(tag_schema, fn {key, _} -> Map.has_key?(input_map, key) end)
     len = length(existing_schema)
-    serialize_tag_buffer(existing_schema, input_map, do_serialize_value(len, :varint))
+    serialize_tag_buffer(existing_schema, input_map, do_serialize_value(len, :unsigned_varint))
   end
 
   defp serialize_tag_buffer([], _input_map, acc_data), do: acc_data
@@ -106,8 +123,8 @@ defmodule KlifeProtocol.Serializer do
     raw_value = Map.fetch!(input_map, key)
 
     value = serialize_value(raw_value, {key, {type, metadata}})
-    size = do_serialize_value(byte_size(value) + 1, :varint)
-    tag = do_serialize_value(tag, :varint)
+    size = do_serialize_value(byte_size(value) + 1, :unsigned_varint)
+    tag = do_serialize_value(tag, :unsigned_varint)
 
     final_val = tag <> size <> value
 

@@ -47,7 +47,7 @@ defmodule KlifeProtocol.Deserializer do
     do: deserialize_array(rest_data, len, schema, [])
 
   defp do_deserialize_value(binary, :compact_bytes) do
-    {len, rest_binary} = do_deserialize_value(binary, :varint)
+    {len, rest_binary} = do_deserialize_value(binary, :unsigned_varint)
 
     if len > 0 do
       len = len - 1
@@ -59,7 +59,7 @@ defmodule KlifeProtocol.Deserializer do
   end
 
   defp do_deserialize_value(binary, :compact_string) do
-    {len, rest_binary} = do_deserialize_value(binary, :varint)
+    {len, rest_binary} = do_deserialize_value(binary, :unsigned_varint)
 
     if len > 0 do
       len = len - 1
@@ -71,14 +71,24 @@ defmodule KlifeProtocol.Deserializer do
   end
 
   defp do_deserialize_value(binary, {:compact_array, schema}) do
-    {len, rest_binary} = do_deserialize_value(binary, :varint)
+    {len, rest_binary} = do_deserialize_value(binary, :unsigned_varint)
     if len > 0, do: deserialize_array(rest_binary, len - 1, schema, []), else: {nil, rest_binary}
   end
 
-  defp do_deserialize_value(binary, :varint), do: deserialize_varint(binary)
+  defp do_deserialize_value(binary, :unsigned_varint), do: deserialize_unsigned_varint(binary)
+
+  defp do_deserialize_value(binary, :varint) do
+    case deserialize_unsigned_varint(binary) do
+      {val, rest_binary} when rem(val, 2) == 0 ->
+        {val / 2, rest_binary}
+
+      {val, rest_binary} ->
+        {-1 * ceil(val / 2), rest_binary}
+    end
+  end
 
   defp do_deserialize_value(binary, {:tag_buffer, tagged_fields}) do
-    {len, rest_binary} = do_deserialize_value(binary, :varint)
+    {len, rest_binary} = do_deserialize_value(binary, :unsigned_varint)
 
     if len > 0,
       do: deserialize_tag_buffer(rest_binary, len, tagged_fields, %{}),
@@ -88,8 +98,8 @@ defmodule KlifeProtocol.Deserializer do
   defp deserialize_tag_buffer(rest_data, 0, _tagged_fields, result), do: {result, rest_data}
 
   defp deserialize_tag_buffer(data, len, tagged_fields, result) do
-    {field_tag, rest_binary} = do_deserialize_value(data, :varint)
-    {field_len, rest_binary} = do_deserialize_value(rest_binary, :varint)
+    {field_tag, rest_binary} = do_deserialize_value(data, :unsigned_varint)
+    {field_len, rest_binary} = do_deserialize_value(rest_binary, :unsigned_varint)
     field_len = field_len - 1
 
     case Map.get(tagged_fields, field_tag) do
@@ -118,14 +128,14 @@ defmodule KlifeProtocol.Deserializer do
     deserialize_array(rest_data, len - 1, type, [new_result | acc_result])
   end
 
-  def deserialize_varint(binary, acc \\ 0, counter \\ 0) do
+  def deserialize_unsigned_varint(binary, acc \\ 0, counter \\ 0) do
     <<msb::1, rest_byte::7, rest_data::binary>> = binary
     result = acc + bsl(rest_byte, counter * 7)
 
     if msb === 0 do
       {result, rest_data}
     else
-      deserialize_varint(rest_data, result, acc + 1)
+      deserialize_unsigned_varint(rest_data, result, acc + 1)
     end
   end
 end
