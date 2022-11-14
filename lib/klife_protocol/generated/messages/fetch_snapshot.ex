@@ -129,7 +129,7 @@ defmodule KlifeProtocol.Messages.FetchSnapshot do
                       ]}, %{is_nullable?: false}},
                   size: {:int64, %{is_nullable?: false}},
                   position: {:int64, %{is_nullable?: false}},
-                  unaligned_records: {:records, %{is_nullable?: false}},
+                  unaligned_records: {:record_batch, %{is_nullable?: false}},
                   tag_buffer:
                     {:tag_buffer,
                      %{

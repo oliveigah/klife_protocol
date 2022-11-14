@@ -409,7 +409,7 @@ if Mix.env() == :dev do
     defp get_type("bytes", %{is_flexible: false}, _raise?), do: :bytes
     defp get_type("bytes", %{is_flexible: true}, _raise?), do: :compact_bytes
     defp get_type("uint16", _msg_metadata, _raise?), do: :uint16
-    defp get_type("records", _msg_metadata, _raise?), do: :records
+    defp get_type("records", _msg_metadata, _raise?), do: :record_batch
 
     defp get_type("[]" <> type, %{message_type: :header} = msg_metadata, _raise?) do
       case get_type(type, msg_metadata, false) do

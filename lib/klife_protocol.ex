@@ -5,89 +5,101 @@ defmodule KlifeProtocol do
   def test do
     {:ok, conn} = Connection.new("localhost:19092")
 
-    # api_version_message_v = 3
+    api_version_v = 3
 
-    # Enum.map(1..5, fn i ->
-    #   msg =
-    #     Messages.ApiVersions.serialize_request(
-    #       %{
-    #         headers: %{
-    #           correlation_id: i,
-    #           client_id: nil
-    #         },
-    #         content: %{
-    #           client_software_name: "name",
-    #           client_software_version: "1"
-    #         }
-    #       },
-    #       api_version_message_v
-    #     )
+    api_version_input = %{
+      headers: %{
+        correlation_id: 1029,
+        client_id: nil
+      },
+      content: %{
+        client_software_name: "name",
+        client_software_version: "1"
+      }
+    }
 
-    #   Connection.send_data(conn, msg)
-    # end)
+    send_msg_with_log(Messages.ApiVersions, api_version_input, api_version_v, conn)
 
-    # Enum.map(1..5, fn i ->
-    #   {:ok, received_data} = Connection.read_data(conn)
+    create_topic_v = 0
 
-    #   Messages.ApiVersions.deserialize_response(received_data, api_version_message_v)
-    #   |> IO.inspect(label: "Kafka Response API Versions Request #{i}")
-    # end)
-
-    metadata_v = 0
-
-    msg =
-      Messages.Metadata.serialize_request(
-        %{
-          headers: %{
-            correlation_id: 123,
-            client_id: nil
-          },
-          content: %{
-            topics: [%{name: "some_topic"}, %{name: "some_craaazy_topic_2"}],
-            allow_auto_topic_creation: true,
-            include_cluster_authorized_operations: true,
-            include_topic_authorized_operations: true
+    create_topics_input = %{
+      headers: %{correlation_id: 1234, client_id: "some_crazy_client"},
+      content: %{
+        topics: [
+          %{
+            name: "produce_topic_test",
+            num_partitions: 3,
+            replication_factor: 2,
+            assignments: [],
+            configs: []
           }
-        },
-        metadata_v
-      )
+        ],
+        timeout_ms: 2000,
+        validate_only: false
+      }
+    }
+
+    send_msg_with_log(Messages.CreateTopics, create_topics_input, create_topic_v, conn)
+
+    produce_v = 8
+
+    ts = DateTime.to_unix(DateTime.utc_now())
+
+    produce_input = %{
+      headers: %{correlation_id: 4321, client_id: "some_crazy_client"},
+      content: %{
+        acks: 1,
+        timeout_ms: 2000,
+        topic_data: [
+          %{
+            name: "produce_topic_test",
+            partition_data: [
+              %{
+                index: 1,
+                records: %{
+                  base_offset: 1,
+                  partition_leader_epoch: -1,
+                  magic: 2,
+                  attributes: 0,
+                  last_offset_delta: 0,
+                  base_timestamp: ts,
+                  max_timestamp: ts,
+                  producer_id: 1,
+                  producer_epoch: 1,
+                  base_sequence: 0,
+                  records: [
+                    %{
+                      attributes: 0,
+                      timestamp_delta: 0,
+                      offset_delta: 0,
+                      key: "some_key",
+                      value: "some_value",
+                      headers: [
+                        %{key: "header_key", value: "header_value"}
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+
+    send_msg_with_log(Messages.Produce, produce_input, produce_v, conn)
+
+    Connection.close(conn)
+  end
+
+  defp send_msg_with_log(message_mod, input, v, conn) do
+    msg = message_mod.serialize_request(input, v)
 
     Connection.send_data(conn, msg)
 
     {:ok, received_data} = Connection.read_data(conn)
 
-    Messages.Metadata.deserialize_response(received_data, metadata_v)
-    |> IO.inspect(label: "Kafka Response Metadata Request")
-
-    # create_topic_v = 5
-
-    # msg =
-    #   Messages.CreateTopics.serialize_request(
-    #     %{
-    #       headers: %{correlation_id: 1357, client_id: "some_crazy_client"},
-    #       content: %{
-    #         topics: [
-    #           %{
-    #             name: "my_first_topic_abc_new_2",
-    #             num_partitions: 3,
-    #             replication_factor: 2,
-    #             assignments: [],
-    #             configs: []
-    #           }
-    #         ],
-    #         timeout_ms: 2000,
-    #         validate_only: true
-    #       }
-    #     },
-    #     create_topic_v
-    #   )
-
-    # Connection.send_data(conn, msg)
-    # {:ok, received_data} = Connection.read_data(conn)
-
-    # Messages.CreateTopics.deserialize_response(received_data, create_topic_v)
-    # |> IO.inspect(label: "Kafka Response Create Topics Request")
-
-    Connection.close(conn)
+    message_mod.deserialize_response(received_data, v)
+    |> IO.inspect(label: "Kafka Response to #{message_mod} Request")
   end
 end

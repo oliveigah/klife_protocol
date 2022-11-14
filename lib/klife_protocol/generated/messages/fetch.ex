@@ -515,7 +515,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                   partition_index: {:int32, %{is_nullable?: false}},
                   error_code: {:int16, %{is_nullable?: false}},
                   high_watermark: {:int64, %{is_nullable?: false}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -533,7 +533,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                   partition_index: {:int32, %{is_nullable?: false}},
                   error_code: {:int16, %{is_nullable?: false}},
                   high_watermark: {:int64, %{is_nullable?: false}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -551,7 +551,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                   partition_index: {:int32, %{is_nullable?: false}},
                   error_code: {:int16, %{is_nullable?: false}},
                   high_watermark: {:int64, %{is_nullable?: false}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -569,7 +569,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                   partition_index: {:int32, %{is_nullable?: false}},
                   error_code: {:int16, %{is_nullable?: false}},
                   high_watermark: {:int64, %{is_nullable?: false}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -594,7 +594,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         producer_id: {:int64, %{is_nullable?: false}},
                         first_offset: {:int64, %{is_nullable?: false}}
                       ]}, %{is_nullable?: true}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -620,7 +620,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         producer_id: {:int64, %{is_nullable?: false}},
                         first_offset: {:int64, %{is_nullable?: false}}
                       ]}, %{is_nullable?: true}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -646,7 +646,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         producer_id: {:int64, %{is_nullable?: false}},
                         first_offset: {:int64, %{is_nullable?: false}}
                       ]}, %{is_nullable?: true}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -674,7 +674,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         producer_id: {:int64, %{is_nullable?: false}},
                         first_offset: {:int64, %{is_nullable?: false}}
                       ]}, %{is_nullable?: true}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -702,7 +702,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         producer_id: {:int64, %{is_nullable?: false}},
                         first_offset: {:int64, %{is_nullable?: false}}
                       ]}, %{is_nullable?: true}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -730,7 +730,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         producer_id: {:int64, %{is_nullable?: false}},
                         first_offset: {:int64, %{is_nullable?: false}}
                       ]}, %{is_nullable?: true}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -758,7 +758,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         producer_id: {:int64, %{is_nullable?: false}},
                         first_offset: {:int64, %{is_nullable?: false}}
                       ]}, %{is_nullable?: true}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -787,7 +787,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         first_offset: {:int64, %{is_nullable?: false}}
                       ]}, %{is_nullable?: true}},
                   preferred_read_replica: {:int32, %{is_nullable?: false}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -817,7 +817,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         tag_buffer: {:tag_buffer, %{}}
                       ]}, %{is_nullable?: true}},
                   preferred_read_replica: {:int32, %{is_nullable?: false}},
-                  records: {:records, %{is_nullable?: true}},
+                  records: {:record_batch, %{is_nullable?: true}},
                   tag_buffer:
                     {:tag_buffer,
                      %{
@@ -877,7 +877,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         tag_buffer: {:tag_buffer, %{}}
                       ]}, %{is_nullable?: true}},
                   preferred_read_replica: {:int32, %{is_nullable?: false}},
-                  records: {:records, %{is_nullable?: true}},
+                  records: {:record_batch, %{is_nullable?: true}},
                   tag_buffer:
                     {:tag_buffer,
                      %{

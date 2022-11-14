@@ -102,7 +102,7 @@ defmodule KlifeProtocol.Messages.Produce do
               {{:array,
                 [
                   index: {:int32, %{is_nullable?: false}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -119,7 +119,7 @@ defmodule KlifeProtocol.Messages.Produce do
               {{:array,
                 [
                   index: {:int32, %{is_nullable?: false}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -136,7 +136,7 @@ defmodule KlifeProtocol.Messages.Produce do
               {{:array,
                 [
                   index: {:int32, %{is_nullable?: false}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -154,7 +154,7 @@ defmodule KlifeProtocol.Messages.Produce do
               {{:array,
                 [
                   index: {:int32, %{is_nullable?: false}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -172,7 +172,7 @@ defmodule KlifeProtocol.Messages.Produce do
               {{:array,
                 [
                   index: {:int32, %{is_nullable?: false}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -190,7 +190,7 @@ defmodule KlifeProtocol.Messages.Produce do
               {{:array,
                 [
                   index: {:int32, %{is_nullable?: false}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -208,7 +208,7 @@ defmodule KlifeProtocol.Messages.Produce do
               {{:array,
                 [
                   index: {:int32, %{is_nullable?: false}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -226,7 +226,7 @@ defmodule KlifeProtocol.Messages.Produce do
               {{:array,
                 [
                   index: {:int32, %{is_nullable?: false}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -244,7 +244,7 @@ defmodule KlifeProtocol.Messages.Produce do
               {{:array,
                 [
                   index: {:int32, %{is_nullable?: false}},
-                  records: {:records, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: true}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -262,7 +262,7 @@ defmodule KlifeProtocol.Messages.Produce do
               {{:compact_array,
                 [
                   index: {:int32, %{is_nullable?: false}},
-                  records: {:records, %{is_nullable?: true}},
+                  records: {:record_batch, %{is_nullable?: true}},
                   tag_buffer: {:tag_buffer, []}
                 ]}, %{is_nullable?: false}},
             tag_buffer: {:tag_buffer, []}
