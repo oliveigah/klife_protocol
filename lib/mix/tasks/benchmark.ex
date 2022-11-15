@@ -21,8 +21,6 @@ if Mix.env() == :dev do
     end
 
     defp do_run_bench("create_topic_serialization") do
-      input = :rand.bytes(10000)
-
       Benchee.run(
         %{
           "klife_protocol" => fn ->
@@ -72,7 +70,7 @@ if Mix.env() == :dev do
 
       Benchee.run(
         %{
-          "klife" => fn -> Serializer.serialize_varint(input) end,
+          "klife" => fn -> Serializer.execute(input, :varint) end,
           "varint_lib" => fn ->
             input
             |> Varint.Zigzag.encode()
@@ -89,12 +87,8 @@ if Mix.env() == :dev do
 
       Benchee.run(
         %{
-          "klife" => fn -> Serializer.execute(%{input: input}, input: {:varint, %{}}) end,
-          "varint_lib" => fn ->
-            input
-            |> Varint.Zigzag.encode()
-            |> Varint.LEB128.encode()
-          end
+          "klife" => fn -> Serializer.execute(input, :unsigned_varint) end,
+          "varint_lib" => fn -> Varint.LEB128.encode(input) end
         },
         time: 10,
         memory_time: 2

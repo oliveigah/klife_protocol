@@ -33,17 +33,30 @@ defmodule KlifeProtocol.RecordBatch do
   alias KlifeProtocol.CRC32c
 
   def serialize(input) do
-    serialized_batch_headers = Serializer.execute(input, batch_headers_schema())
+    for_crc_input = %{
+      attributes: input.attributes,
+      last_offset_delta: input.last_offset_delta,
+      base_timestamp: input.base_timestamp,
+      max_timestamp: input.max_timestamp,
+      producer_id: input.producer_id,
+      producer_epoch: input.producer_epoch,
+      base_sequence: input.base_sequence,
+      records: input.records
+    }
 
-    serialized_records = Serializer.execute(input, record_schema())
+    for_crc_serialized = Serializer.execute(for_crc_input, for_crc_schema())
 
-    for_crc_serialized = serialized_batch_headers <> serialized_records
     crc = CRC32c.execute(for_crc_serialized)
 
-    serialized_crc = Serializer.execute(%{crc: crc}, crc_schema())
-    serialized_rest = Serializer.execute(input, rest_schema())
+    rest_input = %{
+      crc: crc,
+      partition_leader_epoch: input.partition_leader_epoch,
+      magic: input.magic
+    }
 
-    for_length_serialized = serialized_rest <> serialized_crc <> for_crc_serialized
+    serialized_rest = Serializer.execute(rest_input, rest_schema())
+
+    for_length_serialized = serialized_rest <> for_crc_serialized
     batch_length = byte_size(for_length_serialized)
 
     base_input = %{
@@ -66,15 +79,12 @@ defmodule KlifeProtocol.RecordBatch do
   def rest_schema() do
     [
       partition_leader_epoch: {:int32, %{is_nullable?: false}},
-      magic: {:int8, %{is_nullable?: false}}
+      magic: {:int8, %{is_nullable?: false}},
+      crc: {:int32, %{is_nullable?: false}}
     ]
   end
 
-  def crc_schema() do
-    [crc: {:int32, %{is_nullable?: false}}]
-  end
-
-  def batch_headers_schema() do
+  def for_crc_schema() do
     [
       attributes: {:int16, %{is_nullable?: false}},
       last_offset_delta: {:int32, %{is_nullable?: false}},
@@ -82,25 +92,20 @@ defmodule KlifeProtocol.RecordBatch do
       max_timestamp: {:int64, %{is_nullable?: false}},
       producer_id: {:int64, %{is_nullable?: false}},
       producer_epoch: {:int16, %{is_nullable?: false}},
-      base_sequence: {:int32, %{is_nullable?: false}}
-    ]
-  end
-
-  defp record_schema() do
-    [
+      base_sequence: {:int32, %{is_nullable?: false}},
       records:
-        {{:records,
+        {{:records_array,
           [
             attributes: {:int8, %{is_nullable?: false}},
             timestamp_delta: {:varint, %{is_nullable?: false}},
             offset_delta: {:varint, %{is_nullable?: false}},
-            key: {:compact_bytes, %{is_nullable?: false}},
-            value: {:compact_bytes, %{is_nullable?: false}},
+            key: {:record_bytes, %{is_nullable?: false}},
+            value: {:record_bytes, %{is_nullable?: false}},
             headers:
-              {{:compact_array,
+              {{:record_headers,
                 [
-                  key: {:compact_string, %{is_nullable?: false}},
-                  value: {:compact_bytes, %{is_nullable?: false}}
+                  key: {:record_bytes, %{is_nullable?: false}},
+                  value: {:record_bytes, %{is_nullable?: false}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]

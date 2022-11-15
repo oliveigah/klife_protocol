@@ -1,8 +1,26 @@
 defmodule KlifeProtocol.Serializer do
   import Bitwise
 
-  def execute(input, schema, append_binary \\ <<>>) do
+  def execute(input, schema, append_binary \\ <<>>)
+
+  def execute(input, schema, append_binary) when is_map(input) do
     do_serialize(schema, input, append_binary)
+  end
+
+  def execute(input, schema, append_binary) when is_list(input) do
+    do_serialize(schema, input, append_binary)
+  end
+
+  def execute(input, {_, {_, _}} = schema, append_binary) do
+    append_binary <> serialize_value(input, schema)
+  end
+
+  def execute(input, {_, _} = type, append_binary) do
+    append_binary <> serialize_value(input, {:none, type})
+  end
+
+  def execute(input, type, append_binary) do
+    append_binary <> serialize_value(input, {:none, {type, %{}}})
   end
 
   defp do_serialize([], map, result_data) when is_map(map), do: result_data
@@ -35,6 +53,17 @@ defmodule KlifeProtocol.Serializer do
     val
     |> do_serialize_value(type)
     |> then(&do_serialize(type, rest_val, acc_data <> &1))
+  end
+
+  defp do_serialize_records(schema, [], acc_data) when is_list(schema),
+    do: acc_data
+
+  defp do_serialize_records(schema, [val | rest_val], acc_data) when is_list(schema) do
+    serialized_record = do_serialize(schema, val, <<>>)
+    len = byte_size(serialized_record)
+    serialized_len = do_serialize_value(len, :varint)
+    new_acc = acc_data <> serialized_len <> serialized_record
+    do_serialize_records(schema, rest_val, new_acc)
   end
 
   defp serialize_value(nil, {key, {_, %{is_nullable?: false}} = type}) do
@@ -87,10 +116,23 @@ defmodule KlifeProtocol.Serializer do
   defp do_serialize_value(val, {:compact_array, schema}),
     do: do_serialize(schema, val, do_serialize_value(length(val) + 1, :unsigned_varint))
 
-  defp do_serialize_value(val, :record_batch), do: KlifeProtocol.RecordBatch.serialize(val)
+  defp do_serialize_value(val, :record_batch) do
+    serialized_record_batch = KlifeProtocol.RecordBatch.serialize(val)
+    do_serialize_value(byte_size(serialized_record_batch), :int32) <> serialized_record_batch
+  end
 
-  defp do_serialize_value(val, {:records, schema}) do
-    do_serialize(schema, val, <<>>)
+  defp do_serialize_value(val, {:records_array, schema}) do
+    len = do_serialize_value(length(val), :int32)
+    do_serialize_records(schema, val, len)
+  end
+
+  defp do_serialize_value(val, :record_bytes) do
+    do_serialize_value(byte_size(val), :varint) <> val
+  end
+
+  defp do_serialize_value(val, {:record_headers, schema}) do
+    len = do_serialize_value(length(val), :varint)
+    do_serialize(schema, val, len)
   end
 
   defp do_serialize_value(val, :unsigned_varint) when val <= 127, do: <<val>>
