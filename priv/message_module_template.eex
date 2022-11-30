@@ -91,6 +91,9 @@ defmodule KlifeProtocol.Messages.<%= module_name %> do
         %{headers: headers, content: content}
     end
 
+    def max_supported_version(), do: <%= request_schemas |> Enum.map(&elem(&1, 0)) |> Enum.max() %>
+    def min_supported_version(), do: <%= request_schemas |> Enum.map(&elem(&1, 0)) |> Enum.min() %>
+
     <% 
         default_res_header_code = "if(msg_version >= @min_flexible_version_res, do: 1, else: 0)"
         default_req_header_code = "if(msg_version >= @min_flexible_version_req, do: 2, else: 1)"

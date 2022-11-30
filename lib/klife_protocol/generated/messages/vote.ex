@@ -63,6 +63,9 @@ defmodule KlifeProtocol.Messages.Vote do
     %{headers: headers, content: content}
   end
 
+  def max_supported_version(), do: 0
+  def min_supported_version(), do: 0
+
   defp req_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_req, do: 2, else: 1)
 

@@ -13,6 +13,7 @@ defmodule KlifeProtocol.MixProject do
   end
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(:dev), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
   # Run "mix help compile.app" to learn about applications.
@@ -27,12 +28,13 @@ defmodule KlifeProtocol.MixProject do
     [
       # Code generation
       {:jason, "~> 1.4", only: :dev},
-      # Benchmarks
+      # Benchmarks and tests
       {:benchee, "~> 1.0", only: :dev},
       {:crc32cer, "~> 0.1.8", only: :dev},
       {:kafka_protocol, "~> 4.1", only: :dev},
       {:varint, "~>1.2.0", only: :dev},
-      {:kayrock, "~> 0.1.15", only: :dev}
+      {:kayrock, "~> 0.1.15", only: :dev},
+      {:uuid, "~> 1.1", only: [:dev, :test]}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
