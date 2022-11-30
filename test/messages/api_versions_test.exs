@@ -1,37 +1,23 @@
 defmodule Messages.ApiVersionsTest do
   use ExUnit.Case
 
-  alias KlifeProtocol.Connection
   alias KlifeProtocol.Messages.ApiVersions
-  alias KlifeProtocol.TestSupport.ConnectionHelper
+  alias KlifeProtocol.TestSupport.Helpers
 
-  setup_all do
-    %{brokers_connections: ConnectionHelper.start_connections()}
-  end
-
-  test "request and response v0", %{brokers_connections: conns} do
-    {_, conn} = Enum.random(conns)
-
+  test "request and response v0" do
     version = 0
-    correlation_id = Enum.random(1..100_000)
+    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
 
-    headers = %{
-      correlation_id: correlation_id,
-      client_id: "klife_client_id"
-    }
-
-    content = %{}
-
-    msg = ApiVersions.serialize_request(%{headers: headers, content: content}, version)
-
-    assert :ok = Connection.send_data(conn, msg)
-
-    {:ok, received_data} = Connection.read_data(conn)
+    result =
+      %{headers: headers, content: %{}}
+      |> ApiVersions.serialize_request(version)
+      |> Helpers.send_message_to_broker()
+      |> ApiVersions.deserialize_response(version)
 
     assert %{
              headers: headers,
              content: content
-           } = ApiVersions.deserialize_response(received_data, version)
+           } = result
 
     assert length(Map.keys(headers)) == 1
     assert %{correlation_id: ^correlation_id} = headers
@@ -47,29 +33,20 @@ defmodule Messages.ApiVersionsTest do
            end)
   end
 
-  test "request and response v1", %{brokers_connections: conns} do
-    {_, conn} = Enum.random(conns)
-
+  test "request and response v1" do
     version = 1
-    correlation_id = Enum.random(1..100_000)
+    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
 
-    headers = %{
-      correlation_id: correlation_id,
-      client_id: "klife_client_id"
-    }
-
-    content = %{}
-
-    msg = ApiVersions.serialize_request(%{headers: headers, content: content}, version)
-
-    assert :ok = Connection.send_data(conn, msg)
-
-    {:ok, received_data} = Connection.read_data(conn)
+    result =
+      %{headers: headers, content: %{}}
+      |> ApiVersions.serialize_request(version)
+      |> Helpers.send_message_to_broker()
+      |> ApiVersions.deserialize_response(version)
 
     assert %{
              headers: headers,
              content: content
-           } = ApiVersions.deserialize_response(received_data, version)
+           } = result
 
     assert length(Map.keys(headers)) == 1
     assert %{correlation_id: ^correlation_id} = headers
@@ -86,29 +63,20 @@ defmodule Messages.ApiVersionsTest do
            end)
   end
 
-  test "request and response v2", %{brokers_connections: conns} do
-    {_, conn} = Enum.random(conns)
-
+  test "request and response v2" do
     version = 2
-    correlation_id = Enum.random(1..100_000)
+    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
 
-    headers = %{
-      correlation_id: correlation_id,
-      client_id: "klife_client_id"
-    }
-
-    content = %{}
-
-    msg = ApiVersions.serialize_request(%{headers: headers, content: content}, version)
-
-    assert :ok = Connection.send_data(conn, msg)
-
-    {:ok, received_data} = Connection.read_data(conn)
+    result =
+      %{headers: headers, content: %{}}
+      |> ApiVersions.serialize_request(version)
+      |> Helpers.send_message_to_broker()
+      |> ApiVersions.deserialize_response(version)
 
     assert %{
              headers: headers,
              content: content
-           } = ApiVersions.deserialize_response(received_data, version)
+           } = result
 
     assert length(Map.keys(headers)) == 1
     assert %{correlation_id: ^correlation_id} = headers
@@ -125,32 +93,26 @@ defmodule Messages.ApiVersionsTest do
            end)
   end
 
-  test "request and response v3", %{brokers_connections: conns} do
-    {_, conn} = Enum.random(conns)
-
+  test "request and response v3" do
     version = 3
-    correlation_id = Enum.random(1..100_000)
 
-    headers = %{
-      correlation_id: correlation_id,
-      client_id: "klife_client_id"
-    }
+    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
 
     content = %{
       client_software_name: "klife",
       client_software_version: "0"
     }
 
-    msg = ApiVersions.serialize_request(%{headers: headers, content: content}, version)
-
-    assert :ok = Connection.send_data(conn, msg)
-
-    {:ok, received_data} = Connection.read_data(conn)
+    result =
+      %{headers: headers, content: content}
+      |> ApiVersions.serialize_request(version)
+      |> Helpers.send_message_to_broker()
+      |> ApiVersions.deserialize_response(version)
 
     assert %{
              headers: headers,
              content: content
-           } = ApiVersions.deserialize_response(received_data, version)
+           } = result
 
     assert length(Map.keys(headers)) == 1
     assert %{correlation_id: ^correlation_id} = headers

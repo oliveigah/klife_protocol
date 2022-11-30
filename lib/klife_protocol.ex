@@ -94,7 +94,6 @@ defmodule KlifeProtocol do
 
   defp send_msg_with_log(message_mod, input, v, conn) do
     msg = message_mod.serialize_request(input, v)
-    IO.inspect(msg, label: "final_msg", limit: :infinity)
     Connection.send_data(conn, msg)
 
     {:ok, received_data} = Connection.read_data(conn)

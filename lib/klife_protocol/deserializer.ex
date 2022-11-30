@@ -37,6 +37,23 @@ defmodule KlifeProtocol.Deserializer do
        ),
        do: {val, rest_data}
 
+  defp do_deserialize_value(<<val::binary-size(16), rest_data::binary>>, :uuid) do
+    <<
+      s1::binary-size(4),
+      s2::binary-size(2),
+      s3::binary-size(2),
+      s4::binary-size(2),
+      s5::binary-size(6)
+    >> = val
+
+    result =
+      [s1, s2, s3, s4, s5]
+      |> Enum.map(&Base.encode16(&1, case: :lower))
+      |> Enum.join("-")
+
+    {result, rest_data}
+  end
+
   defp do_deserialize_value(<<-1::32-signed, rest_data::binary>>, {:array, _schema}),
     do: {nil, rest_data}
 

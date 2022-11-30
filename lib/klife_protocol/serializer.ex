@@ -55,17 +55,6 @@ defmodule KlifeProtocol.Serializer do
     |> then(&do_serialize(type, rest_val, acc_data <> &1))
   end
 
-  defp do_serialize_records(schema, [], acc_data) when is_list(schema),
-    do: acc_data
-
-  defp do_serialize_records(schema, [val | rest_val], acc_data) when is_list(schema) do
-    serialized_record = do_serialize(schema, val, <<>>)
-    len = byte_size(serialized_record)
-    serialized_len = do_serialize_value(len, :varint)
-    new_acc = acc_data <> serialized_len <> serialized_record
-    do_serialize_records(schema, rest_val, new_acc)
-  end
-
   defp serialize_value(nil, {key, {_, %{is_nullable?: false}} = type}) do
     raise """
     Serialization error:
@@ -91,14 +80,21 @@ defmodule KlifeProtocol.Serializer do
   defp do_serialize_value(val, :string) when is_binary(val),
     do: <<byte_size(val)::16-signed>> <> val
 
-  defp do_serialize_value(nil, {:array, _schema}), do: <<-1::32-signed>>
-
-  defp do_serialize_value(val, {:array, schema}),
-    do: do_serialize(schema, val, <<length(val)::32-signed>>)
+  defp do_serialize_value(val, :uuid) when is_binary(val) do
+    val
+    |> String.replace("-", "")
+    |> String.downcase()
+    |> Base.decode16!(case: :lower)
+  end
 
   defp do_serialize_value(nil, :bytes), do: <<-1::32-signed>>
 
   defp do_serialize_value(val, :bytes), do: <<byte_size(val)::32-signed>> <> val
+
+  defp do_serialize_value(nil, {:array, _schema}), do: <<-1::32-signed>>
+
+  defp do_serialize_value(val, {:array, schema}),
+    do: do_serialize(schema, val, <<length(val)::32-signed>>)
 
   defp do_serialize_value(nil, :compact_bytes), do: do_serialize_value(0, :unsigned_varint)
 
@@ -122,17 +118,17 @@ defmodule KlifeProtocol.Serializer do
   end
 
   defp do_serialize_value(val, {:records_array, schema}) do
-    len = do_serialize_value(length(val), :int32)
-    do_serialize_records(schema, val, len)
+    serialize_records(schema, val, do_serialize_value(length(val), :int32))
   end
+
+  defp do_serialize_value(nil, :record_bytes), do: do_serialize_value(-1, :varint)
 
   defp do_serialize_value(val, :record_bytes) do
     do_serialize_value(byte_size(val), :varint) <> val
   end
 
   defp do_serialize_value(val, {:record_headers, schema}) do
-    len = do_serialize_value(length(val), :varint)
-    do_serialize(schema, val, len)
+    do_serialize(schema, val, do_serialize_value(length(val), :varint))
   end
 
   defp do_serialize_value(val, :unsigned_varint) when val <= 127, do: <<val>>
@@ -171,5 +167,13 @@ defmodule KlifeProtocol.Serializer do
     final_val = tag <> size <> value
 
     serialize_tag_buffer(rest_schema, input_map, acc_data <> final_val)
+  end
+
+  defp serialize_records(_schema, [], acc_data), do: acc_data
+
+  defp serialize_records(schema, [val | rest_val], acc_data) when is_list(schema) do
+    serialized_record = do_serialize(schema, val, <<>>)
+    serialized_len = do_serialize_value(byte_size(serialized_record), :varint)
+    serialize_records(schema, rest_val, acc_data <> serialized_len <> serialized_record)
   end
 end

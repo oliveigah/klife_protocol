@@ -290,4 +290,68 @@ defmodule KlifeProtocol.SerializerTest do
                  """,
                  fn -> Serializer.execute(input, schema) end
   end
+
+  test "record_bytes" do
+    input = %{
+      a: "some_bytes",
+      b: nil,
+      c: "much_more_bytes"
+    }
+
+    schema = [
+      a: {:record_bytes, @default_metadata},
+      b: {:record_bytes, %{is_nullable?: true}},
+      c: {:record_bytes, @default_metadata}
+    ]
+
+    a_length = Serializer.execute(byte_size(input.a), :varint)
+    b_length = Serializer.execute(-1, :varint)
+    c_length = Serializer.execute(byte_size(input.c), :varint)
+
+    assert <<
+             a_length <>
+               "some_bytes" <>
+               b_length <>
+               c_length <>
+               "much_more_bytes"
+           >> == Serializer.execute(input, schema)
+  end
+
+  test "record_headers" do
+    input = %{
+      a: [
+        %{a_1: "some_bytes", a_2: "some_other_bytes"},
+        %{a_1: "crazy_bytes", a_2: "something"}
+      ]
+    }
+
+    schema = [
+      a: {
+        {:record_headers,
+         [
+           a_1: {:record_bytes, @default_metadata},
+           a_2: {:record_bytes, @default_metadata}
+         ]},
+        @default_metadata
+      }
+    ]
+
+    len_array = Serializer.execute(length(input.a), :varint)
+    a_1_1_len = Serializer.execute(byte_size("some_bytes"), :varint)
+    a_2_1_len = Serializer.execute(byte_size("some_other_bytes"), :varint)
+    a_1_2_len = Serializer.execute(byte_size("crazy_bytes"), :varint)
+    a_2_2_len = Serializer.execute(byte_size("something"), :varint)
+
+    assert <<
+             len_array <>
+               a_1_1_len <>
+               "some_bytes" <>
+               a_2_1_len <>
+               "some_other_bytes" <>
+               a_1_2_len <>
+               "crazy_bytes" <>
+               a_2_2_len <> "something"
+           >> ==
+             Serializer.execute(input, schema)
+  end
 end
