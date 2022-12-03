@@ -64,12 +64,12 @@ defmodule KlifeProtocol.RecordBatch do
       batch_length: batch_length
     }
 
-    base_data = Serializer.execute(base_input, base_batch_schema())
+    serialized_base = Serializer.execute(base_input, base_batch_schema())
 
-    base_data <> for_length_serialized
+    serialized_base <> for_length_serialized
   end
 
-  def base_batch_schema do
+  def base_batch_schema() do
     [
       base_offset: {:int64, %{is_nullable?: false}},
       batch_length: {:int32, %{is_nullable?: false}}

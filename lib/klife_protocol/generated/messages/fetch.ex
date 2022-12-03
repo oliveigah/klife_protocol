@@ -820,7 +820,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         tag_buffer: {:tag_buffer, %{}}
                       ]}, %{is_nullable?: true}},
                   preferred_read_replica: {:int32, %{is_nullable?: false}},
-                  records: {:record_batch, %{is_nullable?: true}},
+                  records: {:compact_record_batch, %{is_nullable?: true}},
                   tag_buffer:
                     {:tag_buffer,
                      %{
@@ -880,7 +880,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         tag_buffer: {:tag_buffer, %{}}
                       ]}, %{is_nullable?: true}},
                   preferred_read_replica: {:int32, %{is_nullable?: false}},
-                  records: {:record_batch, %{is_nullable?: true}},
+                  records: {:compact_record_batch, %{is_nullable?: true}},
                   tag_buffer:
                     {:tag_buffer,
                      %{

@@ -851,7 +851,7 @@ defmodule Messages.ProduceTest do
     assert %{
              responses: topics_responses,
              throttle_time_ms: _
-           } = content |> IO.inspect()
+           } = content
 
     assert [
              %{

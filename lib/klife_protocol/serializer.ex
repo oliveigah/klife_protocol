@@ -114,7 +114,14 @@ defmodule KlifeProtocol.Serializer do
 
   defp do_serialize_value(val, :record_batch) do
     serialized_record_batch = KlifeProtocol.RecordBatch.serialize(val)
-    do_serialize_value(byte_size(serialized_record_batch), :int32) <> serialized_record_batch
+    len = do_serialize_value(byte_size(serialized_record_batch), :int32)
+    len <> serialized_record_batch
+  end
+
+  defp do_serialize_value(val, :compact_record_batch) do
+    serialized_record_batch = KlifeProtocol.RecordBatch.serialize(val)
+    len = do_serialize_value(byte_size(serialized_record_batch) + 1, :unsigned_varint)
+    len <> serialized_record_batch
   end
 
   defp do_serialize_value(val, {:records_array, schema}) do
@@ -123,9 +130,8 @@ defmodule KlifeProtocol.Serializer do
 
   defp do_serialize_value(nil, :record_bytes), do: do_serialize_value(-1, :varint)
 
-  defp do_serialize_value(val, :record_bytes) do
-    do_serialize_value(byte_size(val), :varint) <> val
-  end
+  defp do_serialize_value(val, :record_bytes),
+    do: do_serialize_value(byte_size(val), :varint) <> val
 
   defp do_serialize_value(val, {:record_headers, schema}) do
     do_serialize(schema, val, do_serialize_value(length(val), :varint))
