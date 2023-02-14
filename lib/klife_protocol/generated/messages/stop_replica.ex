@@ -11,6 +11,7 @@ defmodule KlifeProtocol.Messages.StopReplica do
   per topic.
   - Version 2 is the first flexible version.
   - Version 3 adds the leader epoch per partition (KIP-570).
+  - Version 4 adds KRaft Controller ID field as part of KIP-866
 
   Response versions summary:
   - Version 1 is the same as version 0.
@@ -31,6 +32,7 @@ defmodule KlifeProtocol.Messages.StopReplica do
   Content fields:
 
   - controller_id: The controller id. (int32 | versions 0+)
+  - is_k_raft_controller: If KRaft controller id is used during migration. See KIP-866 (bool | versions 4+)
   - controller_epoch: The controller epoch. (int32 | versions 0+)
   - broker_epoch: The broker epoch. (int64 | versions 1+)
   - delete_partitions: Whether these partitions should be deleted. (bool | versions 0-2)
@@ -73,7 +75,7 @@ defmodule KlifeProtocol.Messages.StopReplica do
     %{headers: headers, content: content}
   end
 
-  def max_supported_version(), do: 3
+  def max_supported_version(), do: 4
   def min_supported_version(), do: 0
 
   defp req_header_version(msg_version),
@@ -147,6 +149,29 @@ defmodule KlifeProtocol.Messages.StopReplica do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(4),
+    do: [
+      controller_id: {:int32, %{is_nullable?: false}},
+      is_k_raft_controller: {:boolean, %{is_nullable?: false}},
+      controller_epoch: {:int32, %{is_nullable?: false}},
+      broker_epoch: {:int64, %{is_nullable?: false}},
+      topic_states:
+        {{:compact_array,
+          [
+            topic_name: {:compact_string, %{is_nullable?: false}},
+            partition_states:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  leader_epoch: {:int32, %{is_nullable?: false}},
+                  delete_partition: {:boolean, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   defp response_schema(0),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
@@ -186,6 +211,20 @@ defmodule KlifeProtocol.Messages.StopReplica do
     ]
 
   defp response_schema(3),
+    do: [
+      error_code: {:int16, %{is_nullable?: false}},
+      partition_errors:
+        {{:compact_array,
+          [
+            topic_name: {:compact_string, %{is_nullable?: false}},
+            partition_index: {:int32, %{is_nullable?: false}},
+            error_code: {:int16, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  defp response_schema(4),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       partition_errors:

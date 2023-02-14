@@ -61,6 +61,7 @@ defmodule KlifeProtocol.Messages.ApiVersions do
       - name: The name of the feature. (string | versions 3+)
       - max_version_level: The cluster-wide finalized max version level for the feature. (int16 | versions 3+)
       - min_version_level: The cluster-wide finalized min version level for the feature. (int16 | versions 3+)
+  - zk_migration_ready: Set by a KRaft controller if the required configurations for ZK migration are present (bool | versions 3+)
 
   """
   def deserialize_response(data, version) do
@@ -160,7 +161,8 @@ defmodule KlifeProtocol.Messages.ApiVersions do
                   max_version_level: {:int16, %{is_nullable?: false}},
                   min_version_level: {:int16, %{is_nullable?: false}},
                   tag_buffer: {:tag_buffer, %{}}
-                ]}}, %{is_nullable?: false}}
+                ]}}, %{is_nullable?: false}},
+           3 => {{:zk_migration_ready, :boolean}, %{is_nullable?: false}}
          }}
     ]
 end

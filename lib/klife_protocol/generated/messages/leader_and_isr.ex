@@ -13,6 +13,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
   - Version 4 is the first flexible version.
   - Version 5 adds Topic ID and Type to the TopicStates, as described in KIP-516.
   - Version 6 adds LeaderRecoveryState as described in KIP-704.
+  - Version 7 adds KRaft Controller ID field as part of KIP-866
 
   Response versions summary:
   - Version 1 adds KAFKA_STORAGE_ERROR as a valid error code.
@@ -36,6 +37,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
   Content fields:
 
   - controller_id: The current controller ID. (int32 | versions 0+)
+  - is_k_raft_controller: If KRaft controller id is used during migration. See KIP-866 (bool | versions 7+)
   - controller_epoch: The current controller epoch. (int32 | versions 0+)
   - broker_epoch: The current broker epoch. (int64 | versions 2+)
   - type: The type that indicates whether all topics are included in the request (int8 | versions 5+)
@@ -105,7 +107,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
     %{headers: headers, content: content}
   end
 
-  def max_supported_version(), do: 6
+  def max_supported_version(), do: 7
   def min_supported_version(), do: 0
 
   defp req_header_version(msg_version),
@@ -345,6 +347,47 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(7),
+    do: [
+      controller_id: {:int32, %{is_nullable?: false}},
+      is_k_raft_controller: {:boolean, %{is_nullable?: false}},
+      controller_epoch: {:int32, %{is_nullable?: false}},
+      broker_epoch: {:int64, %{is_nullable?: false}},
+      type: {:int8, %{is_nullable?: false}},
+      topic_states:
+        {{:compact_array,
+          [
+            topic_name: {:compact_string, %{is_nullable?: false}},
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partition_states:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  controller_epoch: {:int32, %{is_nullable?: false}},
+                  leader: {:int32, %{is_nullable?: false}},
+                  leader_epoch: {:int32, %{is_nullable?: false}},
+                  isr: {{:compact_array, :int32}, %{is_nullable?: false}},
+                  partition_epoch: {:int32, %{is_nullable?: false}},
+                  replicas: {{:compact_array, :int32}, %{is_nullable?: false}},
+                  adding_replicas: {{:compact_array, :int32}, %{is_nullable?: false}},
+                  removing_replicas: {{:compact_array, :int32}, %{is_nullable?: false}},
+                  is_new: {:boolean, %{is_nullable?: false}},
+                  leader_recovery_state: {:int8, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      live_leaders:
+        {{:compact_array,
+          [
+            broker_id: {:int32, %{is_nullable?: false}},
+            host_name: {:compact_string, %{is_nullable?: false}},
+            port: {:int32, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   defp response_schema(0),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
@@ -427,6 +470,25 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
     ]
 
   defp response_schema(6),
+    do: [
+      error_code: {:int16, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partition_errors:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  defp response_schema(7),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       topics:

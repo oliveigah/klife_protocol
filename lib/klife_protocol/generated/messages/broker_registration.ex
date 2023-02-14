@@ -36,6 +36,7 @@ defmodule KlifeProtocol.Messages.BrokerRegistration do
       - min_supported_version: The minimum supported feature level. (int16 | versions 0+)
       - max_supported_version: The maximum supported feature level. (int16 | versions 0+)
   - rack: The rack which this broker is in. (string | versions 0+)
+  - is_migrating_zk_broker: If the required configurations for ZK migration are present, this value is set to true (bool | versions 1+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -61,7 +62,7 @@ defmodule KlifeProtocol.Messages.BrokerRegistration do
     %{headers: headers, content: content}
   end
 
-  def max_supported_version(), do: 0
+  def max_supported_version(), do: 1
   def min_supported_version(), do: 0
 
   defp req_header_version(msg_version),
@@ -96,7 +97,42 @@ defmodule KlifeProtocol.Messages.BrokerRegistration do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(1),
+    do: [
+      broker_id: {:int32, %{is_nullable?: false}},
+      cluster_id: {:compact_string, %{is_nullable?: false}},
+      incarnation_id: {:uuid, %{is_nullable?: false}},
+      listeners:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            host: {:compact_string, %{is_nullable?: false}},
+            port: {:uint16, %{is_nullable?: false}},
+            security_protocol: {:int16, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      features:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            min_supported_version: {:int16, %{is_nullable?: false}},
+            max_supported_version: {:int16, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      rack: {:compact_string, %{is_nullable?: true}},
+      is_migrating_zk_broker: {:boolean, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   defp response_schema(0),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      broker_epoch: {:int64, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  defp response_schema(1),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},

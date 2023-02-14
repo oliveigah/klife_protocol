@@ -12,7 +12,8 @@ defmodule KlifeProtocol.Messages.UpdateMetadata do
   - Version 3 adds the listener name.
   - Version 4 adds the offline replica list.
   - Version 5 adds the broker epoch field and normalizes partitions by topic.
-  Version 7 adds topicId
+  - Version 7 adds topicId
+  - Version 8 adds KRaft Controller ID field as part of KIP-866
 
   Response versions summary:
   - Versions 1, 2, 3, 4, and 5 are the same as version 0
@@ -31,6 +32,7 @@ defmodule KlifeProtocol.Messages.UpdateMetadata do
   Content fields:
 
   - controller_id: The controller id. (int32 | versions 0+)
+  - is_k_raft_controller: If KRaft controller id is used during migration. See KIP-866 (bool | versions 8+)
   - controller_epoch: The controller epoch. (int32 | versions 0+)
   - broker_epoch: The broker epoch. (int64 | versions 5+)
   - ungrouped_partition_states: In older versions of this RPC, each partition that we would like to update. ([]UpdateMetadataPartitionState | versions 0-4)
@@ -89,7 +91,7 @@ defmodule KlifeProtocol.Messages.UpdateMetadata do
     %{headers: headers, content: content}
   end
 
-  def max_supported_version(), do: 7
+  def max_supported_version(), do: 8
   def min_supported_version(), do: 0
 
   defp req_header_version(msg_version),
@@ -374,6 +376,51 @@ defmodule KlifeProtocol.Messages.UpdateMetadata do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(8),
+    do: [
+      controller_id: {:int32, %{is_nullable?: false}},
+      is_k_raft_controller: {:boolean, %{is_nullable?: false}},
+      controller_epoch: {:int32, %{is_nullable?: false}},
+      broker_epoch: {:int64, %{is_nullable?: false}},
+      topic_states:
+        {{:compact_array,
+          [
+            topic_name: {:compact_string, %{is_nullable?: false}},
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partition_states:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  controller_epoch: {:int32, %{is_nullable?: false}},
+                  leader: {:int32, %{is_nullable?: false}},
+                  leader_epoch: {:int32, %{is_nullable?: false}},
+                  isr: {{:compact_array, :int32}, %{is_nullable?: false}},
+                  zk_version: {:int32, %{is_nullable?: false}},
+                  replicas: {{:compact_array, :int32}, %{is_nullable?: false}},
+                  offline_replicas: {{:compact_array, :int32}, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      live_brokers:
+        {{:compact_array,
+          [
+            id: {:int32, %{is_nullable?: false}},
+            endpoints:
+              {{:compact_array,
+                [
+                  port: {:int32, %{is_nullable?: false}},
+                  host: {:compact_string, %{is_nullable?: false}},
+                  listener: {:compact_string, %{is_nullable?: false}},
+                  security_protocol: {:int16, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            rack: {:compact_string, %{is_nullable?: true}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   defp response_schema(0), do: [error_code: {:int16, %{is_nullable?: false}}]
   defp response_schema(1), do: [error_code: {:int16, %{is_nullable?: false}}]
   defp response_schema(2), do: [error_code: {:int16, %{is_nullable?: false}}]
@@ -385,5 +432,8 @@ defmodule KlifeProtocol.Messages.UpdateMetadata do
     do: [error_code: {:int16, %{is_nullable?: false}}, tag_buffer: {:tag_buffer, %{}}]
 
   defp response_schema(7),
+    do: [error_code: {:int16, %{is_nullable?: false}}, tag_buffer: {:tag_buffer, %{}}]
+
+  defp response_schema(8),
     do: [error_code: {:int16, %{is_nullable?: false}}, tag_buffer: {:tag_buffer, %{}}]
 end
