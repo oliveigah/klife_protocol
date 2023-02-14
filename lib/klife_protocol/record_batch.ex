@@ -99,14 +99,14 @@ defmodule KlifeProtocol.RecordBatch do
             attributes: {:int8, %{is_nullable?: false}},
             timestamp_delta: {:varint, %{is_nullable?: false}},
             offset_delta: {:varint, %{is_nullable?: false}},
-            key: {:record_bytes, %{is_nullable?: false}},
+            key: {:record_bytes, %{is_nullable?: true}},
             value: {:record_bytes, %{is_nullable?: false}},
             headers:
               {{:record_headers,
                 [
                   key: {:record_bytes, %{is_nullable?: false}},
                   value: {:record_bytes, %{is_nullable?: false}}
-                ]}, %{is_nullable?: false}}
+                ]}, %{is_nullable?: true}}
           ]}, %{is_nullable?: false}}
     ]
   end

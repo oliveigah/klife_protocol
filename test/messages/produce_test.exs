@@ -5,13 +5,13 @@ defmodule Messages.ProduceTest do
   alias KlifeProtocol.TestSupport.Helpers
 
   test "request and response v0", ctx do
-    topic_name = String.replace("#{ctx.module}_#{ctx.test}", " ", "_")
+    topic_name = Helpers.generate_topic_name(ctx)
 
     version = 0
     partition_index = 0
     ts = DateTime.to_unix(DateTime.utc_now())
 
-    {:ok, _} = Helpers.create_topic(topic_name)
+    {:ok, _} = Helpers.get_or_create_topic(topic_name)
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
@@ -25,7 +25,7 @@ defmodule Messages.ProduceTest do
           name: topic_name,
           partition_data: [
             %{
-              index: 0,
+              index: partition_index,
               records: %{
                 base_offset: 0,
                 partition_leader_epoch: -1,
@@ -87,13 +87,13 @@ defmodule Messages.ProduceTest do
   end
 
   test "request and response v1", ctx do
-    topic_name = String.replace("#{ctx.module}_#{ctx.test}", " ", "_")
+    topic_name = Helpers.generate_topic_name(ctx)
 
     version = 1
     partition_index = 0
     ts = DateTime.to_unix(DateTime.utc_now())
 
-    {:ok, _} = Helpers.create_topic(topic_name)
+    {:ok, _} = Helpers.get_or_create_topic(topic_name)
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
@@ -107,7 +107,7 @@ defmodule Messages.ProduceTest do
           name: topic_name,
           partition_data: [
             %{
-              index: 0,
+              index: partition_index,
               records: %{
                 base_offset: 0,
                 partition_leader_epoch: -1,
@@ -172,13 +172,13 @@ defmodule Messages.ProduceTest do
   end
 
   test "request and response v2", ctx do
-    topic_name = String.replace("#{ctx.module}_#{ctx.test}", " ", "_")
+    topic_name = Helpers.generate_topic_name(ctx)
 
     version = 2
     partition_index = 0
     ts = DateTime.to_unix(DateTime.utc_now())
 
-    {:ok, _} = Helpers.create_topic(topic_name)
+    {:ok, _} = Helpers.get_or_create_topic(topic_name)
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
@@ -192,7 +192,7 @@ defmodule Messages.ProduceTest do
           name: topic_name,
           partition_data: [
             %{
-              index: 0,
+              index: partition_index,
               records: %{
                 base_offset: 0,
                 partition_leader_epoch: -1,
@@ -258,13 +258,13 @@ defmodule Messages.ProduceTest do
   end
 
   test "request and response v3", ctx do
-    topic_name = String.replace("#{ctx.module}_#{ctx.test}", " ", "_")
+    topic_name = Helpers.generate_topic_name(ctx)
 
     version = 3
     partition_index = 0
     ts = DateTime.to_unix(DateTime.utc_now())
 
-    {:ok, _} = Helpers.create_topic(topic_name)
+    {:ok, _} = Helpers.get_or_create_topic(topic_name)
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
@@ -279,7 +279,7 @@ defmodule Messages.ProduceTest do
           name: topic_name,
           partition_data: [
             %{
-              index: 0,
+              index: partition_index,
               records: %{
                 base_offset: 0,
                 partition_leader_epoch: -1,
@@ -345,13 +345,13 @@ defmodule Messages.ProduceTest do
   end
 
   test "request and response v4", ctx do
-    topic_name = String.replace("#{ctx.module}_#{ctx.test}", " ", "_")
+    topic_name = Helpers.generate_topic_name(ctx)
 
     version = 4
     partition_index = 0
     ts = DateTime.to_unix(DateTime.utc_now())
 
-    {:ok, _} = Helpers.create_topic(topic_name)
+    {:ok, _} = Helpers.get_or_create_topic(topic_name)
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
@@ -366,7 +366,7 @@ defmodule Messages.ProduceTest do
           name: topic_name,
           partition_data: [
             %{
-              index: 0,
+              index: partition_index,
               records: %{
                 base_offset: 0,
                 partition_leader_epoch: -1,
@@ -432,13 +432,13 @@ defmodule Messages.ProduceTest do
   end
 
   test "request and response v5", ctx do
-    topic_name = String.replace("#{ctx.module}_#{ctx.test}", " ", "_")
+    topic_name = Helpers.generate_topic_name(ctx)
 
     version = 5
     partition_index = 0
     ts = DateTime.to_unix(DateTime.utc_now())
 
-    {:ok, _} = Helpers.create_topic(topic_name)
+    {:ok, _} = Helpers.get_or_create_topic(topic_name)
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
@@ -453,7 +453,7 @@ defmodule Messages.ProduceTest do
           name: topic_name,
           partition_data: [
             %{
-              index: 0,
+              index: partition_index,
               records: %{
                 base_offset: 0,
                 partition_leader_epoch: -1,
@@ -519,13 +519,13 @@ defmodule Messages.ProduceTest do
   end
 
   test "request and response v6", ctx do
-    topic_name = String.replace("#{ctx.module}_#{ctx.test}", " ", "_")
+    topic_name = Helpers.generate_topic_name(ctx)
 
     version = 6
     partition_index = 0
     ts = DateTime.to_unix(DateTime.utc_now())
 
-    {:ok, _} = Helpers.create_topic(topic_name)
+    {:ok, _} = Helpers.get_or_create_topic(topic_name)
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
@@ -540,7 +540,7 @@ defmodule Messages.ProduceTest do
           name: topic_name,
           partition_data: [
             %{
-              index: 0,
+              index: partition_index,
               records: %{
                 base_offset: 0,
                 partition_leader_epoch: -1,
@@ -606,13 +606,13 @@ defmodule Messages.ProduceTest do
   end
 
   test "request and response v7", ctx do
-    topic_name = String.replace("#{ctx.module}_#{ctx.test}", " ", "_")
+    topic_name = Helpers.generate_topic_name(ctx)
 
     version = 7
     partition_index = 0
     ts = DateTime.to_unix(DateTime.utc_now())
 
-    {:ok, _} = Helpers.create_topic(topic_name)
+    {:ok, _} = Helpers.get_or_create_topic(topic_name)
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
@@ -627,7 +627,7 @@ defmodule Messages.ProduceTest do
           name: topic_name,
           partition_data: [
             %{
-              index: 0,
+              index: partition_index,
               records: %{
                 base_offset: 0,
                 partition_leader_epoch: -1,
@@ -693,13 +693,13 @@ defmodule Messages.ProduceTest do
   end
 
   test "request and response v8", ctx do
-    topic_name = String.replace("#{ctx.module}_#{ctx.test}", " ", "_")
+    topic_name = Helpers.generate_topic_name(ctx)
 
     version = 8
     partition_index = 0
     ts = DateTime.to_unix(DateTime.utc_now())
 
-    {:ok, _} = Helpers.create_topic(topic_name)
+    {:ok, _} = Helpers.get_or_create_topic(topic_name)
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
@@ -714,7 +714,7 @@ defmodule Messages.ProduceTest do
           name: topic_name,
           partition_data: [
             %{
-              index: 0,
+              index: partition_index,
               records: %{
                 base_offset: 0,
                 partition_leader_epoch: -1,
@@ -782,13 +782,13 @@ defmodule Messages.ProduceTest do
   end
 
   test "request and response v9", ctx do
-    topic_name = String.replace("#{ctx.module}_#{ctx.test}", " ", "_")
+    topic_name = Helpers.generate_topic_name(ctx)
 
     version = 9
     partition_index = 0
     ts = DateTime.to_unix(DateTime.utc_now())
 
-    {:ok, _} = Helpers.create_topic(topic_name)
+    {:ok, _} = Helpers.get_or_create_topic(topic_name)
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
@@ -803,7 +803,7 @@ defmodule Messages.ProduceTest do
           name: topic_name,
           partition_data: [
             %{
-              index: 0,
+              index: partition_index,
               records: %{
                 base_offset: 0,
                 partition_leader_epoch: -1,
@@ -820,11 +820,9 @@ defmodule Messages.ProduceTest do
                     attributes: 0,
                     timestamp_delta: 0,
                     offset_delta: 0,
-                    key: "some_key",
+                    key: nil,
                     value: "some_value",
-                    headers: [
-                      %{key: "header_key", value: "header_value"}
-                    ]
+                    headers: nil
                   }
                 ]
               }
