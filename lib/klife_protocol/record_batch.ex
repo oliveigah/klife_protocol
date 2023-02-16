@@ -71,15 +71,40 @@ defmodule KlifeProtocol.RecordBatch do
   end
 
   def deserialize(input) do
-    # TODO: Think about a good way to unify
-    # serialization and deserialization schemas
-    # in order to avoid code duplication
-    schema = [
+    {%{magic: magic_byte}, _} = Deserializer.execute(input, base_batch_schema() ++ rest_schema())
+
+    case magic_byte do
+      0 ->
+        raise "Unsupported magic version 0"
+
+      1 ->
+        raise "Unsupported magic version 1"
+
+      2 ->
+        Deserializer.execute(input, record_batch_complete_schema())
+
+      magic_byte ->
+        raise "Unexpected magic version #{magic_byte}"
+    end
+  end
+
+  def base_batch_schema() do
+    [
       base_offset: {:int64, %{is_nullable?: false}},
-      batch_length: {:int32, %{is_nullable?: false}},
+      batch_length: {:int32, %{is_nullable?: false}}
+    ]
+  end
+
+  def rest_schema() do
+    [
       partition_leader_epoch: {:int32, %{is_nullable?: false}},
       magic: {:int8, %{is_nullable?: false}},
-      crc: {:int32, %{is_nullable?: false}},
+      crc: {:int32, %{is_nullable?: false}}
+    ]
+  end
+
+  def for_crc_schema() do
+    [
       attributes: {:int16, %{is_nullable?: false}},
       last_offset_delta: {:int32, %{is_nullable?: false}},
       base_timestamp: {:int64, %{is_nullable?: false}},
@@ -103,27 +128,18 @@ defmodule KlifeProtocol.RecordBatch do
                 ]}, %{is_nullable?: true}}
           ]}, %{is_nullable?: false}}
     ]
-
-    Deserializer.execute(input, schema)
   end
 
-  def base_batch_schema() do
+  def record_batch_complete_schema() do
+    # TODO: Think about a good way to unify
+    # serialization and deserialization schemas
+    # in order to avoid code duplication
     [
       base_offset: {:int64, %{is_nullable?: false}},
-      batch_length: {:int32, %{is_nullable?: false}}
-    ]
-  end
-
-  def rest_schema() do
-    [
+      batch_length: {:int32, %{is_nullable?: false}},
       partition_leader_epoch: {:int32, %{is_nullable?: false}},
       magic: {:int8, %{is_nullable?: false}},
-      crc: {:int32, %{is_nullable?: false}}
-    ]
-  end
-
-  def for_crc_schema() do
-    [
+      crc: {:int32, %{is_nullable?: false}},
       attributes: {:int16, %{is_nullable?: false}},
       last_offset_delta: {:int32, %{is_nullable?: false}},
       base_timestamp: {:int64, %{is_nullable?: false}},

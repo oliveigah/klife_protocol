@@ -118,6 +118,11 @@ defmodule KlifeProtocol.Deserializer do
     RecordBatch.deserialize(rest_binary)
   end
 
+  defp do_deserialize_value(binary, :compact_record_batch) do
+    {_len, rest_binary} = do_deserialize_value(binary, :unsigned_varint)
+    RecordBatch.deserialize(rest_binary)
+  end
+
   defp do_deserialize_value(binary, {:records_array, schema}) do
     {len, rest_binary} = do_deserialize_value(binary, :int32)
     deserialize_records_array(rest_binary, len, schema, [])
