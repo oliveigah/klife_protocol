@@ -1,5 +1,6 @@
 defmodule KlifeProtocol.Deserializer do
   import Bitwise
+  alias KlifeProtocol.RecordBatch
 
   def execute(data, schema) do
     do_deserialize(schema, data, %{})
@@ -97,10 +98,10 @@ defmodule KlifeProtocol.Deserializer do
   defp do_deserialize_value(binary, :varint) do
     case deserialize_unsigned_varint(binary) do
       {val, rest_binary} when rem(val, 2) == 0 ->
-        {val / 2, rest_binary}
+        {trunc(val / 2), rest_binary}
 
       {val, rest_binary} ->
-        {-1 * ceil(val / 2), rest_binary}
+        {trunc(-1 * ceil(val / 2)), rest_binary}
     end
   end
 
@@ -110,6 +111,43 @@ defmodule KlifeProtocol.Deserializer do
     if len > 0,
       do: deserialize_tag_buffer(rest_binary, len, tagged_fields, %{}),
       else: {%{}, rest_binary}
+  end
+
+  defp do_deserialize_value(binary, :record_batch) do
+    {_len, rest_binary} = do_deserialize_value(binary, :int32)
+    RecordBatch.deserialize(rest_binary)
+  end
+
+  defp do_deserialize_value(binary, {:records_array, schema}) do
+    {len, rest_binary} = do_deserialize_value(binary, :int32)
+    deserialize_records_array(rest_binary, len, schema, [])
+  end
+
+  defp do_deserialize_value(binary, :record_bytes) do
+    case do_deserialize_value(binary, :varint) do
+      {-1, rest_binary} ->
+        {nil, rest_binary}
+
+      {0, rest_binary} ->
+        {<<>>, rest_binary}
+
+      {len, rest_binary} ->
+        <<record::binary-size(len), rest::binary>> = rest_binary
+        {record, rest}
+    end
+  end
+
+  defp do_deserialize_value(binary, {:record_headers, schema}) do
+    case do_deserialize_value(binary, :varint) do
+      {-1, rest_binary} ->
+        {nil, rest_binary}
+
+      {0, rest_binary} ->
+        {[], rest_binary}
+
+      {len, rest_binary} ->
+        deserialize_record_headers(rest_binary, len, schema, [])
+    end
   end
 
   defp deserialize_tag_buffer(rest_data, 0, _tagged_fields, result), do: {result, rest_data}
@@ -154,5 +192,22 @@ defmodule KlifeProtocol.Deserializer do
     else
       deserialize_unsigned_varint(rest_data, result, acc + 1)
     end
+  end
+
+  def deserialize_records_array(rest_data, 0, _schema, acc_result),
+    do: {Enum.reverse(acc_result), rest_data}
+
+  def deserialize_records_array(data, len, schema, acc_result) do
+    {_rec_size, rest_bin} = do_deserialize_value(data, :varint)
+    {rec, rest_bin} = do_deserialize(schema, rest_bin, %{})
+    deserialize_records_array(rest_bin, len - 1, schema, [rec | acc_result])
+  end
+
+  def deserialize_record_headers(rest_data, 0, _schema, acc_result),
+    do: {Enum.reverse(acc_result), rest_data}
+
+  def deserialize_record_headers(data, len, schema, acc_result) do
+    {header, rest_bin} = do_deserialize(schema, data, %{})
+    deserialize_record_headers(rest_bin, len - 1, schema, [header | acc_result])
   end
 end

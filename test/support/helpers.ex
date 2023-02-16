@@ -76,6 +76,23 @@ defmodule KlifeProtocol.TestSupport.Helpers do
     :atomics.sub_get(ref, 1, decr)
   end
 
+  defp override_base_sequence(topic, partition, val) do
+    key = {:base_sequence_counter, topic, partition}
+
+    ref =
+      case read_from_shared(key) do
+        nil ->
+          ref = :atomics.new(1, [])
+          write_to_shared(key, ref)
+          ref
+
+        ref ->
+          ref
+      end
+
+    :atomics.put(ref, 1, val)
+  end
+
   def genereate_headers(opts \\ []) do
     %{
       correlation_id: generate_correlation_id(),
@@ -173,7 +190,10 @@ defmodule KlifeProtocol.TestSupport.Helpers do
 
       %{error_code: 36} ->
         %{content: content} = metadata_request(topic_name: topic_name)
+
         [result] = content.topics
+
+        sync_shared_base_sequence(topic_name)
 
         {:ok, result.topic_id}
 
@@ -249,7 +269,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
                       offset_delta: idx,
                       key: Keyword.get(opts, :key),
                       value: val,
-                      headers: Keyword.get(opts, :headers, [])
+                      headers: Keyword.get(opts, :headers)
                     }
                   end)
               }
@@ -273,6 +293,10 @@ defmodule KlifeProtocol.TestSupport.Helpers do
       %{error_code: 0} = resp ->
         {:ok, %{broker: broker, partition_index: partition_index, offset: resp.base_offset}}
 
+      %{error_code: 45, log_start_offset: offset} ->
+        override_base_sequence(topic_name, partition_index, offset)
+        produce_message(topic_name, vals, opts)
+
       resp ->
         decrement_base_sequence(topic_name, partition_index, vals_len)
         {:error, {resp.error_code, resp.error_message}}
@@ -280,4 +304,49 @@ defmodule KlifeProtocol.TestSupport.Helpers do
   end
 
   def produce_message(topic_name, val, opts), do: produce_message(topic_name, [val], opts)
+
+  defp sync_shared_base_sequence(topic) do
+    %{content: metadata_content} = metadata_request(topic_name: topic)
+    [topic_res] = metadata_content.topics
+    partitions = topic_res.partitions
+
+    Enum.each(partitions, fn p ->
+      version = Messages.DescribeProducers.max_supported_version()
+      headers = genereate_headers()
+
+      content = %{
+        topics: [
+          %{
+            name: topic,
+            partition_indexes: [p.partition_index]
+          }
+        ]
+      }
+
+      %{headers: _headers, content: resp_content} =
+        %{headers: headers, content: content}
+        |> Messages.DescribeProducers.serialize_request(version)
+        |> send_message_to_broker(get_broker_for_topic_partition(topic, p.partition_index))
+        |> Messages.DescribeProducers.deserialize_response(version)
+
+      last_sequence =
+        resp_content
+        |> Map.get(:topics)
+        |> List.first()
+        |> Map.get(:partitions)
+        |> List.first()
+        |> Map.get(:active_producers)
+        |> case do
+          [] ->
+            -1
+
+          active_producers ->
+            active_producers
+            |> List.first()
+            |> Map.get(:last_sequence)
+        end
+
+      override_base_sequence(topic, p.partition_index, last_sequence + 1)
+    end)
+  end
 end
