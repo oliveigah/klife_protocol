@@ -267,6 +267,9 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message OffsetCommit")
+
   defp response_schema(0),
     do: [
       topics:
@@ -410,4 +413,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
           ]}, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, %{}}
     ]
+
+  defp response_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message OffsetCommit")
 end

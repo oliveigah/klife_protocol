@@ -125,6 +125,9 @@ defmodule KlifeProtocol.Messages.DescribeAcls do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message DescribeAcls")
+
   defp response_schema(0),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
@@ -217,4 +220,7 @@ defmodule KlifeProtocol.Messages.DescribeAcls do
           ]}, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, %{}}
     ]
+
+  defp response_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message DescribeAcls")
 end

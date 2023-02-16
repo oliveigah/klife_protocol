@@ -88,6 +88,9 @@ defmodule KlifeProtocol.Messages.EndQuorumEpoch do
           ]}, %{is_nullable?: false}}
     ]
 
+  defp request_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message EndQuorumEpoch")
+
   defp response_schema(0),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
@@ -105,4 +108,7 @@ defmodule KlifeProtocol.Messages.EndQuorumEpoch do
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
+
+  defp response_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message EndQuorumEpoch")
 end

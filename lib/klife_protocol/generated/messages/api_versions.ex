@@ -90,6 +90,9 @@ defmodule KlifeProtocol.Messages.ApiVersions do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message ApiVersions")
+
   defp response_schema(0),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
@@ -165,4 +168,7 @@ defmodule KlifeProtocol.Messages.ApiVersions do
            3 => {{:zk_migration_ready, :boolean}, %{is_nullable?: false}}
          }}
     ]
+
+  defp response_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message ApiVersions")
 end

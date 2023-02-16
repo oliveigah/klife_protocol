@@ -421,6 +421,9 @@ defmodule KlifeProtocol.Messages.UpdateMetadata do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message UpdateMetadata")
+
   defp response_schema(0), do: [error_code: {:int16, %{is_nullable?: false}}]
   defp response_schema(1), do: [error_code: {:int16, %{is_nullable?: false}}]
   defp response_schema(2), do: [error_code: {:int16, %{is_nullable?: false}}]
@@ -436,4 +439,7 @@ defmodule KlifeProtocol.Messages.UpdateMetadata do
 
   defp response_schema(8),
     do: [error_code: {:int16, %{is_nullable?: false}}, tag_buffer: {:tag_buffer, %{}}]
+
+  defp response_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message UpdateMetadata")
 end

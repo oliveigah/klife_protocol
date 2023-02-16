@@ -20,6 +20,10 @@ if Mix.env() == :dev do
       "ApiVersions" => {:fixed, 0}
     }
 
+    @version_exceptions %{
+      "Fetch" => [0, 1, 2, 3]
+    }
+
     def run(args) do
       kafka_commoms_path = List.first(args)
 
@@ -85,7 +89,8 @@ if Mix.env() == :dev do
               req_versions_comments: get_versions_comments(req_file_path),
               res_versions_comments: get_versions_comments(res_file_path),
               req_field_comments: get_fields_comments(req_map),
-              res_field_comments: get_fields_comments(res_map)
+              res_field_comments: get_fields_comments(res_map),
+              version_exceptions: Map.get(@version_exceptions, module_name, [])
             ]
 
           "priv/header_module_template.eex" ->

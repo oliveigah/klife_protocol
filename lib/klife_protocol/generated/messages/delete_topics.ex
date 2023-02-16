@@ -130,6 +130,9 @@ defmodule KlifeProtocol.Messages.DeleteTopics do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message DeleteTopics")
+
   defp response_schema(0),
     do: [
       responses:
@@ -206,4 +209,7 @@ defmodule KlifeProtocol.Messages.DeleteTopics do
           ]}, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, %{}}
     ]
+
+  defp response_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message DeleteTopics")
 end

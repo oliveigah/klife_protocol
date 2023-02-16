@@ -85,6 +85,9 @@ defmodule KlifeProtocol.Messages.ControlledShutdown do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message ControlledShutdown")
+
   defp response_schema(0),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
@@ -130,4 +133,7 @@ defmodule KlifeProtocol.Messages.ControlledShutdown do
           ]}, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, %{}}
     ]
+
+  defp response_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message ControlledShutdown")
 end

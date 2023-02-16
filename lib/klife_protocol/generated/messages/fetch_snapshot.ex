@@ -110,6 +110,9 @@ defmodule KlifeProtocol.Messages.FetchSnapshot do
       tag_buffer: {:tag_buffer, [cluster_id: {{0, :compact_string}, %{is_nullable?: true}}]}
     ]
 
+  defp request_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message FetchSnapshot")
+
   defp response_schema(0),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
@@ -150,4 +153,7 @@ defmodule KlifeProtocol.Messages.FetchSnapshot do
           ]}, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, %{}}
     ]
+
+  defp response_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message FetchSnapshot")
 end

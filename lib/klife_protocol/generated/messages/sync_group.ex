@@ -167,6 +167,9 @@ defmodule KlifeProtocol.Messages.SyncGroup do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message SyncGroup")
+
   defp response_schema(0),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
@@ -211,4 +214,7 @@ defmodule KlifeProtocol.Messages.SyncGroup do
       assignment: {:compact_bytes, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, %{}}
     ]
+
+  defp response_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message SyncGroup")
 end

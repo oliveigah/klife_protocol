@@ -97,6 +97,9 @@ defmodule KlifeProtocol.Messages.DescribeClientQuotas do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message DescribeClientQuotas")
+
   defp response_schema(0),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
@@ -146,4 +149,7 @@ defmodule KlifeProtocol.Messages.DescribeClientQuotas do
           ]}, %{is_nullable?: true}},
       tag_buffer: {:tag_buffer, %{}}
     ]
+
+  defp response_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message DescribeClientQuotas")
 end

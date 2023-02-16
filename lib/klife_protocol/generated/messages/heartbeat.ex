@@ -105,6 +105,9 @@ defmodule KlifeProtocol.Messages.Heartbeat do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message Heartbeat")
+
   defp response_schema(0), do: [error_code: {:int16, %{is_nullable?: false}}]
 
   defp response_schema(1),
@@ -131,4 +134,7 @@ defmodule KlifeProtocol.Messages.Heartbeat do
       error_code: {:int16, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, %{}}
     ]
+
+  defp response_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message Heartbeat")
 end

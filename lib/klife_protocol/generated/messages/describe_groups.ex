@@ -103,6 +103,9 @@ defmodule KlifeProtocol.Messages.DescribeGroups do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message DescribeGroups")
+
   defp response_schema(0),
     do: [
       groups:
@@ -247,4 +250,7 @@ defmodule KlifeProtocol.Messages.DescribeGroups do
           ]}, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, %{}}
     ]
+
+  defp response_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message DescribeGroups")
 end

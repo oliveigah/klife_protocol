@@ -91,8 +91,18 @@ defmodule KlifeProtocol.Messages.<%= module_name %> do
         %{headers: headers, content: content}
     end
 
-    def max_supported_version(), do: <%= request_schemas |> Enum.map(&elem(&1, 0)) |> Enum.max() %>
-    def min_supported_version(), do: <%= request_schemas |> Enum.map(&elem(&1, 0)) |> Enum.min() %>
+    def max_supported_version(), do: <%= 
+    request_schemas 
+    |> Enum.map(&elem(&1, 0)) 
+    |> Enum.reject(&(&1 in version_exceptions)) 
+    |> Enum.max()
+    %>
+    def min_supported_version(), do: <%= 
+    request_schemas 
+    |> Enum.map(&elem(&1, 0))
+    |> Enum.reject(&(&1 in version_exceptions)) 
+    |> Enum.min() 
+    %>
 
     <% 
         default_res_header_code = "if(msg_version >= @min_flexible_version_res, do: 1, else: 0)"
@@ -123,15 +133,28 @@ defmodule KlifeProtocol.Messages.<%= module_name %> do
         end
     %>
 
-    <%= Enum.map(request_schemas, fn {version, schema} -> 
+    <%= Enum.map(request_schemas, fn {version, schema} ->
+        if version not in version_exceptions do
         """
         defp request_schema(#{version}), do: #{inspect(schema)}
         """
+        else
+        ""
+        end
     end) %>
 
-    <%= Enum.map(response_schemas, fn {version, schema} -> 
+    defp request_schema(unkown_version), do: raise("Unknown version #{unkown_version} for message <%= module_name %>") 
+
+
+    <%= Enum.map(response_schemas, fn {version, schema} ->
+        if version not in version_exceptions do
         """
         defp response_schema(#{version}), do: #{inspect(schema)}
         """
+        else
+        ""
+        end
     end) %>
+
+    defp response_schema(unkown_version), do: raise("Unknown version #{unkown_version} for message <%= module_name %>") 
 end

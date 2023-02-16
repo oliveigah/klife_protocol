@@ -61,6 +61,9 @@ defmodule KlifeProtocol.Messages.UnregisterBroker do
   defp request_schema(0),
     do: [broker_id: {:int32, %{is_nullable?: false}}, tag_buffer: {:tag_buffer, []}]
 
+  defp request_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message UnregisterBroker")
+
   defp response_schema(0),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
@@ -68,4 +71,7 @@ defmodule KlifeProtocol.Messages.UnregisterBroker do
       error_message: {:compact_string, %{is_nullable?: true}},
       tag_buffer: {:tag_buffer, %{}}
     ]
+
+  defp response_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message UnregisterBroker")
 end

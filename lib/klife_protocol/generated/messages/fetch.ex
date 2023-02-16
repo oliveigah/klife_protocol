@@ -128,90 +128,13 @@ defmodule KlifeProtocol.Messages.Fetch do
   end
 
   def max_supported_version(), do: 13
-  def min_supported_version(), do: 0
+  def min_supported_version(), do: 4
 
   defp req_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_req, do: 2, else: 1)
 
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
-
-  defp request_schema(0),
-    do: [
-      replica_id: {:int32, %{is_nullable?: false}},
-      max_wait_ms: {:int32, %{is_nullable?: false}},
-      min_bytes: {:int32, %{is_nullable?: false}},
-      topics:
-        {{:array,
-          [
-            topic: {:string, %{is_nullable?: false}},
-            partitions:
-              {{:array,
-                [
-                  partition: {:int32, %{is_nullable?: false}},
-                  fetch_offset: {:int64, %{is_nullable?: false}},
-                  partition_max_bytes: {:int32, %{is_nullable?: false}}
-                ]}, %{is_nullable?: false}}
-          ]}, %{is_nullable?: false}}
-    ]
-
-  defp request_schema(1),
-    do: [
-      replica_id: {:int32, %{is_nullable?: false}},
-      max_wait_ms: {:int32, %{is_nullable?: false}},
-      min_bytes: {:int32, %{is_nullable?: false}},
-      topics:
-        {{:array,
-          [
-            topic: {:string, %{is_nullable?: false}},
-            partitions:
-              {{:array,
-                [
-                  partition: {:int32, %{is_nullable?: false}},
-                  fetch_offset: {:int64, %{is_nullable?: false}},
-                  partition_max_bytes: {:int32, %{is_nullable?: false}}
-                ]}, %{is_nullable?: false}}
-          ]}, %{is_nullable?: false}}
-    ]
-
-  defp request_schema(2),
-    do: [
-      replica_id: {:int32, %{is_nullable?: false}},
-      max_wait_ms: {:int32, %{is_nullable?: false}},
-      min_bytes: {:int32, %{is_nullable?: false}},
-      topics:
-        {{:array,
-          [
-            topic: {:string, %{is_nullable?: false}},
-            partitions:
-              {{:array,
-                [
-                  partition: {:int32, %{is_nullable?: false}},
-                  fetch_offset: {:int64, %{is_nullable?: false}},
-                  partition_max_bytes: {:int32, %{is_nullable?: false}}
-                ]}, %{is_nullable?: false}}
-          ]}, %{is_nullable?: false}}
-    ]
-
-  defp request_schema(3),
-    do: [
-      replica_id: {:int32, %{is_nullable?: false}},
-      max_wait_ms: {:int32, %{is_nullable?: false}},
-      min_bytes: {:int32, %{is_nullable?: false}},
-      max_bytes: {:int32, %{is_nullable?: false}},
-      topics:
-        {{:array,
-          [
-            topic: {:string, %{is_nullable?: false}},
-            partitions:
-              {{:array,
-                [
-                  partition: {:int32, %{is_nullable?: false}},
-                  fetch_offset: {:int64, %{is_nullable?: false}},
-                  partition_max_bytes: {:int32, %{is_nullable?: false}}
-                ]}, %{is_nullable?: false}}
-          ]}, %{is_nullable?: false}}
-    ]
 
   defp request_schema(4),
     do: [
@@ -506,76 +429,8 @@ defmodule KlifeProtocol.Messages.Fetch do
       tag_buffer: {:tag_buffer, [cluster_id: {{0, :compact_string}, %{is_nullable?: true}}]}
     ]
 
-  defp response_schema(0),
-    do: [
-      responses:
-        {{:array,
-          [
-            topic: {:string, %{is_nullable?: false}},
-            partitions:
-              {{:array,
-                [
-                  partition_index: {:int32, %{is_nullable?: false}},
-                  error_code: {:int16, %{is_nullable?: false}},
-                  high_watermark: {:int64, %{is_nullable?: false}},
-                  records: {:record_batch, %{is_nullable?: true}}
-                ]}, %{is_nullable?: false}}
-          ]}, %{is_nullable?: false}}
-    ]
-
-  defp response_schema(1),
-    do: [
-      throttle_time_ms: {:int32, %{is_nullable?: false}},
-      responses:
-        {{:array,
-          [
-            topic: {:string, %{is_nullable?: false}},
-            partitions:
-              {{:array,
-                [
-                  partition_index: {:int32, %{is_nullable?: false}},
-                  error_code: {:int16, %{is_nullable?: false}},
-                  high_watermark: {:int64, %{is_nullable?: false}},
-                  records: {:record_batch, %{is_nullable?: true}}
-                ]}, %{is_nullable?: false}}
-          ]}, %{is_nullable?: false}}
-    ]
-
-  defp response_schema(2),
-    do: [
-      throttle_time_ms: {:int32, %{is_nullable?: false}},
-      responses:
-        {{:array,
-          [
-            topic: {:string, %{is_nullable?: false}},
-            partitions:
-              {{:array,
-                [
-                  partition_index: {:int32, %{is_nullable?: false}},
-                  error_code: {:int16, %{is_nullable?: false}},
-                  high_watermark: {:int64, %{is_nullable?: false}},
-                  records: {:record_batch, %{is_nullable?: true}}
-                ]}, %{is_nullable?: false}}
-          ]}, %{is_nullable?: false}}
-    ]
-
-  defp response_schema(3),
-    do: [
-      throttle_time_ms: {:int32, %{is_nullable?: false}},
-      responses:
-        {{:array,
-          [
-            topic: {:string, %{is_nullable?: false}},
-            partitions:
-              {{:array,
-                [
-                  partition_index: {:int32, %{is_nullable?: false}},
-                  error_code: {:int16, %{is_nullable?: false}},
-                  high_watermark: {:int64, %{is_nullable?: false}},
-                  records: {:record_batch, %{is_nullable?: true}}
-                ]}, %{is_nullable?: false}}
-          ]}, %{is_nullable?: false}}
-    ]
+  defp request_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message Fetch")
 
   defp response_schema(4),
     do: [
@@ -914,4 +769,7 @@ defmodule KlifeProtocol.Messages.Fetch do
           ]}, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, %{}}
     ]
+
+  defp response_schema(unkown_version),
+    do: raise("Unknown version #{unkown_version} for message Fetch")
 end
