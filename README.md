@@ -19,7 +19,7 @@ Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_do
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at <https://hexdocs.pm/klife_protocol>.
 
-## Running Tests
+## Running tests
 
 ```
 docker-compose -f ./test/compose_files docker-compose-latest.yml up --force-recreate
@@ -27,15 +27,15 @@ docker-compose -f ./test/compose_files docker-compose-latest.yml up --force-recr
 mix test
 ```
 
-## Generating auto generate files
+## Generating auto generated files
 
 ```
 mix generate_files PATH_TO_KAFKA_COMMONS_FOLDER
 ```
 
-
 ## Todos
 
-- Add tests for most used kafka messages
-- Add records serialization
-- Benchmark serialization
+- Handle partial messages errors on fetch
+- Add produce and fecth more comprehensive tests
+- Optimize pure elixir serialziation algorithm
+- Optimize pure elixir deserialization algorithm

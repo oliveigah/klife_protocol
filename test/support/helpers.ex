@@ -239,7 +239,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
 
     content = %{
       transactional_id: Keyword.get(opts, :transactional_id),
-      acks: Keyword.get(opts, :acks, 1),
+      acks: Keyword.get(opts, :acks, -1),
       timeout_ms: Keyword.get(opts, :timeout_ms, 1000),
       topic_data: [
         %{

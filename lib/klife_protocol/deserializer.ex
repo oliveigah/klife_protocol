@@ -114,13 +114,17 @@ defmodule KlifeProtocol.Deserializer do
   end
 
   defp do_deserialize_value(binary, :record_batch) do
-    {_len, rest_binary} = do_deserialize_value(binary, :int32)
-    RecordBatch.deserialize(rest_binary)
+    {len, rest_binary} = do_deserialize_value(binary, :int32)
+    <<rest_binary::size(len)-binary, rest::binary>> = rest_binary
+    {resp, <<>>} = deserialize_record_batch(rest_binary, [])
+    {resp, rest}
   end
 
   defp do_deserialize_value(binary, :compact_record_batch) do
-    {_len, rest_binary} = do_deserialize_value(binary, :unsigned_varint)
-    RecordBatch.deserialize(rest_binary)
+    {len, rest_binary} = do_deserialize_value(binary, :unsigned_varint)
+    <<rest_binary::size(len - 1)-binary, rest::binary>> = rest_binary
+    {resp, <<>>} = deserialize_record_batch(rest_binary, [])
+    {resp, rest}
   end
 
   defp do_deserialize_value(binary, {:records_array, schema}) do
@@ -214,5 +218,12 @@ defmodule KlifeProtocol.Deserializer do
   def deserialize_record_headers(data, len, schema, acc_result) do
     {header, rest_bin} = do_deserialize(schema, data, %{})
     deserialize_record_headers(rest_bin, len - 1, schema, [header | acc_result])
+  end
+
+  def deserialize_record_batch(<<>>, acc_result), do: {Enum.reverse(acc_result), <<>>}
+
+  def deserialize_record_batch(data, acc_result) do
+    {res, rest_data} = RecordBatch.deserialize(data)
+    deserialize_record_batch(rest_data, [res | acc_result])
   end
 end
