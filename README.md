@@ -35,7 +35,6 @@ mix generate_files PATH_TO_KAFKA_COMMONS_FOLDER
 
 ## Todos
 
-- Handle partial messages errors on fetch
 - Add produce and fecth more comprehensive tests
 - Optimize pure elixir serialziation algorithm
 - Optimize pure elixir deserialization algorithm

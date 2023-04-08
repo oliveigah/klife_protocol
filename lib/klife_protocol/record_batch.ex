@@ -71,31 +71,44 @@ defmodule KlifeProtocol.RecordBatch do
   end
 
   def deserialize(input) do
-    {%{magic: magic_byte}, _} = Deserializer.execute(input, base_batch_schema() ++ rest_schema())
+    {base_result, rest} = Deserializer.execute(input, base_batch_schema())
 
-    case magic_byte do
-      0 ->
-        raise "Unsupported magic version 0"
+    if byte_size(input) >= base_result.batch_length do
+      {rest_result, rest} = Deserializer.execute(rest, rest_schema())
 
-      1 ->
-        raise "Unsupported magic version 1"
+      case rest_result.magic do
+        0 ->
+          raise "Unsupported magic version 0"
 
-      2 ->
-        Deserializer.execute(input, record_batch_complete_schema())
+        1 ->
+          raise "Unsupported magic version 1"
 
-      magic_byte ->
-        raise "Unexpected magic version #{magic_byte}"
+        2 ->
+          {for_crc_result, rest} = Deserializer.execute(rest, for_crc_schema())
+
+          result =
+            base_result
+            |> Map.merge(rest_result)
+            |> Map.merge(for_crc_result)
+
+          {result, rest}
+
+        unkown_magic_byte ->
+          raise "Unexpected magic version #{unkown_magic_byte}"
+      end
+    else
+      :incomplete_batch
     end
   end
 
-  def base_batch_schema() do
+  defp base_batch_schema() do
     [
       base_offset: {:int64, %{is_nullable?: false}},
       batch_length: {:int32, %{is_nullable?: false}}
     ]
   end
 
-  def rest_schema() do
+  defp rest_schema() do
     [
       partition_leader_epoch: {:int32, %{is_nullable?: false}},
       magic: {:int8, %{is_nullable?: false}},
@@ -103,43 +116,8 @@ defmodule KlifeProtocol.RecordBatch do
     ]
   end
 
-  def for_crc_schema() do
+  defp for_crc_schema() do
     [
-      attributes: {:int16, %{is_nullable?: false}},
-      last_offset_delta: {:int32, %{is_nullable?: false}},
-      base_timestamp: {:int64, %{is_nullable?: false}},
-      max_timestamp: {:int64, %{is_nullable?: false}},
-      producer_id: {:int64, %{is_nullable?: false}},
-      producer_epoch: {:int16, %{is_nullable?: false}},
-      base_sequence: {:int32, %{is_nullable?: false}},
-      records:
-        {{:records_array,
-          [
-            attributes: {:int8, %{is_nullable?: false}},
-            timestamp_delta: {:varint, %{is_nullable?: false}},
-            offset_delta: {:varint, %{is_nullable?: false}},
-            key: {:record_bytes, %{is_nullable?: true}},
-            value: {:record_bytes, %{is_nullable?: false}},
-            headers:
-              {{:record_headers,
-                [
-                  key: {:record_bytes, %{is_nullable?: false}},
-                  value: {:record_bytes, %{is_nullable?: false}}
-                ]}, %{is_nullable?: true}}
-          ]}, %{is_nullable?: false}}
-    ]
-  end
-
-  def record_batch_complete_schema() do
-    # TODO: Think about a good way to unify
-    # serialization and deserialization schemas
-    # in order to avoid code duplication
-    [
-      base_offset: {:int64, %{is_nullable?: false}},
-      batch_length: {:int32, %{is_nullable?: false}},
-      partition_leader_epoch: {:int32, %{is_nullable?: false}},
-      magic: {:int8, %{is_nullable?: false}},
-      crc: {:int32, %{is_nullable?: false}},
       attributes: {:int16, %{is_nullable?: false}},
       last_offset_delta: {:int32, %{is_nullable?: false}},
       base_timestamp: {:int64, %{is_nullable?: false}},

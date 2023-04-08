@@ -220,10 +220,16 @@ defmodule KlifeProtocol.Deserializer do
     deserialize_record_headers(rest_bin, len - 1, schema, [header | acc_result])
   end
 
-  def deserialize_record_batch(<<>>, acc_result), do: {Enum.reverse(acc_result), <<>>}
+  def deserialize_record_batch(data, acc_result) when byte_size(data) < 12,
+    do: {Enum.reverse(acc_result), <<>>}
 
   def deserialize_record_batch(data, acc_result) do
-    {res, rest_data} = RecordBatch.deserialize(data)
-    deserialize_record_batch(rest_data, [res | acc_result])
+    case RecordBatch.deserialize(data) do
+      :incomplete_batch ->
+        deserialize_record_batch(<<>>, acc_result)
+
+      {res, rest_data} ->
+        deserialize_record_batch(rest_data, [res | acc_result])
+    end
   end
 end
