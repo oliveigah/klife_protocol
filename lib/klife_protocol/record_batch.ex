@@ -31,7 +31,6 @@ defmodule KlifeProtocol.RecordBatch do
 
   alias KlifeProtocol.Serializer
   alias KlifeProtocol.Deserializer
-  alias KlifeProtocol.CRC32c
 
   def serialize(input) do
     for_crc_input = %{
@@ -47,7 +46,7 @@ defmodule KlifeProtocol.RecordBatch do
 
     for_crc_serialized = Serializer.execute(for_crc_input, for_crc_schema())
 
-    crc = CRC32c.execute(for_crc_serialized)
+    crc = :crc32cer.nif(for_crc_serialized)
 
     rest_input = %{
       crc: crc,

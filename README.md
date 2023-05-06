@@ -35,6 +35,4 @@ mix generate_files PATH_TO_KAFKA_COMMONS_FOLDER
 
 ## Todos
 
-- Add produce and fecth more comprehensive tests
-- Optimize pure elixir serialziation algorithm
-- Optimize pure elixir deserialization algorithm
+- Add docs and examples

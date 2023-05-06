@@ -94,5 +94,68 @@ if Mix.env() == :dev do
         memory_time: 2
       )
     end
+
+    defp do_run_bench("records_serialization") do
+      headers = %{
+        correlation_id: 12345,
+        client_id: "klife_benchmark"
+      }
+
+      ts = DateTime.to_unix(DateTime.utc_now())
+
+      generate_content = fn qty, size ->
+        %{
+          acks: 1,
+          timeout_ms: 1000,
+          topic_data: [
+            %{
+              name: "some_benchmark_topic",
+              partition_data: [
+                %{
+                  index: 0,
+                  records: %{
+                    base_offset: 0,
+                    partition_leader_epoch: -1,
+                    magic: 2,
+                    attributes: 0,
+                    last_offset_delta: 0,
+                    base_timestamp: ts,
+                    max_timestamp: ts,
+                    producer_id: 1,
+                    producer_epoch: 1,
+                    base_sequence: 1,
+                    records:
+                      Enum.map(1..qty, fn idx ->
+                        %{
+                          attributes: 0,
+                          timestamp_delta: idx - 1,
+                          offset_delta: idx - 1,
+                          key: "some_key",
+                          value: :rand.bytes(size),
+                          headers: [
+                            %{key: "header_key", value: "header_value"}
+                          ]
+                        }
+                      end)
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      end
+
+      input = %{headers: headers, content: generate_content.(1, 100_000)}
+
+      Benchee.run(
+        %{
+          "test" => fn ->
+            KlifeProtocol.Messages.Produce.serialize_request(input, 0)
+          end
+        },
+        time: 10,
+        memory_time: 2
+      )
+    end
   end
 end
