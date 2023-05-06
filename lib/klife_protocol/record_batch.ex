@@ -111,7 +111,7 @@ defmodule KlifeProtocol.RecordBatch do
     [
       partition_leader_epoch: {:int32, %{is_nullable?: false}},
       magic: {:int8, %{is_nullable?: false}},
-      crc: {:int32, %{is_nullable?: false}}
+      crc: {:unsigned_int32, %{is_nullable?: false}}
     ]
   end
 
