@@ -44,7 +44,7 @@ defmodule KlifeProtocol.Messages.SaslAuthenticate do
   - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
   - error_message: The error message, or null if there was no error. (string | versions 0+)
   - auth_bytes: The SASL authentication bytes from the server, as defined by the SASL mechanism. (bytes | versions 0+)
-  - session_lifetime_ms: The SASL authentication bytes from the server, as defined by the SASL mechanism. (int64 | versions 1+)
+  - session_lifetime_ms: Number of milliseconds after which only re-authentication over the existing connection to create a new session can occur. (int64 | versions 1+)
 
   """
   def deserialize_response(data, version) do

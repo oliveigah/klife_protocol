@@ -15,6 +15,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
   - Version 5 is the same as version 4.
   - Version 6 enables flexible versions.
   - Version 7 enables listing offsets by max timestamp (KIP-734).
+  - Version 8 enables listing offsets by local log start offset (KIP-405).
 
   Response versions summary:
   - Version 1 removes the offsets array in favor of returning a single offset.
@@ -25,6 +26,8 @@ defmodule KlifeProtocol.Messages.ListOffsets do
   - Version 5 adds a new error code, OFFSET_NOT_AVAILABLE.
   - Version 6 enables flexible versions.
   - Version 7 is the same as version 6 (KIP-734).
+  - Version 8 enables listing offsets by local log start offset.
+  This is the ealiest log start offset in the local log. (KIP-405).
 
   """
 
@@ -80,7 +83,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
     %{headers: headers, content: content}
   end
 
-  def max_supported_version(), do: 7
+  def max_supported_version(), do: 8
   def min_supported_version(), do: 0
 
   defp req_header_version(msg_version),
@@ -234,6 +237,27 @@ defmodule KlifeProtocol.Messages.ListOffsets do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(8),
+    do: [
+      replica_id: {:int32, %{is_nullable?: false}},
+      isolation_level: {:int8, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  current_leader_epoch: {:int32, %{is_nullable?: false}},
+                  timestamp: {:int64, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   defp request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message ListOffsets")
 
@@ -367,6 +391,28 @@ defmodule KlifeProtocol.Messages.ListOffsets do
     ]
 
   defp response_schema(7),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  timestamp: {:int64, %{is_nullable?: false}},
+                  offset: {:int64, %{is_nullable?: false}},
+                  leader_epoch: {:int32, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  defp response_schema(8),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       topics:

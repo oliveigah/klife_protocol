@@ -189,7 +189,8 @@ if Mix.env() == :dev do
 
     defp build_field_comment_line(field) do
       name = to_snake_case(field.name)
-      "- #{name}: #{field[:about] || ""} (#{field.type} | versions #{field.versions})"
+
+      "- #{name}: #{field[:about] || ""} (#{field.type} | versions #{field[:versions] || field[:taggedVersions]})"
     end
 
     defp parse_message_schema(message) do
@@ -234,9 +235,43 @@ if Mix.env() == :dev do
     end
 
     defp parse_commom_structs(common_structs, msg_metadata) do
-      common_structs
-      |> Enum.map(&Map.put_new(&1, :type, &1.name))
-      |> parse_schema(msg_metadata)
+      grouped_structs =
+        Enum.group_by(common_structs, &is_recursive_common_struct?(&1, msg_metadata))
+
+      non_recursive_structs = grouped_structs[false] || []
+      recursive_structs = grouped_structs[true] || []
+
+      base_commom_structs =
+        non_recursive_structs
+        |> Enum.map(&Map.put_new(&1, :type, &1.name))
+        |> parse_schema(msg_metadata)
+
+      recursive_commom_structs =
+        recursive_structs
+        |> Enum.map(&Map.put_new(&1, :type, &1.name))
+        |> parse_schema(Map.put(msg_metadata, :common_structs, base_commom_structs))
+
+      base_commom_structs ++ recursive_commom_structs
+    end
+
+    defp is_recursive_common_struct?(common_struct, msg_metadata) do
+      Enum.map(common_struct.fields, fn f ->
+        cond do
+          get_type(f.type, msg_metadata, false) in [:array, :compact_array, :not_found] ->
+            case Map.get(f, :fields) do
+              nil ->
+                true
+
+              nested_fields ->
+                is_recursive_common_struct?(nested_fields, msg_metadata)
+            end
+
+          true ->
+            false
+        end
+      end)
+      |> List.flatten()
+      |> Enum.any?()
     end
 
     defp parse_schema(fields, msg_metadata),
@@ -343,7 +378,7 @@ if Mix.env() == :dev do
     end
 
     defp available_in_version?(field, current_version) do
-      field.versions
+      (field[:versions] || field[:taggedVersions])
       |> parse_versions_string()
       |> check_version(current_version)
     end

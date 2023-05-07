@@ -26,6 +26,9 @@ defmodule KlifeProtocol.Messages.Fetch do
   Version 12 adds flexible versions support as well as epoch validation through
   the `LastFetchedEpoch` field
   - Version 13 replaces topic names with topic IDs (KIP-516). May return UNKNOWN_TOPIC_ID error code.
+  - Version 14 is the same as version 13 but it also receives a new error called OffsetMovedToTieredStorageException(KIP-405)
+  - Version 15 adds the ReplicaState which includes new field ReplicaEpoch and the ReplicaId. Also,
+  deprecate the old ReplicaId field and set its default value to -1. (KIP-903)
 
   Response versions summary:
   - Version 1 adds throttle time.
@@ -42,6 +45,8 @@ defmodule KlifeProtocol.Messages.Fetch do
   Version 12 adds support for flexible versions, epoch detection through the `TruncationOffset` field,
   and leader discovery through the `CurrentLeader` field
   - Version 13 replaces the topic name field with topic ID (KIP-516).
+  - Version 14 is the same as version 13 but it also receives a new error called OffsetMovedToTieredStorageException (KIP-405)
+  - Version 15 is the same as version 14 (KIP-903).
 
   """
 
@@ -57,7 +62,10 @@ defmodule KlifeProtocol.Messages.Fetch do
   Content fields:
 
   - cluster_id: The clusterId if known. This is used to validate metadata fetches prior to broker registration. (string | versions 12+)
-  - replica_id: The broker ID of the follower, of -1 if this request is from a consumer. (int32 | versions 0+)
+  - replica_id: The broker ID of the follower, of -1 if this request is from a consumer. (int32 | versions 0-14)
+  - replica_state:  (ReplicaState | versions 15+)
+      - replica_id: The replica ID of the follower, or -1 if this request is from a consumer. (int32 | versions 15+)
+      - replica_epoch: The epoch of this follower, or -1 if not available. (int64 | versions 15+)
   - max_wait_ms: The maximum time in milliseconds to wait for the response. (int32 | versions 0+)
   - min_bytes: The minimum bytes to accumulate in the response. (int32 | versions 0+)
   - max_bytes: The maximum bytes to fetch.  See KIP-74 for cases where this limit may not be honored. (int32 | versions 3+)
@@ -127,7 +135,7 @@ defmodule KlifeProtocol.Messages.Fetch do
     %{headers: headers, content: content}
   end
 
-  def max_supported_version(), do: 13
+  def max_supported_version(), do: 15
   def min_supported_version(), do: 4
 
   defp req_header_version(msg_version),
@@ -429,6 +437,91 @@ defmodule KlifeProtocol.Messages.Fetch do
       tag_buffer: {:tag_buffer, [cluster_id: {{0, :compact_string}, %{is_nullable?: true}}]}
     ]
 
+  defp request_schema(14),
+    do: [
+      replica_id: {:int32, %{is_nullable?: false}},
+      max_wait_ms: {:int32, %{is_nullable?: false}},
+      min_bytes: {:int32, %{is_nullable?: false}},
+      max_bytes: {:int32, %{is_nullable?: false}},
+      isolation_level: {:int8, %{is_nullable?: false}},
+      session_id: {:int32, %{is_nullable?: false}},
+      session_epoch: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition: {:int32, %{is_nullable?: false}},
+                  current_leader_epoch: {:int32, %{is_nullable?: false}},
+                  fetch_offset: {:int64, %{is_nullable?: false}},
+                  last_fetched_epoch: {:int32, %{is_nullable?: false}},
+                  log_start_offset: {:int64, %{is_nullable?: false}},
+                  partition_max_bytes: {:int32, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      forgotten_topics_data:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions: {{:compact_array, :int32}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      rack_id: {:compact_string, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, [cluster_id: {{0, :compact_string}, %{is_nullable?: true}}]}
+    ]
+
+  defp request_schema(15),
+    do: [
+      max_wait_ms: {:int32, %{is_nullable?: false}},
+      min_bytes: {:int32, %{is_nullable?: false}},
+      max_bytes: {:int32, %{is_nullable?: false}},
+      isolation_level: {:int8, %{is_nullable?: false}},
+      session_id: {:int32, %{is_nullable?: false}},
+      session_epoch: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition: {:int32, %{is_nullable?: false}},
+                  current_leader_epoch: {:int32, %{is_nullable?: false}},
+                  fetch_offset: {:int64, %{is_nullable?: false}},
+                  last_fetched_epoch: {:int32, %{is_nullable?: false}},
+                  log_start_offset: {:int64, %{is_nullable?: false}},
+                  partition_max_bytes: {:int32, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      forgotten_topics_data:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions: {{:compact_array, :int32}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      rack_id: {:compact_string, %{is_nullable?: false}},
+      tag_buffer:
+        {:tag_buffer,
+         [
+           cluster_id: {{0, :compact_string}, %{is_nullable?: true}},
+           replica_state:
+             {{1,
+               {:object,
+                [
+                  replica_id: {:int32, %{is_nullable?: false}},
+                  replica_epoch: {:int64, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}}, %{is_nullable?: false}}
+         ]}
+    ]
+
   defp request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message Fetch")
 
@@ -711,6 +804,126 @@ defmodule KlifeProtocol.Messages.Fetch do
     ]
 
   defp response_schema(13),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      session_id: {:int32, %{is_nullable?: false}},
+      responses:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  high_watermark: {:int64, %{is_nullable?: false}},
+                  last_stable_offset: {:int64, %{is_nullable?: false}},
+                  log_start_offset: {:int64, %{is_nullable?: false}},
+                  aborted_transactions:
+                    {{:compact_array,
+                      [
+                        producer_id: {:int64, %{is_nullable?: false}},
+                        first_offset: {:int64, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, %{}}
+                      ]}, %{is_nullable?: true}},
+                  preferred_read_replica: {:int32, %{is_nullable?: false}},
+                  records: {:compact_record_batch, %{is_nullable?: true}},
+                  tag_buffer:
+                    {:tag_buffer,
+                     %{
+                       0 =>
+                         {{:diverging_epoch,
+                           {:object,
+                            [
+                              epoch: {:int32, %{is_nullable?: false}},
+                              end_offset: {:int64, %{is_nullable?: false}},
+                              tag_buffer: {:tag_buffer, %{}}
+                            ]}}, %{is_nullable?: false}},
+                       1 =>
+                         {{:current_leader,
+                           {:object,
+                            [
+                              leader_id: {:int32, %{is_nullable?: false}},
+                              leader_epoch: {:int32, %{is_nullable?: false}},
+                              tag_buffer: {:tag_buffer, %{}}
+                            ]}}, %{is_nullable?: false}},
+                       2 =>
+                         {{:snapshot_id,
+                           {:object,
+                            [
+                              end_offset: {:int64, %{is_nullable?: false}},
+                              epoch: {:int32, %{is_nullable?: false}},
+                              tag_buffer: {:tag_buffer, %{}}
+                            ]}}, %{is_nullable?: false}}
+                     }}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  defp response_schema(14),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      session_id: {:int32, %{is_nullable?: false}},
+      responses:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  high_watermark: {:int64, %{is_nullable?: false}},
+                  last_stable_offset: {:int64, %{is_nullable?: false}},
+                  log_start_offset: {:int64, %{is_nullable?: false}},
+                  aborted_transactions:
+                    {{:compact_array,
+                      [
+                        producer_id: {:int64, %{is_nullable?: false}},
+                        first_offset: {:int64, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, %{}}
+                      ]}, %{is_nullable?: true}},
+                  preferred_read_replica: {:int32, %{is_nullable?: false}},
+                  records: {:compact_record_batch, %{is_nullable?: true}},
+                  tag_buffer:
+                    {:tag_buffer,
+                     %{
+                       0 =>
+                         {{:diverging_epoch,
+                           {:object,
+                            [
+                              epoch: {:int32, %{is_nullable?: false}},
+                              end_offset: {:int64, %{is_nullable?: false}},
+                              tag_buffer: {:tag_buffer, %{}}
+                            ]}}, %{is_nullable?: false}},
+                       1 =>
+                         {{:current_leader,
+                           {:object,
+                            [
+                              leader_id: {:int32, %{is_nullable?: false}},
+                              leader_epoch: {:int32, %{is_nullable?: false}},
+                              tag_buffer: {:tag_buffer, %{}}
+                            ]}}, %{is_nullable?: false}},
+                       2 =>
+                         {{:snapshot_id,
+                           {:object,
+                            [
+                              end_offset: {:int64, %{is_nullable?: false}},
+                              epoch: {:int32, %{is_nullable?: false}},
+                              tag_buffer: {:tag_buffer, %{}}
+                            ]}}, %{is_nullable?: false}}
+                     }}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  defp response_schema(15),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},

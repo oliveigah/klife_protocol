@@ -9,11 +9,13 @@ defmodule KlifeProtocol.Messages.AlterPartition do
   Request versions summary:   
   - Version 1 adds LeaderRecoveryState field (KIP-704).
   - Version 2 adds TopicId field to replace TopicName field (KIP-841).
+  - Version 3 adds the NewIsrEpochs field and deprecates the NewIsr field (KIP-903).
 
   Response versions summary:
   - Version 1 adds LeaderRecoveryState field (KIP-704).
   - Version 2 adds TopicId field to replace TopicName field, can return the following new errors:
   INELIGIBLE_REPLICA, NEW_LEADER_ELECTED and UNKNOWN_TOPIC_ID (KIP-841).
+  - Version 3 is the same as vesion 2 (KIP-903).
 
   """
 
@@ -36,7 +38,10 @@ defmodule KlifeProtocol.Messages.AlterPartition do
       - partitions:  ([]PartitionData | versions 0+)
           - partition_index: The partition index (int32 | versions 0+)
           - leader_epoch: The leader epoch of this partition (int32 | versions 0+)
-          - new_isr: The ISR for this partition ([]int32 | versions 0+)
+          - new_isr: The ISR for this partition. Deprecated since version 3. ([]int32 | versions 0-2)
+          - new_isr_with_epochs:  ([]BrokerState | versions 3+)
+              - broker_id: The ID of the broker. (int32 | versions 3+)
+              - broker_epoch: The epoch of the broker. It will be -1 if the epoch check is not supported. (int64 | versions 3+)
           - leader_recovery_state: 1 if the partition is recovering from an unclean leader election; 0 otherwise. (int8 | versions 1+)
           - partition_epoch: The expected epoch of the partition which is being updated. For legacy cluster this is the ZkVersion in the LeaderAndIsr request. (int32 | versions 0+)
 
@@ -74,7 +79,7 @@ defmodule KlifeProtocol.Messages.AlterPartition do
     %{headers: headers, content: content}
   end
 
-  def max_supported_version(), do: 2
+  def max_supported_version(), do: 3
   def min_supported_version(), do: 0
 
   defp req_header_version(msg_version),
@@ -151,6 +156,35 @@ defmodule KlifeProtocol.Messages.AlterPartition do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(3),
+    do: [
+      broker_id: {:int32, %{is_nullable?: false}},
+      broker_epoch: {:int64, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  leader_epoch: {:int32, %{is_nullable?: false}},
+                  new_isr_with_epochs:
+                    {{:compact_array,
+                      [
+                        broker_id: {:int32, %{is_nullable?: false}},
+                        broker_epoch: {:int64, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, []}
+                      ]}, %{is_nullable?: false}},
+                  leader_recovery_state: {:int8, %{is_nullable?: false}},
+                  partition_epoch: {:int32, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   defp request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message AlterPartition")
 
@@ -204,6 +238,31 @@ defmodule KlifeProtocol.Messages.AlterPartition do
     ]
 
   defp response_schema(2),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  leader_id: {:int32, %{is_nullable?: false}},
+                  leader_epoch: {:int32, %{is_nullable?: false}},
+                  isr: {{:compact_array, :int32}, %{is_nullable?: false}},
+                  leader_recovery_state: {:int8, %{is_nullable?: false}},
+                  partition_epoch: {:int32, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  defp response_schema(3),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
