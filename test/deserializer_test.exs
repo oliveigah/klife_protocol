@@ -258,29 +258,31 @@ defmodule KlifeProtocol.DeserializerTest do
   end
 
   test "unsigned_varint" do
-    input = <<10, 120, 172, 2>>
+    input = <<10, 120, 172, 2, 192, 132, 61>>
 
     schema = [
       a: {:unsigned_varint, @default_metadata},
       b: {:unsigned_varint, @default_metadata},
-      c: {:unsigned_varint, @default_metadata}
+      c: {:unsigned_varint, @default_metadata},
+      d: {:unsigned_varint, @default_metadata}
     ]
 
     assert {response, <<>>} = Deserializer.execute(input, schema)
 
-    assert %{a: 10, b: 120, c: 300} = response
+    assert %{a: 10, b: 120, c: 300, d: 1_000_000} = response
   end
 
   test "varint" do
-    input = <<19, 239, 1, 215, 4>>
+    input = <<19, 239, 1, 215, 4, 160, 156, 1>>
 
     schema = [
       a: {:varint, @default_metadata},
       b: {:varint, @default_metadata},
-      c: {:varint, @default_metadata}
+      c: {:varint, @default_metadata},
+      d: {:varint, @default_metadata}
     ]
 
-    assert {%{a: -10, b: -120, c: -300}, <<>>} = Deserializer.execute(input, schema)
+    assert {%{a: -10, b: -120, c: -300, d: 10_000}, <<>>} = Deserializer.execute(input, schema)
   end
 
   test "tag_buffer" do

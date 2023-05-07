@@ -225,27 +225,29 @@ defmodule KlifeProtocol.SerializerTest do
   end
 
   test "unsigned_varint" do
-    input = %{a: 10, b: 120, c: 300}
+    input = %{a: 10, b: 120, c: 300, d: 1_000_000}
 
     schema = [
       a: {:unsigned_varint, @default_metadata},
       b: {:unsigned_varint, @default_metadata},
-      c: {:unsigned_varint, @default_metadata}
+      c: {:unsigned_varint, @default_metadata},
+      d: {:unsigned_varint, @default_metadata}
     ]
 
-    assert <<10, 120, 172, 2>> = Serializer.execute(input, schema)
+    assert <<10, 120, 172, 2, 192, 132, 61>> = Serializer.execute(input, schema)
   end
 
   test "varint" do
-    input = %{a: -10, b: -120, c: -300}
+    input = %{a: -10, b: -120, c: -300, d: 10_000}
 
     schema = [
       a: {:varint, @default_metadata},
       b: {:varint, @default_metadata},
-      c: {:varint, @default_metadata}
+      c: {:varint, @default_metadata},
+      d: {:varint, @default_metadata}
     ]
 
-    assert <<19, 239, 1, 215, 4>> = Serializer.execute(input, schema)
+    assert <<19, 239, 1, 215, 4, 160, 156, 1>> = Serializer.execute(input, schema)
   end
 
   test "tag_buffer" do

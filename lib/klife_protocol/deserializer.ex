@@ -200,7 +200,7 @@ defmodule KlifeProtocol.Deserializer do
     if msb === 0 do
       {result, rest_data}
     else
-      deserialize_unsigned_varint(rest_data, result, acc + 1)
+      deserialize_unsigned_varint(rest_data, result, counter + 1)
     end
   end
 
