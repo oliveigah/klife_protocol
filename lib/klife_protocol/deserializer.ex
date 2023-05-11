@@ -4,6 +4,9 @@ defmodule KlifeProtocol.Deserializer do
 
   def execute(data, schema) do
     do_deserialize(schema, data, %{})
+  catch
+    {:error, reason} ->
+      {:error, reason}
   end
 
   defp do_deserialize([], data, result), do: {result, data}
@@ -228,6 +231,15 @@ defmodule KlifeProtocol.Deserializer do
     case RecordBatch.deserialize(data) do
       :incomplete_batch ->
         deserialize_record_batch(<<>>, acc_result)
+
+      :redundancy_check_failed ->
+        throw({:error, :redudancy_check_failed})
+
+      :unsupported_magic ->
+        raise "Unsupported kafka magic version"
+
+      {:error, reason} ->
+        raise "Unexpected error. #{inspect(reason)}"
 
       {res, rest_data} ->
         deserialize_record_batch(rest_data, [res | acc_result])
