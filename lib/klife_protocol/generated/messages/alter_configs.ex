@@ -57,9 +57,14 @@ defmodule KlifeProtocol.Messages.AlterConfigs do
   """
   def deserialize_response(data, version) do
     {headers, rest_data} = Header.deserialize_response(data, res_header_version(version))
-    {content, <<>>} = Deserializer.execute(rest_data, response_schema(version))
 
-    %{headers: headers, content: content}
+    case Deserializer.execute(rest_data, response_schema(version)) do
+      {content, <<>>} ->
+        %{headers: headers, content: content}
+
+      {:error, _reason} = err ->
+        err
+    end
   end
 
   def max_supported_version(), do: 2
