@@ -64,6 +64,17 @@ if Mix.env() in [:dev] do
         content: produce_generate_content()
       }
 
+      File.write(
+        Path.relative("/priv/test_resources/produce_test_binary"),
+        :erlang.term_to_binary(input)
+      )
+
+      input =
+        "/priv/test_resources/produce_test_binary"
+        |> Path.relative()
+        |> File.read!()
+        |> :erlang.binary_to_term()
+
       Benchee.run(
         %{
           "main" => fn -> Messages.Produce.serialize_request(input, 9) end
@@ -124,8 +135,8 @@ if Mix.env() in [:dev] do
         |> Messages.Fetch.serialize_request(version)
         |> Helpers.send_message_to_broker(broker)
 
-      File.write(Path.relative("/priv/fetch_test_binary"), binary_input)
-      binary_input = File.read!(Path.relative("/priv/fetch_test_binary"))
+      File.write(Path.relative("/priv/test_resources/fetch_test_binary"), binary_input)
+      binary_input = File.read!(Path.relative("/priv/test_resources/fetch_test_binary"))
 
       Benchee.run(
         %{
@@ -139,17 +150,16 @@ if Mix.env() in [:dev] do
     end
 
     def profile_fetch() do
-      binary_input = File.read!(Path.relative("/priv/fetch_test_binary"))
+      binary_input = File.read!(Path.relative("/priv/test_resources/fetch_test_binary"))
       Messages.Fetch.deserialize_response(binary_input, 13)
     end
 
     def profile_produce() do
-      headers = Helpers.genereate_headers()
-
-      input = %{
-        headers: headers,
-        content: produce_generate_content.(@msg_qty, @msg_size)
-      }
+      input =
+        "/priv/test_resources/produce_test_binary"
+        |> Path.relative()
+        |> File.read!()
+        |> :erlang.binary_to_term()
 
       Messages.Produce.serialize_request(input, 9)
     end
