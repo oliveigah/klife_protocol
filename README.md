@@ -1,6 +1,6 @@
 # Klife Protocol
 
-Pure elixir implementation of the kafka protocol
+Elixir implementation of the kafka protocol
 
 ## Installation
 
