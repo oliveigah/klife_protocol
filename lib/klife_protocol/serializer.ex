@@ -1,29 +1,13 @@
 defmodule KlifeProtocol.Serializer do
-  import Bitwise
+  alias KlifeProtocol.RecordBatch
 
-  def execute(input, schema, append_binary \\ <<>>)
-
-  def execute(input, schema, append_binary) when is_map(input) do
+  def execute(%{} = input, schema, append_binary \\ <<>>) do
     do_serialize(schema, input, append_binary)
   end
 
-  def execute(input, schema, append_binary) when is_list(input) do
-    do_serialize(schema, input, append_binary)
-  end
-
-  def execute(input, {_, {_, _}} = schema, append_binary) do
-    append_binary <> serialize_value(input, schema)
-  end
-
-  def execute(input, {_, _} = type, append_binary) do
-    append_binary <> serialize_value(input, {:none, type})
-  end
-
-  def execute(input, type, append_binary) do
-    append_binary <> serialize_value(input, {:none, {type, %{}}})
-  end
-
+  #  Base case for the main function
   defp do_serialize([], map, result_data) when is_map(map), do: result_data
+  #  Base case for arrays
   defp do_serialize(_schema, [], result_data), do: result_data
 
   # Used for tag buffer
@@ -33,7 +17,7 @@ defmodule KlifeProtocol.Serializer do
     |> then(&do_serialize(rest_schema, input_map, acc_data <> &1))
   end
 
-  # Main function
+  # Main function - The recursion always start here
   defp do_serialize([{key, type} | rest_schema], %{} = input_map, acc_data) do
     input_map
     |> Map.get(key)
@@ -114,7 +98,7 @@ defmodule KlifeProtocol.Serializer do
     do: do_serialize(schema, val, do_serialize_value(length(val) + 1, :unsigned_varint))
 
   defp do_serialize_value(val, :record_batch) do
-    serialized_record_batch = KlifeProtocol.RecordBatch.serialize(val)
+    serialized_record_batch = RecordBatch.serialize(val)
 
     len =
       serialized_record_batch
@@ -125,7 +109,7 @@ defmodule KlifeProtocol.Serializer do
   end
 
   defp do_serialize_value(val, :compact_record_batch) do
-    serialized_record_batch = KlifeProtocol.RecordBatch.serialize(val)
+    serialized_record_batch = RecordBatch.serialize(val)
 
     len =
       serialized_record_batch
@@ -156,7 +140,7 @@ defmodule KlifeProtocol.Serializer do
   defp do_serialize_value(val, :unsigned_varint) when val <= 127, do: <<val>>
 
   defp do_serialize_value(val, :unsigned_varint),
-    do: <<1::1, val::7, do_serialize_value(bsr(val, 7), :unsigned_varint)::binary>>
+    do: <<1::1, val::7, do_serialize_value(Bitwise.bsr(val, 7), :unsigned_varint)::binary>>
 
   defp do_serialize_value(val, :varint) when val >= 0,
     do: do_serialize_value(2 * val, :unsigned_varint)
