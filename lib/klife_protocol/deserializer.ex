@@ -3,9 +3,9 @@ defmodule KlifeProtocol.Deserializer do
   alias KlifeProtocol.RecordBatch
 
   def execute(data, schema) do
-    do_deserialize(schema, data, %{})
+    {:ok, do_deserialize(schema, data, %{})}
   catch
-    {:error, reason} ->
+    reason ->
       {:error, reason}
   end
 
@@ -233,7 +233,7 @@ defmodule KlifeProtocol.Deserializer do
         deserialize_record_batch(<<>>, acc_result)
 
       :redundancy_check_failed ->
-        throw({:error, :redudancy_check_failed})
+        throw(:redudancy_check_failed)
 
       :unsupported_magic ->
         raise "Unsupported kafka magic version"

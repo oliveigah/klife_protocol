@@ -8,7 +8,7 @@ defmodule Messages.ApiVersionsTest do
     version = 0
     headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
 
-    result =
+    {:ok, result} =
       %{headers: headers, content: %{}}
       |> ApiVersions.serialize_request(version)
       |> Helpers.send_message_to_broker()
@@ -37,7 +37,7 @@ defmodule Messages.ApiVersionsTest do
     version = 1
     headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
 
-    result =
+    {:ok, result} =
       %{headers: headers, content: %{}}
       |> ApiVersions.serialize_request(version)
       |> Helpers.send_message_to_broker()
@@ -67,7 +67,7 @@ defmodule Messages.ApiVersionsTest do
     version = 2
     headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
 
-    result =
+    {:ok, result} =
       %{headers: headers, content: %{}}
       |> ApiVersions.serialize_request(version)
       |> Helpers.send_message_to_broker()
@@ -103,7 +103,7 @@ defmodule Messages.ApiVersionsTest do
       client_software_version: "0"
     }
 
-    result =
+    {:ok, result} =
       %{headers: headers, content: content}
       |> ApiVersions.serialize_request(version)
       |> Helpers.send_message_to_broker()

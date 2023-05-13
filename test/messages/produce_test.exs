@@ -56,7 +56,7 @@ defmodule Messages.ProduceTest do
       ]
     }
 
-    result =
+    {:ok, result} =
       %{headers: headers, content: content}
       |> Produce.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -138,7 +138,7 @@ defmodule Messages.ProduceTest do
       ]
     }
 
-    result =
+    {:ok, result} =
       %{headers: headers, content: content}
       |> Produce.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -223,7 +223,7 @@ defmodule Messages.ProduceTest do
       ]
     }
 
-    result =
+    {:ok, result} =
       %{headers: headers, content: content}
       |> Produce.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -310,7 +310,7 @@ defmodule Messages.ProduceTest do
       ]
     }
 
-    result =
+    {:ok, result} =
       %{headers: headers, content: content}
       |> Produce.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -397,7 +397,7 @@ defmodule Messages.ProduceTest do
       ]
     }
 
-    result =
+    {:ok, result} =
       %{headers: headers, content: content}
       |> Produce.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -484,7 +484,7 @@ defmodule Messages.ProduceTest do
       ]
     }
 
-    result =
+    {:ok, result} =
       %{headers: headers, content: content}
       |> Produce.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -571,7 +571,7 @@ defmodule Messages.ProduceTest do
       ]
     }
 
-    result =
+    {:ok, result} =
       %{headers: headers, content: content}
       |> Produce.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -658,7 +658,7 @@ defmodule Messages.ProduceTest do
       ]
     }
 
-    result =
+    {:ok, result} =
       %{headers: headers, content: content}
       |> Produce.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -745,7 +745,7 @@ defmodule Messages.ProduceTest do
       ]
     }
 
-    result =
+    {:ok, result} =
       %{headers: headers, content: content}
       |> Produce.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -832,7 +832,7 @@ defmodule Messages.ProduceTest do
       ]
     }
 
-    result =
+    {:ok, result} =
       %{headers: headers, content: content}
       |> Produce.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)

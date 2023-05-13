@@ -18,6 +18,7 @@ if Mix.env() in [:dev] do
       %{
         acks: 1,
         timeout_ms: 1000,
+        transactional_id: "1",
         topic_data: [
           %{
             name: "some_benchmark_topic",
@@ -54,6 +55,18 @@ if Mix.env() in [:dev] do
           }
         ]
       }
+    end
+
+    def do_run_bench("test") do
+      input = %{a: 1, b: 2, c: 3}
+
+      Benchee.run(
+        %{
+          "test" => fn -> Map.get(input, :b) end
+        },
+        time: 10,
+        memory_time: 2
+      )
     end
 
     def do_run_bench("produce_serialization") do

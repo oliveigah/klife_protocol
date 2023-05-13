@@ -14,7 +14,7 @@ defmodule KlifeProtocol.DeserializerTest do
       c: {:boolean, @default_metadata}
     ]
 
-    assert {response, <<>>} = Deserializer.execute(input, schema)
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
     assert %{a: true, b: false, c: true} = response
   end
 
@@ -27,7 +27,7 @@ defmodule KlifeProtocol.DeserializerTest do
       c: {:int8, @default_metadata}
     ]
 
-    assert {response, <<>>} = Deserializer.execute(input, schema)
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
     assert %{a: 31, b: 123, c: 4} = response
   end
 
@@ -40,7 +40,7 @@ defmodule KlifeProtocol.DeserializerTest do
       c: {:int16, %{is_nullable?: false}}
     ]
 
-    assert {response, <<>>} = Deserializer.execute(input, schema)
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
     assert %{a: 31, b: 123, c: 4} = response
   end
 
@@ -53,7 +53,7 @@ defmodule KlifeProtocol.DeserializerTest do
       c: {:int32, %{is_nullable?: false}}
     ]
 
-    assert {response, <<>>} = Deserializer.execute(input, schema)
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
     assert %{a: 31, b: 123, c: 4} = response
   end
 
@@ -66,7 +66,7 @@ defmodule KlifeProtocol.DeserializerTest do
       c: {:unsigned_int32, %{is_nullable?: false}}
     ]
 
-    assert {response, <<>>} = Deserializer.execute(input, schema)
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
     assert %{a: 0, b: 2, c: 4_223_817_021} = response
   end
 
@@ -79,7 +79,7 @@ defmodule KlifeProtocol.DeserializerTest do
       c: {:int64, @default_metadata}
     ]
 
-    assert {response, <<>>} = Deserializer.execute(input, schema)
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
     assert %{a: 31, b: 123, c: 4} = response
   end
 
@@ -101,7 +101,7 @@ defmodule KlifeProtocol.DeserializerTest do
       d: {:string, %{is_nullable?: false}}
     ]
 
-    assert {response, <<>>} = Deserializer.execute(input, schema)
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
     assert %{a: "abc", b: "defgh", c: nil, d: "ij"} = response
   end
 
@@ -124,7 +124,7 @@ defmodule KlifeProtocol.DeserializerTest do
       b: {{:array, :string}, %{is_nullable?: false}}
     ]
 
-    assert {response, <<>>} = Deserializer.execute(input, schema)
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
     assert %{a: [10, 20], b: ["a", "b", "c"]} = response
   end
 
@@ -169,7 +169,7 @@ defmodule KlifeProtocol.DeserializerTest do
       d: {{:array, [d_a: {:int32, %{is_nullable?: false}}]}, %{is_nullable?: false}}
     ]
 
-    assert {response, <<>>} = Deserializer.execute(input, schema)
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
 
     assert %{
              a: [%{a_a: 10, a_b: 20}, %{a_a: 30, a_b: 40}],
@@ -195,7 +195,7 @@ defmodule KlifeProtocol.DeserializerTest do
       c: {:compact_bytes, @default_metadata}
     ]
 
-    assert {response, <<>>} = Deserializer.execute(input, schema)
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
 
     assert %{a: <<1, 2, 3>>, b: nil, c: <<7, 8, 9, 10>>} = response
   end
@@ -209,7 +209,7 @@ defmodule KlifeProtocol.DeserializerTest do
       c: {:compact_string, @default_metadata}
     ]
 
-    assert {response, <<>>} = Deserializer.execute(input, schema)
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
 
     assert %{a: "aaa", b: nil, c: "abcabcabc"} = response
   end
@@ -226,7 +226,7 @@ defmodule KlifeProtocol.DeserializerTest do
       c: {{:compact_array, :string}, %{is_nullable?: true}}
     ]
 
-    assert {response, <<>>} = Deserializer.execute(input, schema)
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
 
     assert %{a: [10, 20], b: ["a", "b", "c"], c: nil} = response
   end
@@ -249,7 +249,7 @@ defmodule KlifeProtocol.DeserializerTest do
           ]}, @default_metadata}
     ]
 
-    assert {response, <<>>} = Deserializer.execute(input, schema)
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
 
     assert %{
              a: [[10], [20, 30]],
@@ -267,7 +267,7 @@ defmodule KlifeProtocol.DeserializerTest do
       d: {:unsigned_varint, @default_metadata}
     ]
 
-    assert {response, <<>>} = Deserializer.execute(input, schema)
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
 
     assert %{a: 10, b: 120, c: 300, d: 1_000_000} = response
   end
@@ -282,7 +282,8 @@ defmodule KlifeProtocol.DeserializerTest do
       d: {:varint, @default_metadata}
     ]
 
-    assert {%{a: -10, b: -120, c: -300, d: 10_000}, <<>>} = Deserializer.execute(input, schema)
+    assert {:ok, {%{a: -10, b: -120, c: -300, d: 10_000}, <<>>}} =
+             Deserializer.execute(input, schema)
   end
 
   test "tag_buffer" do
@@ -298,7 +299,7 @@ defmodule KlifeProtocol.DeserializerTest do
          }}
     ]
 
-    assert {response, <<>>} = Deserializer.execute(input, schema)
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
 
     assert %{a: "aaa", c: 123} = response
   end
@@ -308,7 +309,7 @@ defmodule KlifeProtocol.DeserializerTest do
 
     schema = [tag_buffer: {:tag_buffer, %{}}]
 
-    assert {response, <<>>} = Deserializer.execute(input, schema)
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
 
     assert %{} = response
   end

@@ -70,13 +70,13 @@ defmodule KlifeProtocol.RecordBatch do
   end
 
   def deserialize(input) do
-    with {base_result, rest} <- Deserializer.execute(input, base_batch_schema()),
+    with {:ok, {base_result, rest}} <- Deserializer.execute(input, base_batch_schema()),
          {:full_batch?, true} <- {:full_batch?, byte_size(rest) >= base_result.batch_length},
          <<curr_batch::binary-size(base_result.batch_length), total_rest::binary>> <- rest,
-         {rest_result, rest} <- Deserializer.execute(curr_batch, rest_schema()),
+         {:ok, {rest_result, rest}} <- Deserializer.execute(curr_batch, rest_schema()),
          {:magic?, true} <- {:magic?, rest_result.magic in [2]},
          {:crc?, true} <- {:crc?, :crc32cer.nif(rest) == rest_result.crc},
-         {for_crc_result, <<>>} <- Deserializer.execute(rest, for_crc_schema()) do
+         {:ok, {for_crc_result, <<>>}} <- Deserializer.execute(rest, for_crc_schema()) do
       result =
         base_result
         |> Map.merge(rest_result)

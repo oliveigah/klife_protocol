@@ -132,7 +132,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
       include_cluster_authorized_operations: true
     }
 
-    %{headers: _resp_headers, content: resp_content} =
+    {:ok, %{headers: _resp_headers, content: resp_content}} =
       %{headers: headers, content: content}
       |> Messages.DescribeCluster.serialize_request(version)
       |> send_message_to_broker()
@@ -146,7 +146,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
   end
 
   def get_broker_for_topic_partition(topic, partition_index) do
-    %{content: content} = metadata_request(topic_name: topic)
+    {:ok, %{content: content}} = metadata_request(topic_name: topic)
     [topic_data] = content.topics
 
     %{leader_id: leader_id} =
@@ -176,7 +176,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
       validate_only: false
     }
 
-    %{headers: _headers, content: resp_content} =
+    {:ok, %{headers: _headers, content: resp_content}} =
       %{headers: headers, content: content}
       |> Messages.CreateTopics.serialize_request(version)
       |> send_message_to_broker(get_cluster_controller_broker())
@@ -189,7 +189,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
         {:ok, result.topic_id}
 
       %{error_code: 36} ->
-        %{content: content} = metadata_request(topic_name: topic_name)
+        {:ok, %{content: content}} = metadata_request(topic_name: topic_name)
 
         [result] = content.topics
 
@@ -215,6 +215,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
   def get_metadata_for_topic_and_partition(topic_name, partition_index) do
     [topic_name: topic_name]
     |> metadata_request()
+    |> elem(1)
     |> Map.get(:content)
     |> Map.get(:topics)
     |> Enum.find(%{}, &(&1.name == topic_name))
@@ -279,7 +280,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
       ]
     }
 
-    %{headers: _resp_headers, content: resp_content} =
+    {:ok, %{headers: _resp_headers, content: resp_content}} =
       %{headers: headers, content: content}
       |> Messages.Produce.serialize_request(version)
       |> send_message_to_broker(broker)
@@ -306,7 +307,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
   def produce_message(topic_name, val, opts), do: produce_message(topic_name, [val], opts)
 
   defp sync_shared_base_sequence(topic) do
-    %{content: metadata_content} = metadata_request(topic_name: topic)
+    {:ok, %{content: metadata_content}} = metadata_request(topic_name: topic)
     [topic_res] = metadata_content.topics
     partitions = topic_res.partitions
 
@@ -323,7 +324,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
         ]
       }
 
-      %{headers: _headers, content: resp_content} =
+      {:ok, %{headers: _headers, content: resp_content}} =
         %{headers: headers, content: content}
         |> Messages.DescribeProducers.serialize_request(version)
         |> send_message_to_broker(get_broker_for_topic_partition(topic, p.partition_index))

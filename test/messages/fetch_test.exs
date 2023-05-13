@@ -56,7 +56,7 @@ defmodule Messages.FetchTest do
       ]
     }
 
-    %{headers: resp_headers, content: resp_content} =
+    {:ok, %{headers: resp_headers, content: resp_content}} =
       %{headers: headers, content: content}
       |> Fetch.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -254,7 +254,7 @@ defmodule Messages.FetchTest do
       ]
     }
 
-    %{headers: resp_headers, content: resp_content} =
+    {:ok, %{headers: resp_headers, content: resp_content}} =
       %{headers: headers, content: content}
       |> Fetch.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -452,7 +452,7 @@ defmodule Messages.FetchTest do
       ]
     }
 
-    %{headers: resp_headers, content: resp_content} =
+    {:ok, %{headers: resp_headers, content: resp_content}} =
       %{headers: headers, content: content}
       |> Fetch.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -653,7 +653,7 @@ defmodule Messages.FetchTest do
       forgotten_topics_data: []
     }
 
-    %{headers: resp_headers, content: resp_content} =
+    {:ok, %{headers: resp_headers, content: resp_content}} =
       %{headers: headers, content: content}
       |> Fetch.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -855,7 +855,7 @@ defmodule Messages.FetchTest do
       forgotten_topics_data: []
     }
 
-    %{headers: resp_headers, content: resp_content} =
+    {:ok, %{headers: resp_headers, content: resp_content}} =
       %{headers: headers, content: content}
       |> Fetch.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -1058,7 +1058,7 @@ defmodule Messages.FetchTest do
       forgotten_topics_data: []
     }
 
-    %{headers: resp_headers, content: resp_content} =
+    {:ok, %{headers: resp_headers, content: resp_content}} =
       %{headers: headers, content: content}
       |> Fetch.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -1261,7 +1261,7 @@ defmodule Messages.FetchTest do
       forgotten_topics_data: []
     }
 
-    %{headers: resp_headers, content: resp_content} =
+    {:ok, %{headers: resp_headers, content: resp_content}} =
       %{headers: headers, content: content}
       |> Fetch.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -1465,7 +1465,7 @@ defmodule Messages.FetchTest do
       rack_id: "rack"
     }
 
-    %{headers: resp_headers, content: resp_content} =
+    {:ok, %{headers: resp_headers, content: resp_content}} =
       %{headers: headers, content: content}
       |> Fetch.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -1670,7 +1670,7 @@ defmodule Messages.FetchTest do
       rack_id: "rack"
     }
 
-    %{headers: resp_headers, content: resp_content} =
+    {:ok, %{headers: resp_headers, content: resp_content}} =
       %{headers: headers, content: content}
       |> Fetch.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -1875,7 +1875,7 @@ defmodule Messages.FetchTest do
       rack_id: "rack"
     }
 
-    %{headers: resp_headers, content: resp_content} =
+    {:ok, %{headers: resp_headers, content: resp_content}} =
       %{headers: headers, content: content}
       |> Fetch.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
@@ -2080,7 +2080,7 @@ defmodule Messages.FetchTest do
       rack_id: "rack"
     }
 
-    %{headers: resp_headers, content: resp_content} =
+    {:ok, %{headers: resp_headers, content: resp_content}} =
       %{headers: headers, content: content}
       |> Fetch.serialize_request(version)
       |> Helpers.send_message_to_broker(broker)
