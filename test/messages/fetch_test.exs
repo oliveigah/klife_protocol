@@ -1033,6 +1033,9 @@ defmodule Messages.FetchTest do
 
     headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
 
+    %{leader_epoch: leader_epoch} =
+      Helpers.get_metadata_for_topic_and_partition(topic_name, partition_index)
+
     content = %{
       replica_id: -1,
       max_wait_ms: 1000,
@@ -1047,7 +1050,7 @@ defmodule Messages.FetchTest do
           partitions: [
             %{
               partition: partition_index,
-              current_leader_epoch: 0,
+              current_leader_epoch: leader_epoch,
               fetch_offset: offset_1,
               log_start_offset: 0,
               partition_max_bytes: 100_000
@@ -1236,6 +1239,9 @@ defmodule Messages.FetchTest do
 
     headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
 
+    %{leader_epoch: leader_epoch} =
+      Helpers.get_metadata_for_topic_and_partition(topic_name, partition_index)
+
     content = %{
       replica_id: -1,
       max_wait_ms: 1000,
@@ -1250,7 +1256,7 @@ defmodule Messages.FetchTest do
           partitions: [
             %{
               partition: partition_index,
-              current_leader_epoch: 0,
+              current_leader_epoch: leader_epoch,
               fetch_offset: offset_1,
               log_start_offset: 0,
               partition_max_bytes: 100_000
@@ -1439,6 +1445,9 @@ defmodule Messages.FetchTest do
 
     headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
 
+    %{leader_epoch: leader_epoch} =
+      Helpers.get_metadata_for_topic_and_partition(topic_name, partition_index)
+
     content = %{
       replica_id: -1,
       max_wait_ms: 1000,
@@ -1453,7 +1462,7 @@ defmodule Messages.FetchTest do
           partitions: [
             %{
               partition: partition_index,
-              current_leader_epoch: 0,
+              current_leader_epoch: leader_epoch,
               fetch_offset: offset_1,
               log_start_offset: 0,
               partition_max_bytes: 100_000
@@ -1643,6 +1652,9 @@ defmodule Messages.FetchTest do
 
     headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
 
+    %{leader_epoch: leader_epoch} =
+      Helpers.get_metadata_for_topic_and_partition(topic_name, partition_index)
+
     content = %{
       replica_id: -1,
       max_wait_ms: 1000,
@@ -1657,7 +1669,7 @@ defmodule Messages.FetchTest do
           partitions: [
             %{
               partition: partition_index,
-              current_leader_epoch: 0,
+              current_leader_epoch: leader_epoch,
               fetch_offset: offset_1,
               last_fetched_epoch: 0,
               log_start_offset: 0,
@@ -1846,6 +1858,9 @@ defmodule Messages.FetchTest do
        offset: offset_3
      }} = Helpers.produce_message(topic_name, message_data_3)
 
+    %{leader_epoch: leader_epoch} =
+      Helpers.get_metadata_for_topic_and_partition(topic_name, partition_index)
+
     headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
 
     content = %{
@@ -1862,7 +1877,7 @@ defmodule Messages.FetchTest do
           partitions: [
             %{
               partition: partition_index,
-              current_leader_epoch: 0,
+              current_leader_epoch: leader_epoch,
               fetch_offset: offset_1,
               last_fetched_epoch: 0,
               log_start_offset: 0,
@@ -2053,6 +2068,9 @@ defmodule Messages.FetchTest do
 
     headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
 
+    %{leader_epoch: leader_epoch} =
+      Helpers.get_metadata_for_topic_and_partition(topic_name, partition_index)
+
     content = %{
       replica_id: -1,
       max_wait_ms: 1000,
@@ -2067,7 +2085,7 @@ defmodule Messages.FetchTest do
           partitions: [
             %{
               partition: partition_index,
-              current_leader_epoch: 0,
+              current_leader_epoch: leader_epoch,
               fetch_offset: offset_1,
               last_fetched_epoch: 0,
               log_start_offset: 0,
