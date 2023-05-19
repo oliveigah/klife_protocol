@@ -1,51 +1,87 @@
-version: "2"
+version: '3.3'
 
 services:
   zookeeper:
-    image: docker.io/bitnami/zookeeper:3.8
+    image: confluentinc/cp-zookeeper:7.4.0
     ports:
-      - "2181:2181"
+    - "2181:2181"
+    - "2888:2888"
+    - "3888:3888"
     environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
+    - ZOOKEEPER_SERVER_ID=1
+    - ZOOKEEPER_CLIENT_PORT=2181
+    - ZOOKEEPER_TICK_TIME=2000
+    - ZOOKEEPER_INIT_LIMIT=5
+    - ZOOKEEPER_SYNC_LIMIT=2
+    - ZOOKEEPER_SERVERS=zookeeper:2888:3888
 
   kafka1:
-    image: docker.io/bitnami/kafka:3.4
-    hostname: broker1
-    ports:
-      - "19092:9092"
-    environment:
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_ENABLE_KRAFT=no
-      - KAFKA_CFG_BROKER_ID=1
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+    image: confluentinc/cp-kafka:7.4.0
     depends_on:
-      - zookeeper
+    - zookeeper
+    ports:
+    - "19092:9092"
+    - "19093:9093"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      ZOOKEEPER: zookeeper:2181
+      BOOTSTRAP_SERVERS: kafka1:9091,kafka2:9091,kafka3:9091
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka1:9091,EXTERNAL_PLAIN://kafka1:9092,EXTERNAL://kafka1:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL_PLAIN:PLAINTEXT,EXTERNAL:SSL
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_SSL_KEYSTORE_LOCATION: /secrets/kafka.keystore.jks
+      KAFKA_SSL_TRUSTSTORE_LOCATION: /secrets/kafka.truststore.jks
+      KAFKA_SSL_KEY_PASSWORD: klifeprotocol
+      KAFKA_SSL_KEYSTORE_PASSWORD: klifeprotocol
+      KAFKA_SSL_TRUSTSTORE_PASSWORD: klifeprotocol
+    volumes:
+    - ./keystore/kafka.keystore.jks:/secrets/kafka.keystore.jks:ro,z
+    - ./truststore/kafka.truststore.jks:/secrets/kafka.truststore.jks:ro,z
 
   kafka2:
-    image: docker.io/bitnami/kafka:3.4
-    hostname: broker2    
-    ports:
-      - "29092:9092"
-    environment:
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_ENABLE_KRAFT=no
-      - KAFKA_CFG_BROKER_ID=2
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+    image: confluentinc/cp-kafka:7.4.0
     depends_on:
-      - kafka1
+    - zookeeper
+    - kafka1
+    ports:
+    - "29092:9092"
+    - "29093:9093"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      ZOOKEEPER: zookeeper:2181
+      BOOTSTRAP_SERVERS: kafka1:9091,kafka2:9091,kafka3:9091
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka2:9091,EXTERNAL_PLAIN://kafka2:9092,EXTERNAL://kafka2:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL_PLAIN:PLAINTEXT,EXTERNAL:SSL
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_SSL_KEYSTORE_LOCATION: /secrets/kafka.keystore.jks
+      KAFKA_SSL_TRUSTSTORE_LOCATION: /secrets/kafka.truststore.jks
+      KAFKA_SSL_KEY_PASSWORD: klifeprotocol
+      KAFKA_SSL_KEYSTORE_PASSWORD: klifeprotocol
+      KAFKA_SSL_TRUSTSTORE_PASSWORD: klifeprotocol
+    volumes:
+    - ./keystore/kafka.keystore.jks:/secrets/kafka.keystore.jks:ro,z
+    - ./truststore/kafka.truststore.jks:/secrets/kafka.truststore.jks:ro,z
 
   kafka3:
-    image: docker.io/bitnami/kafka:3.4
-    hostname: broker3
-    ports:
-      - "39092:9092"
-    environment:
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_ENABLE_KRAFT=no
-      - KAFKA_CFG_BROKER_ID=3
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+    image: confluentinc/cp-kafka:7.4.0
     depends_on:
-      - kafka2
+    - zookeeper
+    - kafka2
+    ports:
+    - "39092:9092"
+    - "39093:9093"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      ZOOKEEPER: zookeeper:2181
+      BOOTSTRAP_SERVERS: kafka1:9091,kafka2:9091,kafka3:9091
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka3:9091,EXTERNAL_PLAIN://kafka3:9092,EXTERNAL://kafka3:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL_PLAIN:PLAINTEXT,EXTERNAL:SSL
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_SSL_KEYSTORE_LOCATION: /secrets/kafka.keystore.jks
+      KAFKA_SSL_TRUSTSTORE_LOCATION: /secrets/kafka.truststore.jks
+      KAFKA_SSL_KEY_PASSWORD: klifeprotocol
+      KAFKA_SSL_KEYSTORE_PASSWORD: klifeprotocol
+      KAFKA_SSL_TRUSTSTORE_PASSWORD: klifeprotocol
+    volumes:
+    - ./keystore/kafka.keystore.jks:/secrets/kafka.keystore.jks:ro,z
+    - ./truststore/kafka.truststore.jks:/secrets/kafka.truststore.jks:ro,z

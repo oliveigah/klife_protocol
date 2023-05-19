@@ -143,9 +143,30 @@ bash stop-kafka.sh
 | 50      | 10 kb    | 131 k  | 2.62 k | 382 μs | 370 μs | 521 μs  | ±14% | 250 kb   |
 | 100     | 5 kb     | 200 k  | 2.00 k | 500 μs | 490 μs | 652 μs  | ±13% | 486 kb   |
 
+
+## Running Tests
+
+```
+bash run-kafka.sh
+mix test
+bash stop-kafka.sh
+```
+
+In order to prevent race conditions with kafka initialization is recommended to wait a couple of seconds between `bash run-kafka.sh` and `mix test`. 
+
+Running the tests may fail on the first attempt due to all topics being created while the tests are in progress. In such cases, running the tests again usually resolves the issue.
+
+If you want to run tests using a SSL connection, you can use an env var `CONN_MODE=SSL` like this:
+
+```
+bash run-kafka.sh
+CONN_MODE=SSL mix test
+bash stop-kafka.sh
+```
+
+
 ## Todos
 
 - Improve docs
 - Rewrite generator
 - Add compression
-- Add SSL to Connection module

@@ -1,10 +1,11 @@
 defmodule KlifeProtocol.Connection do
   alias KlifeProtocol.Connection
-  defstruct [:socket, :host, :port, :connect_timeout, :read_timeout]
+  defstruct [:socket, :host, :port, :connect_timeout, :read_timeout, :ssl]
 
   @default_opts %{
     connect_timeout: :timer.seconds(5),
-    read_timeout: :timer.seconds(5)
+    read_timeout: :timer.seconds(5),
+    ssl: false
   }
 
   def new(url, opts \\ []) do
@@ -12,11 +13,17 @@ defmodule KlifeProtocol.Connection do
     socket_opts = [:binary, active: false, packet: 4]
     conn_opts = Map.merge(@default_opts, Map.new(opts))
 
-    case :gen_tcp.connect(String.to_charlist(host), port, socket_opts, conn_opts.connect_timeout) do
+    init_connection(String.to_charlist(host), port, socket_opts, conn_opts)
+  end
+
+  defp init_connection(host, port, socket_opts, %{ssl: false} = conn_opts) do
+    case :gen_tcp.connect(host, port, socket_opts, conn_opts.connect_timeout) do
       {:ok, socket} ->
+        filtered_conn_opts = Map.take(conn_opts, Map.keys(%Connection{}))
+
         conn =
           %Connection{socket: socket, host: host, port: port}
-          |> Map.merge(conn_opts)
+          |> Map.merge(filtered_conn_opts)
 
         {:ok, conn}
 
@@ -25,12 +32,35 @@ defmodule KlifeProtocol.Connection do
     end
   end
 
-  def send_data(%Connection{} = conn, msg), do: :gen_tcp.send(conn.socket, msg)
+  defp init_connection(host, port, socket_opts, %{ssl: true} = conn_opts) do
+    ssl_opts = Map.get(conn_opts, :ssl_opts, [])
 
-  def read_data(%Connection{} = conn),
+    case :ssl.connect(host, port, socket_opts ++ ssl_opts, conn_opts.connect_timeout) do
+      {:ok, socket} ->
+        filtered_conn_opts = Map.take(conn_opts, Map.keys(%Connection{}))
+
+        conn =
+          %Connection{socket: socket, host: host, port: port}
+          |> Map.merge(filtered_conn_opts)
+
+        {:ok, conn}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  def send_data(%Connection{ssl: false} = conn, msg), do: :gen_tcp.send(conn.socket, msg)
+  def send_data(%Connection{ssl: true} = conn, msg), do: :ssl.send(conn.socket, msg)
+
+  def read_data(%Connection{ssl: false} = conn),
     do: :gen_tcp.recv(conn.socket, 0, conn.read_timeout)
 
-  def close(%Connection{} = conn), do: :gen_tcp.close(conn.socket)
+  def read_data(%Connection{ssl: true} = conn),
+    do: :ssl.recv(conn.socket, 0, conn.read_timeout)
+
+  def close(%Connection{ssl: false} = conn), do: :gen_tcp.close(conn.socket)
+  def close(%Connection{ssl: true} = conn), do: :ssl.close(conn.socket)
 
   defp parse_url(url) do
     [host, port] = String.split(url, ":")

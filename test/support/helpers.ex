@@ -8,15 +8,48 @@ defmodule KlifeProtocol.TestSupport.Helpers do
 
   # defined by the docker compose file
   @default_brokers [
-    broker1: "localhost:19092",
-    broker2: "localhost:29092",
-    broker3: "localhost:39092"
+    kafka1: "localhost:19092",
+    kafka2: "localhost:29092",
+    kafka3: "localhost:39092"
+  ]
+
+  @default_brokers_ssl [
+    kafka1: "localhost:19093",
+    kafka2: "localhost:29093",
+    kafka3: "localhost:39093"
   ]
 
   def initialize_shared_storage() do
     :ets.new(:shared_storage, [:named_table, :set, :public])
     write_to_shared(:correlation_counter, :atomics.new(1, []))
+
     :ok
+  end
+
+  def initialize_connections("SSL") do
+    ssl_opts = [
+      verify: :verify_peer,
+      cacertfile: Path.relative("test/compose_files/truststore/ca.crt")
+    ]
+
+    Enum.each(@default_brokers_ssl, fn {broker, hostname} ->
+      write_to_shared(broker, Connection.new(hostname, ssl: true, ssl_opts: ssl_opts))
+    end)
+  end
+
+  def initialize_connections(nil) do
+    Enum.each(@default_brokers, fn {broker, hostname} ->
+      write_to_shared(broker, Connection.new(hostname, ssl: false))
+    end)
+  end
+
+  def initialize_connections(unknown_conn_mode) do
+    raise """
+    Unkown CONN_MODE env var.
+
+    Expected: SSL
+    Found: #{unknown_conn_mode}
+    """
   end
 
   def write_to_shared(key, val), do: :ets.insert(:shared_storage, {key, val})
@@ -31,20 +64,24 @@ defmodule KlifeProtocol.TestSupport.Helpers do
     end
   end
 
-  def send_message_to_broker(data, broker \\ nil) do
-    host =
-      if broker do
-        Keyword.fetch!(@default_brokers, broker)
-      else
-        @default_brokers
-        |> Enum.random()
-        |> elem(1)
-      end
+  def send_message_to_broker(data), do: send_message_to_broker(data, nil)
 
-    {:ok, conn} = Connection.new(host)
+  def send_message_to_broker(data, nil) do
+    broker =
+      @default_brokers
+      |> Enum.random()
+      |> elem(0)
+
+    {:ok, conn} = read_from_shared(broker)
     :ok = Connection.send_data(conn, data)
     {:ok, response} = Connection.read_data(conn)
-    Connection.close(conn)
+    response
+  end
+
+  def send_message_to_broker(data, broker) do
+    {:ok, conn} = read_from_shared(broker)
+    :ok = Connection.send_data(conn, data)
+    {:ok, response} = Connection.read_data(conn)
     response
   end
 
