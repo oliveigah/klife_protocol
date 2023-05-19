@@ -1,5 +1,5 @@
 defmodule KlifeProtocol.SerializerTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   alias KlifeProtocol.Serializer
 

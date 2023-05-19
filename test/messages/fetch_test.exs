@@ -1,5 +1,5 @@
 defmodule Messages.FetchTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   alias KlifeProtocol.Messages.Fetch
   alias KlifeProtocol.TestSupport.Helpers

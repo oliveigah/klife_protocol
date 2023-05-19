@@ -1,5 +1,5 @@
 defmodule Messages.ApiVersionsTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   alias KlifeProtocol.Messages.ApiVersions
   alias KlifeProtocol.TestSupport.Helpers

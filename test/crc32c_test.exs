@@ -1,5 +1,5 @@
 defmodule KlifeProtocol.CRC32cTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   alias KlifeProtocol.CRC32c
 
