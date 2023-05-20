@@ -27,6 +27,7 @@ defmodule KlifeProtocol.MixProject do
   defp deps do
     [
       {:crc32cer, "~> 0.1.8"},
+      {:snappyer, "~> 1.2.7"},
       # Code generation
       {:jason, "~> 1.4", only: :dev},
       # Benchmarks and tests

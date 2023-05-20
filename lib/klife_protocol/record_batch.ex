@@ -33,18 +33,25 @@ defmodule KlifeProtocol.RecordBatch do
   alias KlifeProtocol.Deserializer
 
   def serialize(input) do
-    for_crc_input = %{
+    serialized_records =
+      %{records: input.records}
+      |> Serializer.execute(records_schema())
+      |> maybe_compress(input.attributes)
+
+    records_metadata_input = %{
       attributes: input.attributes,
       last_offset_delta: input.last_offset_delta,
       base_timestamp: input.base_timestamp,
       max_timestamp: input.max_timestamp,
       producer_id: input.producer_id,
       producer_epoch: input.producer_epoch,
-      base_sequence: input.base_sequence,
-      records: input.records
+      base_sequence: input.base_sequence
     }
 
-    for_crc_serialized = Serializer.execute(for_crc_input, for_crc_schema())
+    serialized_records_metadata =
+      Serializer.execute(records_metadata_input, records_metadata_schema())
+
+    for_crc_serialized = serialized_records_metadata <> serialized_records
 
     crc = :crc32cer.nif(for_crc_serialized)
 
@@ -76,11 +83,14 @@ defmodule KlifeProtocol.RecordBatch do
          {:ok, {rest_result, rest}} <- Deserializer.execute(curr_batch, rest_schema()),
          {:magic?, true} <- {:magic?, rest_result.magic in [2]},
          {:crc?, true} <- {:crc?, :crc32cer.nif(rest) == rest_result.crc},
-         {:ok, {for_crc_result, <<>>}} <- Deserializer.execute(rest, for_crc_schema()) do
+         {:ok, {metadata_result, rest}} <- Deserializer.execute(rest, records_metadata_schema()),
+         {:ok, records_bin} <- maybe_decompress(rest, metadata_result.attributes),
+         {:ok, {records_result, <<>>}} <- Deserializer.execute(records_bin, records_schema()) do
       result =
         base_result
         |> Map.merge(rest_result)
-        |> Map.merge(for_crc_result)
+        |> Map.merge(metadata_result)
+        |> Map.merge(records_result)
 
       {result, total_rest}
     else
@@ -98,6 +108,106 @@ defmodule KlifeProtocol.RecordBatch do
     end
   end
 
+  def encode_attributes(opts \\ []) do
+    compression = encode_compression(Keyword.get(opts, :compression, :none))
+    timestamp_type = encode_timestamp_type(Keyword.get(opts, :timestamp_type, :create_time))
+    is_transactional = if Keyword.get(opts, :is_transactional, false), do: 1, else: 0
+    is_control_batch = if Keyword.get(opts, :is_control_batch, false), do: 1, else: 0
+    has_delete_horizon_ms = if Keyword.get(opts, :has_delete_horizon, false), do: 1, else: 0
+
+    <<val::16-signed>> = <<
+      0::9,
+      has_delete_horizon_ms::1,
+      is_control_batch::1,
+      is_transactional::1,
+      timestamp_type::1,
+      compression::3
+    >>
+
+    val
+  end
+
+  def decode_attributes(val) do
+    <<
+      0::9,
+      has_delete_horizon_ms::1,
+      is_control_batch::1,
+      is_transactional::1,
+      timestamp_type::1,
+      compression::3
+    >> = <<val::16-signed>>
+
+    %{
+      compression: decode_compression(compression),
+      timestamp_type: decode_timestamp_type(timestamp_type),
+      is_transactional: is_transactional == 1,
+      is_control_batch: is_control_batch == 1,
+      has_delete_horizon: has_delete_horizon_ms == 1
+    }
+  end
+
+  defp maybe_compress(serialized_records, attributes) when is_integer(attributes) do
+    case Bitwise.band(attributes, 7) do
+      0 ->
+        serialized_records
+
+      1 ->
+        <<records_length::32-signed, records::binary>> = serialized_records
+        <<records_length::32-signed, :zlib.gzip(records)::binary>>
+
+      2 ->
+        <<records_length::32-signed, records::binary>> = serialized_records
+        {:ok, compressed_records} = :snappyer.compress(records)
+        <<records_length::32-signed, compressed_records::binary>>
+
+      unkown ->
+        raise "unsupported compression #{decode_compression(unkown)}"
+    end
+  end
+
+  defp maybe_decompress(serialized_records, attributes) when is_integer(attributes) do
+    case Bitwise.band(attributes, 7) do
+      0 ->
+        {:ok, serialized_records}
+
+      1 ->
+        <<records_length::32-signed, records_values::binary>> = serialized_records
+        z = :zlib.open()
+        # :zlib.gzip/1 implementation always use 31 window bits
+        # see: https://github.com/erlang/otp/blob/master/erts/preloaded/src/zlib.erl#L551
+        :zlib.inflateInit(z, 31)
+        [decompressed_records | []] = :zlib.inflate(z, records_values)
+        :zlib.close(z)
+        {:ok, <<records_length::32-signed, decompressed_records::binary>>}
+
+      2 ->
+        <<records_length::32-signed, records_values::binary>> = serialized_records
+        {:ok, decompressed_records} = :snappyer.decompress(records_values)
+        {:ok, <<records_length::32-signed, decompressed_records::binary>>}
+
+      unkown ->
+        raise "unsupported decompression #{decode_compression(unkown)}"
+    end
+  end
+
+  defp encode_compression(:none), do: 0
+  defp encode_compression(:gzip), do: 1
+  defp encode_compression(:snappy), do: 2
+  defp encode_compression(:lz4), do: 3
+  defp encode_compression(:zstd), do: 4
+
+  defp decode_compression(0), do: :none
+  defp decode_compression(1), do: :gzip
+  defp decode_compression(2), do: :snappy
+  defp decode_compression(3), do: :lz4
+  defp decode_compression(4), do: :zstd
+
+  defp encode_timestamp_type(:create_time), do: 0
+  defp encode_timestamp_type(:log_append_time), do: 1
+
+  defp decode_timestamp_type(0), do: :create_time
+  defp decode_timestamp_type(1), do: :log_append_time
+
   defp base_batch_schema() do
     [
       base_offset: {:int64, %{is_nullable?: false}},
@@ -113,7 +223,7 @@ defmodule KlifeProtocol.RecordBatch do
     ]
   end
 
-  defp for_crc_schema() do
+  defp records_metadata_schema() do
     [
       attributes: {:int16, %{is_nullable?: false}},
       last_offset_delta: {:int32, %{is_nullable?: false}},
@@ -121,7 +231,12 @@ defmodule KlifeProtocol.RecordBatch do
       max_timestamp: {:int64, %{is_nullable?: false}},
       producer_id: {:int64, %{is_nullable?: false}},
       producer_epoch: {:int16, %{is_nullable?: false}},
-      base_sequence: {:int32, %{is_nullable?: false}},
+      base_sequence: {:int32, %{is_nullable?: false}}
+    ]
+  end
+
+  defp records_schema() do
+    [
       records:
         {{:records_array,
           [

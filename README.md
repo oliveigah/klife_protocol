@@ -168,5 +168,9 @@ bash stop-kafka.sh
 ## Todos
 
 - Improve docs
+  - Add module docs
+  - Add SSL docs
+  - Add compression docs
+  - Add project overview
+  - Update benchmarks
 - Rewrite generator
-- Add compression
