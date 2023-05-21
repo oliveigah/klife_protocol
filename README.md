@@ -107,6 +107,39 @@ Which means that on the returning value of the deserialization function will ret
 } = content
 
 ```
+## Compression and Record Batch Attributes
+
+Currently supports two compression methods: `snappy` using [sanppyer library](https://github.com/zmstone/snappyer) and `gzip` using [erlang zlib library](https://www.erlang.org/doc/man/zlib.html).
+
+
+To configure the compression strategy, along with other important data such as `timestampType` and `isTransactional`, you can utilize the Kafka record batch's [attributes byte](https://kafka.apache.org/documentation/#recordbatch).
+
+
+Klife protocol provides an interface to simplify the creation of this attributes using the `encode_attributes/1` and `decode_attributes/1` functions of the `RecordBatch` module. Here's an example:
+
+```elixir
+alias KlifeProtocol.RecordBatch
+
+opts = [
+  compression: :snappy, 
+  timestamp_type: :log_append_time,
+  is_transactional: true,
+  is_control_batch: true,
+  has_delete_horizon: true
+]
+
+attr_val = RecordBatch.encode_attributes(opts)
+
+%{
+  compression: :snappy,
+  timestamp_type: :log_append_time,
+  is_transactional: true,
+  is_control_batch: true,
+  has_delete_horizon: true
+} = RecordBatch.decode_attributes(attr_val)
+```
+
+With these functions, a client can easily generate and decode attributes for each record batch it handles.
 ## Performance
 
 This section provides performance benchmarks for the main use cases of produce serialization and fetch deserialization, conducted using the [benchee tool](https://github.com/bencheeorg/benchee). The benchmarks measure only the serialization work, as the Kafka cluster is running solely to retrieve data samples for benchmarking purposes. Note that network latency is not included in the measurements, only serialization/deserialization performance.
@@ -130,10 +163,10 @@ bash stop-kafka.sh
 ### Produce Serialization
 | REC QTY | REC SIZE | REC/S  | IPS    | AVG    | P50    | P99     | SD   | Mem. Usg |
 |---------|----------|--------|--------|--------|--------|---------|------|----------|
-| 1       | 500 kb   | 1.7 k  | 1.70 k | 589 μs | 590 μs | 1007 μs | ±31% | 4 kb     |
-| 10      | 50 kb    | 15.8 k | 1.58 k | 634 μs | 583 μs | 1276 μs | ±26% | 13 kb    |
-| 50      | 10 kb    | 74 k   | 1.44 k | 693 μs | 610 μs | 1310 μs | ±27% | 57 kb    |
-| 100     | 5 kb     | 122 k  | 1.22 k | 817 μs | 765 μs | 1418 μs | ±22% | 109 kb   |
+| 1       | 500 kb   | 1.6 k  | 1.60 K | 623 μs | 610 μs | 1150 μs | ±32% | 4 kb     |
+| 10      | 50 kb    | 14.3 k | 1.43 K | 700 μs | 645 μs | 1393 μs | ±30% | 13 kb    |
+| 50      | 10 kb    | 67.5 k | 1.35 K | 738 μs | 680 μs | 1321 μs | ±25% | 57 kb    |
+| 100     | 5 kb     | 110 k  | 1.10 K | 907 μs | 855 μs | 1547 μs | ±22% | 109 kb   |
 
 ### Fetch Deserialization
 | REC QTY | REC SIZE | REC/S  | IPS    | AVG    | P50    | P99     | SD   | Mem. Usg |
@@ -152,7 +185,7 @@ mix test
 bash stop-kafka.sh
 ```
 
-In order to prevent race conditions with kafka initialization is recommended to wait a couple of seconds between `bash run-kafka.sh` and `mix test`. 
+In order to prevent race conditions with kafka initialization is recommended to wait a couple seconds between `bash run-kafka.sh` and `mix test`. 
 
 Running the tests may fail on the first attempt due to all topics being created while the tests are in progress. In such cases, running the tests again usually resolves the issue.
 
@@ -169,8 +202,5 @@ bash stop-kafka.sh
 
 - Improve docs
   - Add module docs
-  - Add SSL docs
-  - Add compression docs
   - Add project overview
-  - Update benchmarks
 - Rewrite generator
