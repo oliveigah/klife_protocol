@@ -32,26 +32,85 @@ defmodule KlifeProtocol.RecordBatch do
   alias KlifeProtocol.Serializer
   alias KlifeProtocol.Deserializer
 
+  @base_batch_schema [
+    base_offset: {:int64, %{is_nullable?: false}},
+    batch_length: {:int32, %{is_nullable?: false}}
+  ]
+
+  @rest_schema [
+    partition_leader_epoch: {:int32, %{is_nullable?: false}},
+    magic: {:int8, %{is_nullable?: false}},
+    crc: {:unsigned_int32, %{is_nullable?: false}}
+  ]
+
+  @records_metadata_schema [
+    attributes: {:int16, %{is_nullable?: false}},
+    last_offset_delta: {:int32, %{is_nullable?: false}},
+    base_timestamp: {:int64, %{is_nullable?: false}},
+    max_timestamp: {:int64, %{is_nullable?: false}},
+    producer_id: {:int64, %{is_nullable?: false}},
+    producer_epoch: {:int16, %{is_nullable?: false}},
+    base_sequence: {:int32, %{is_nullable?: false}}
+  ]
+
+  @records_schema [
+    records:
+      {{:records_array,
+        [
+          attributes: {:int8, %{is_nullable?: false}},
+          timestamp_delta: {:varint, %{is_nullable?: false}},
+          offset_delta: {:varint, %{is_nullable?: false}},
+          key: {:record_bytes, %{is_nullable?: true}},
+          value: {:record_bytes, %{is_nullable?: false}},
+          headers:
+            {{:record_headers,
+              [
+                key: {:record_bytes, %{is_nullable?: false}},
+                value: {:record_bytes, %{is_nullable?: false}}
+              ]}, %{is_nullable?: true}}
+        ]}, %{is_nullable?: false}}
+  ]
+
+  @for_crc_serialization_no_compression_schema @records_metadata_schema ++ @records_schema
+
   def serialize(input) do
-    serialized_records =
-      %{records: input.records}
-      |> Serializer.execute(records_schema())
-      |> maybe_compress(input.attributes)
+    for_crc_serialized =
+      case Bitwise.band(input.attributes, 7) do
+        0 ->
+          for_crc_input = %{
+            attributes: input.attributes,
+            last_offset_delta: input.last_offset_delta,
+            base_timestamp: input.base_timestamp,
+            max_timestamp: input.max_timestamp,
+            producer_id: input.producer_id,
+            producer_epoch: input.producer_epoch,
+            base_sequence: input.base_sequence,
+            records: input.records
+          }
 
-    records_metadata_input = %{
-      attributes: input.attributes,
-      last_offset_delta: input.last_offset_delta,
-      base_timestamp: input.base_timestamp,
-      max_timestamp: input.max_timestamp,
-      producer_id: input.producer_id,
-      producer_epoch: input.producer_epoch,
-      base_sequence: input.base_sequence
-    }
+          Serializer.execute(for_crc_input, @for_crc_serialization_no_compression_schema)
 
-    serialized_records_metadata =
-      Serializer.execute(records_metadata_input, records_metadata_schema())
+        other ->
+          serialized_records =
+            %{records: input.records}
+            |> Serializer.execute(@records_schema)
+            |> compress(other)
 
-    for_crc_serialized = serialized_records_metadata <> serialized_records
+          records_metadata_input = %{
+            attributes: input.attributes,
+            last_offset_delta: input.last_offset_delta,
+            base_timestamp: input.base_timestamp,
+            max_timestamp: input.max_timestamp,
+            producer_id: input.producer_id,
+            producer_epoch: input.producer_epoch,
+            base_sequence: input.base_sequence
+          }
+
+          serialized_records_metadata =
+            Serializer.execute(records_metadata_input, @records_metadata_schema)
+
+          serialized_records_metadata <> serialized_records
+      end
 
     crc = :crc32cer.nif(for_crc_serialized)
 
@@ -61,7 +120,7 @@ defmodule KlifeProtocol.RecordBatch do
       magic: input.magic
     }
 
-    serialized_rest = Serializer.execute(rest_input, rest_schema())
+    serialized_rest = Serializer.execute(rest_input, @rest_schema)
 
     for_length_serialized = serialized_rest <> for_crc_serialized
     batch_length = byte_size(for_length_serialized)
@@ -71,21 +130,21 @@ defmodule KlifeProtocol.RecordBatch do
       batch_length: batch_length
     }
 
-    serialized_base = Serializer.execute(base_input, base_batch_schema())
+    serialized_base = Serializer.execute(base_input, @base_batch_schema)
 
     serialized_base <> for_length_serialized
   end
 
   def deserialize(input) do
-    with {:ok, {base_result, rest}} <- Deserializer.execute(input, base_batch_schema()),
+    with {:ok, {base_result, rest}} <- Deserializer.execute(input, @base_batch_schema),
          {:full_batch?, true} <- {:full_batch?, byte_size(rest) >= base_result.batch_length},
          <<curr_batch::binary-size(base_result.batch_length), total_rest::binary>> <- rest,
-         {:ok, {rest_result, rest}} <- Deserializer.execute(curr_batch, rest_schema()),
+         {:ok, {rest_result, rest}} <- Deserializer.execute(curr_batch, @rest_schema),
          {:magic?, true} <- {:magic?, rest_result.magic in [2]},
          {:crc?, true} <- {:crc?, :crc32cer.nif(rest) == rest_result.crc},
-         {:ok, {metadata_result, rest}} <- Deserializer.execute(rest, records_metadata_schema()),
+         {:ok, {metadata_result, rest}} <- Deserializer.execute(rest, @records_metadata_schema),
          {:ok, records_bin} <- maybe_decompress(rest, metadata_result.attributes),
-         {:ok, {records_result, <<>>}} <- Deserializer.execute(records_bin, records_schema()) do
+         {:ok, {records_result, <<>>}} <- Deserializer.execute(records_bin, @records_schema) do
       result =
         base_result
         |> Map.merge(rest_result)
@@ -146,23 +205,19 @@ defmodule KlifeProtocol.RecordBatch do
     }
   end
 
-  defp maybe_compress(serialized_records, attributes) when is_integer(attributes) do
-    case Bitwise.band(attributes, 7) do
-      0 ->
-        serialized_records
+  defp compress(serialized_records, 1) do
+    <<records_length::32-signed, records::binary>> = serialized_records
+    <<records_length::32-signed, :zlib.gzip(records)::binary>>
+  end
 
-      1 ->
-        <<records_length::32-signed, records::binary>> = serialized_records
-        <<records_length::32-signed, :zlib.gzip(records)::binary>>
+  defp compress(serialized_records, 2) do
+    <<records_length::32-signed, records::binary>> = serialized_records
+    {:ok, compressed_records} = :snappyer.compress(records)
+    <<records_length::32-signed, compressed_records::binary>>
+  end
 
-      2 ->
-        <<records_length::32-signed, records::binary>> = serialized_records
-        {:ok, compressed_records} = :snappyer.compress(records)
-        <<records_length::32-signed, compressed_records::binary>>
-
-      unkown ->
-        raise "unsupported compression #{decode_compression(unkown)}"
-    end
+  defp compress(_serialized_records, unkown) do
+    raise "unsupported compression #{decode_compression(unkown)}"
   end
 
   defp maybe_decompress(serialized_records, attributes) when is_integer(attributes) do
@@ -207,51 +262,4 @@ defmodule KlifeProtocol.RecordBatch do
 
   defp decode_timestamp_type(0), do: :create_time
   defp decode_timestamp_type(1), do: :log_append_time
-
-  defp base_batch_schema() do
-    [
-      base_offset: {:int64, %{is_nullable?: false}},
-      batch_length: {:int32, %{is_nullable?: false}}
-    ]
-  end
-
-  defp rest_schema() do
-    [
-      partition_leader_epoch: {:int32, %{is_nullable?: false}},
-      magic: {:int8, %{is_nullable?: false}},
-      crc: {:unsigned_int32, %{is_nullable?: false}}
-    ]
-  end
-
-  defp records_metadata_schema() do
-    [
-      attributes: {:int16, %{is_nullable?: false}},
-      last_offset_delta: {:int32, %{is_nullable?: false}},
-      base_timestamp: {:int64, %{is_nullable?: false}},
-      max_timestamp: {:int64, %{is_nullable?: false}},
-      producer_id: {:int64, %{is_nullable?: false}},
-      producer_epoch: {:int16, %{is_nullable?: false}},
-      base_sequence: {:int32, %{is_nullable?: false}}
-    ]
-  end
-
-  defp records_schema() do
-    [
-      records:
-        {{:records_array,
-          [
-            attributes: {:int8, %{is_nullable?: false}},
-            timestamp_delta: {:varint, %{is_nullable?: false}},
-            offset_delta: {:varint, %{is_nullable?: false}},
-            key: {:record_bytes, %{is_nullable?: true}},
-            value: {:record_bytes, %{is_nullable?: false}},
-            headers:
-              {{:record_headers,
-                [
-                  key: {:record_bytes, %{is_nullable?: false}},
-                  value: {:record_bytes, %{is_nullable?: false}}
-                ]}, %{is_nullable?: true}}
-          ]}, %{is_nullable?: false}}
-    ]
-  end
 end

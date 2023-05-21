@@ -6,6 +6,7 @@ if Mix.env() in [:dev] do
 
     def run(args) do
       Helpers.initialize_shared_storage()
+      Helpers.initialize_connections(System.get_env("CONN_MODE"))
       apply(Mix.Tasks.Benchmark, :do_run_bench, args)
     end
 
