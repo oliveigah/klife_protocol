@@ -135,7 +135,7 @@ defmodule KlifeProtocol.RecordBatch do
     serialized_base <> for_length_serialized
   end
 
-  def deserialize(input) do
+  def deserialize(<<input::binary>>) do
     with {:ok, {base_result, rest}} <- Deserializer.execute(input, @base_batch_schema),
          {:full_batch?, true} <- {:full_batch?, byte_size(rest) >= base_result.batch_length},
          <<curr_batch::binary-size(base_result.batch_length), total_rest::binary>> <- rest,
