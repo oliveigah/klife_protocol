@@ -40,7 +40,7 @@ defmodule KlifeProtocol.RecordBatch do
   @rest_schema [
     partition_leader_epoch: {:int32, %{is_nullable?: false}},
     magic: {:int8, %{is_nullable?: false}},
-    crc: {:unsigned_int32, %{is_nullable?: false}}
+    crc: {:uint32, %{is_nullable?: false}}
   ]
 
   @records_metadata_schema [

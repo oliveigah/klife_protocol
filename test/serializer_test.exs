@@ -53,6 +53,18 @@ defmodule KlifeProtocol.SerializerTest do
     assert <<31::32-signed, 123::32-signed, 4::32-signed>> = Serializer.execute(input, schema)
   end
 
+  test "uint32" do
+    input = %{a: 0, b: 2, c: 4_223_817_021}
+
+    schema = [
+      a: {:int32, %{is_nullable?: false}},
+      b: {:int8, %{is_nullable?: false}},
+      c: {:uint32, %{is_nullable?: false}}
+    ]
+
+    assert <<0::32-signed, 2::8-signed, 4_223_817_021::32>> = Serializer.execute(input, schema)
+  end
+
   test "int64" do
     input = %{a: 31, b: 123, c: 4}
 
@@ -63,6 +75,18 @@ defmodule KlifeProtocol.SerializerTest do
     ]
 
     assert <<31::64-signed, 123::64-signed, 4::64-signed>> = Serializer.execute(input, schema)
+  end
+
+  test "float64" do
+    input = %{a: 31.123, b: 123.0, c: 4}
+
+    schema = [
+      a: {:float64, @default_metadata},
+      b: {:float64, @default_metadata},
+      c: {:float64, @default_metadata}
+    ]
+
+    assert <<31.123::float, 123.0::float, 4.0::float>> = Serializer.execute(input, schema)
   end
 
   test "string" do

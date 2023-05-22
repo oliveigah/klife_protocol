@@ -56,9 +56,12 @@ defmodule KlifeProtocol.Serializer do
 
   defp do_serialize_value(val, :int8), do: <<val::8-signed>>
   defp do_serialize_value(val, :int16), do: <<val::16-signed>>
+  defp do_serialize_value(val, :uint16), do: <<val::16>>
   defp do_serialize_value(val, :int32), do: <<val::32-signed>>
-  defp do_serialize_value(val, :unsigned_int32), do: <<val::32>>
+  defp do_serialize_value(val, :uint32), do: <<val::32>>
   defp do_serialize_value(val, :int64), do: <<val::64-signed>>
+
+  defp do_serialize_value(val, :float64), do: <<val::float>>
 
   defp do_serialize_value(nil, :string), do: <<-1::16-signed>>
 

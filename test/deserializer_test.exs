@@ -57,13 +57,13 @@ defmodule KlifeProtocol.DeserializerTest do
     assert %{a: 31, b: 123, c: 4} = response
   end
 
-  test "unsigned_int32" do
+  test "uint32" do
     input = <<0::32-signed, 2::8-signed, 4_223_817_021::32>>
 
     schema = [
       a: {:int32, %{is_nullable?: false}},
       b: {:int8, %{is_nullable?: false}},
-      c: {:unsigned_int32, %{is_nullable?: false}}
+      c: {:uint32, %{is_nullable?: false}}
     ]
 
     assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
@@ -82,6 +82,19 @@ defmodule KlifeProtocol.DeserializerTest do
     assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
     assert %{a: 31, b: 123, c: 4} = response
   end
+
+  test "float64" do
+    input = <<31.123::float, 123.0::float, 4::float>>
+
+    schema = [
+      a: {:float64, @default_metadata},
+      b: {:float64, @default_metadata},
+      c: {:float64, @default_metadata}
+    ]
+
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
+    assert %{a: 31.123, b: 123.0, c: 4.0} = response
+end
 
   test "string" do
     input = <<
