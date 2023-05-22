@@ -203,4 +203,3 @@ bash stop-kafka.sh
 - Improve docs
   - Add module docs
   - Add project overview
-- Rewrite generator

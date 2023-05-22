@@ -13,13 +13,42 @@ if Mix.env() == :dev do
       "default" => "lib/klife_protocol/generated/messages/"
     }
 
+    @doc """
+    There is a simple rule that define the request header version to be used
+    for all the messages. This rule is coded inside the eex template
+
+    But for ControlledShutdown in version 0 is always 0
+
+    Other messages can be added to the map in order to
+    achieve a similar behaviour.
+    """
     @req_header_exceptions %{
       "ControlledShutdown" => {:versions, [0], 0}
     }
+    @doc """
+    There is a simple rule that define the response header version to be used
+    for all the messages. This rule is coded inside the eex template
+
+    But ApiVersions message is always 0
+
+    Other messages can be added to the map in order to
+    achieve a similar behaviour.
+    """
     @res_header_exceptions %{
       "ApiVersions" => {:fixed, 0}
     }
 
+    @doc """
+    By default all messages are supported.
+
+    But Fetch versions below 4 uses a different serialization
+    for record batch that are not supported yet.
+
+    This configuration prev prevent the generation for such versions.
+
+    Other messages can be added to the map in order to
+    achieve a similar behaviour.
+    """
     @version_exceptions %{
       "Fetch" => [0, 1, 2, 3]
     }
@@ -32,6 +61,8 @@ if Mix.env() == :dev do
         |> Path.wildcard()
         |> Enum.map(&Path.split/1)
         |> Enum.map(&List.last/1)
+        # Filter only for files of request messages.
+        # We get the response counter part inside the `parse_file/1`
         |> Enum.filter(&String.contains?(&1, "Request"))
         |> Enum.map(fn req_file_name -> kafka_commoms_path <> "/#{req_file_name}" end)
         |> Enum.map(&parse_file/1)
@@ -50,12 +81,23 @@ if Mix.env() == :dev do
     end
 
     defp parse_file(req_file_path) do
+      # Every message is composed by 2 files, one request and one response.
+      # Since we started  the process on `run/1` filtering only for files
+      # that `Request` on their name, we need to get the `Response`
+      # counter part in order to be able to generate the module correctly.
       res_file_path = String.replace(req_file_path, "Request", "Response")
 
+      # Parse both json files to elixir maps
       req_map = path_to_map(req_file_path)
       res_map = path_to_map(res_file_path)
 
+      # The name of the generated module must always be the same name
+      # of the json file used to generate it. Removes only the qualifier
+      # `Request` because we are grouping both request and response
+      # on the same module
       module_name = req_map.name |> String.replace("Request", "")
+
+      # Traverse the map for build all schemas for the message being handled
       request_schemas = parse_message_schema(req_map)
       response_schemas = parse_message_schema(res_map)
 
@@ -215,17 +257,16 @@ if Mix.env() == :dev do
             message_type: message_type
           }
 
+          # Common structs are complex types that can be reused on multiple fields of the message
+          # and because of it, the field that refers to a common struct does not have
+          # the key `fields` that usually indicates the schema of that complex type.
+          # Therefore we need to handle the common structs first nd add it to the msg metadata
+          # in order to copy their schema into the field when they are used.
+          # Ex: ConsumerGroupHeartbeatResponse, DescribeQuorumResponse and many others
           common_structs = parse_commom_structs(message[:commonStructs] || [], msg_metadata)
+          msg_metadata = Map.put(msg_metadata, :common_structs, common_structs)
 
-          should_add_common_structs? =
-            (is_flexible and length(common_structs) > 1) or
-              (!is_flexible and length(common_structs) > 0)
-
-          msg_metadata =
-            if should_add_common_structs?,
-              do: Map.put(msg_metadata, :common_structs, common_structs),
-              else: msg_metadata
-
+          # Traverse the list of fields for properly build the schema
           schema = parse_schema(message.fields, msg_metadata)
 
           {version, schema}
@@ -238,6 +279,10 @@ if Mix.env() == :dev do
       grouped_structs =
         Enum.group_by(common_structs, &is_recursive_common_struct?(&1, msg_metadata))
 
+      # Some common structs can refer to other common structs, i've called them recursives
+      # therefore we need to build the non recursive ones first, in order to reuse them
+      # on the recursive common structs that refer to them
+      # Example: AddPartitionsToTxnResponse
       non_recursive_structs = grouped_structs[false] || []
       recursive_structs = grouped_structs[true] || []
 
@@ -274,15 +319,23 @@ if Mix.env() == :dev do
       |> Enum.any?()
     end
 
+    # Recursivelly parse fields into klife protocol schemas
     defp parse_schema(fields, msg_metadata),
       do: do_parse_schema(fields, msg_metadata, [], [])
 
+    # Tag buffers are always added at the end of complex type fields in flexible versions.
+    # Request tag buffers must be a list, because we receive a map as te input
+    # and we need to know the exact order of the tagged fields
     defp do_parse_schema([], %{type: :request, is_flexible: true}, schema, tag_buffer),
       do: schema ++ [{:tag_buffer, {:tag_buffer, tag_buffer}}]
 
+    # Response tag buffers can be a map because the order is already given
+    # by the binary input and we just need to pull out the proper schema for the
+    # tagged_fields based on their tag number at the begining of the binary
     defp do_parse_schema([], %{type: :response, is_flexible: true}, schema, tag_buffer),
       do: schema ++ [{:tag_buffer, {:tag_buffer, Map.new(tag_buffer)}}]
 
+    # Tag buffers must not be added on not flexible versions
     defp do_parse_schema([], %{is_flexible: false}, schema, _tag_buffer),
       do: schema
 
@@ -299,6 +352,14 @@ if Mix.env() == :dev do
         is_nullable?: is_nullable?(field, version)
       }
 
+      # Check if the current field is present on the version being handled
+      # If it is not, just go to the next field.
+      # If it is present, check if it is a tagged field.
+      # Tagged fields must be handled different because of 2 main reasons:
+      # 1 - They need to be accumulated on the tag buffer and not on the main schema
+      # 2 - They have a tag` attribute in order to proper order them
+      # Beside this 2 reasons, the process is the same for tagged and non tagged.
+      # The `parse_tagged_field/2` delegates to `do_parse_schema_field/2` the heavy work.
       case {version?, tagged_field?} do
         {false, _} ->
           do_parse_schema(rest_fields, msg_metadata, schema, tag_buffer)
@@ -317,9 +378,20 @@ if Mix.env() == :dev do
 
     defp do_parse_schema_field(field, msg_metadata) do
       name = field.name |> to_snake_case() |> String.to_atom()
+
       has_fields? = Map.has_key?(field, :fields)
 
-      case get_type(field.type, msg_metadata, !has_fields?) do
+      type_is_common_struct? =
+        Keyword.has_key?(msg_metadata[:common_structs] || [], get_type_name(field.type))
+
+      should_raise_on_get_type? = !has_fields? && !type_is_common_struct?
+      # This function maps the kafka types to the klife protocol types
+      # We need the metadata in order to differentiate betewen compact and
+      # non compact fields.
+      # The raise part is just to know if something is missing. Otherwise
+      # even if some basic type is missing the modules are generated
+      # successfully but with types `:not_found`.
+      case get_type(field.type, msg_metadata, should_raise_on_get_type?) do
         :array ->
           if has_fields? do
             {name, {:array, parse_schema(field.fields, msg_metadata)}}
@@ -378,6 +450,9 @@ if Mix.env() == :dev do
     end
 
     defp available_in_version?(field, current_version) do
+      # For some reason only the ReplicaState field of the fetchRequest message
+      # does not have a version key, therefore we are using the taggedVersion as a fallback.
+      # I've open a PR about this on the kafka repo: https://github.com/apache/kafka/pull/13680
       (field[:versions] || field[:taggedVersions])
       |> parse_versions_string()
       |> check_version(current_version)
@@ -485,6 +560,7 @@ if Mix.env() == :dev do
     defp get_type(_, _, false), do: :not_found
 
     defp get_type_name("[]" <> name), do: name |> to_snake_case() |> String.to_atom()
+    defp get_type_name(name), do: name |> to_snake_case() |> String.to_atom()
 
     defp to_snake_case(string), do: Macro.underscore(string)
   end
