@@ -1,13 +1,33 @@
 defmodule KlifeProtocol.Connection do
+  @moduledoc """
+  Simple wrapper of `:gen_tcp` and `:ssl` erlang modules.
+
+  Set socket opts that are needed to proper communicate with kafka broker (mainly `packet: 4`).
+
+  Since it is a simple wrapper, clients may choose to set up their on
+  connection or just initialize them with this module and extracting the
+  `socket` attribute and using it directly with `:gen_tcp` and `:ssl` modules.
+  """
   alias KlifeProtocol.Connection
   defstruct [:socket, :host, :port, :connect_timeout, :read_timeout, :ssl]
 
   @default_opts %{
     connect_timeout: :timer.seconds(5),
     read_timeout: :timer.seconds(5),
-    ssl: false
+    ssl: false,
+    ssl_opts: %{}
   }
 
+  @doc """
+  Initialize a connection.
+
+  Options:
+
+  - connect_timeout: Timeout to initialze the connection. (default 5 seconds)
+  - read_timeout: Timeout to read messages from socket. (default 5 seconds)
+  - ssl: Define the backend to use, `:gen_tcp` when false and `:ssl` when true (default false)
+  - ssl_opts: only used when ssl: true, this option will be forwareded to `:ssl.connect/4` as its 3rd argument
+  """
   def new(url, opts \\ []) do
     %{host: host, port: port} = parse_url(url)
     socket_opts = [:binary, active: false, packet: 4]

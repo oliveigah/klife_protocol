@@ -144,7 +144,7 @@ With these functions, a client can easily generate and decode attributes for eac
 
 This section provides performance benchmarks for the main use cases of produce serialization and fetch deserialization, conducted using the [benchee tool](https://github.com/bencheeorg/benchee). The benchmarks measure only the serialization work, as the Kafka cluster is running solely to retrieve data samples for benchmarking purposes. Note that network latency is not included in the measurements, only serialization/deserialization performance.
 
-The benchmarks were conducted on a personal computer with the following specifications, using only a single core. The operations were performed on messages containing a single record batch with 1, 10, 50 and 100 records to/from a single partition.
+The benchmarks were conducted on a personal computer with the following specifications, using only a single core. The operations were performed on messages containing a single record batch with 1, 10, 50 and 100 records to/from a single partition without compression.
 
 ```
 CPU: Intel i7 10750h
@@ -177,6 +177,21 @@ bash stop-kafka.sh
 | 100     | 5 kb     | 200 k  | 2.00 k | 500 μs | 490 μs | 652 μs  | ±13% | 486 kb   |
 
 
+## Project Overview
+
+The project is composed by 5 main components:
+
+- [Module generator](./lib/mix/tasks/generate_files.ex): This component performs a variety of tasks to convert Kafka's message definitions into message modules.
+
+- [Message Modules](./lib/klife_protocol/generated/messages/): These modules serve as the primary interface for clients using this library. They enable the serialization and deserialization of specific messages in the Kafka protocol.
+
+- [Serializer](./lib/klife_protocol/serializer.ex): This module is responsible for transforming Elixir maps into appropriate binaries using the schemas defined by the message modules. These binaries can then be sent across the wire to Kafka brokers.
+
+- [Deserializer](./lib/klife_protocol/deserializer.ex): This module handles the conversion of binaries received from Kafka brokers into Elixir maps. It utilizes the schemas defined by the message modules.
+
+- [Connection](./lib/klife_protocol/connection.ex): Simple wrapper of `:gen_tcp` and `:ssl` erlang modules. Set socket opts that are needed to proper communicate with kafka broker (mainly `packet: 4`). Since it is a simple wrapper, clients may choose to set up their on connection or just initialize it with this module and extract the `socket` attribute and using it directly with `:gen_tcp` and `:ssl` modules.
+
+![](./overview.png "Project overview")
 ## Running Tests
 
 ```
@@ -196,10 +211,3 @@ bash run-kafka.sh
 CONN_MODE=SSL mix test
 bash stop-kafka.sh
 ```
-
-
-## Todos
-
-- Improve docs
-  - Add module docs
-  - Add project overview
