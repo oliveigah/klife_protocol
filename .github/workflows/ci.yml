@@ -18,11 +18,5 @@ jobs:
         with:
           elixir-version: '1.14.5'
           otp-version: '26.0'
-      - uses: isbang/compose-action@v1.4.1
-        with:
-          compose-file: "./test/compose_files/docker-compose-kafka.yml"
-          down-flags: "--volumes"
       - run: mix deps.get
-      # - run: CONN_MODE=SSL mix test
-      - run: mix test
-      - run: docker-compose -f "test/compose_files/docker-compose-kafka.yml" down
+      - run: mix compile --warning-as-errors

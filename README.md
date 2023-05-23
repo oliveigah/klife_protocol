@@ -211,3 +211,9 @@ bash run-kafka.sh
 CONN_MODE=SSL mix test
 bash stop-kafka.sh
 ```
+
+## TODOs
+
+- Execute tests on CI
+- Create all test topics before executing
+- Publish hex package
