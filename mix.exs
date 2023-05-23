@@ -29,15 +29,7 @@ defmodule KlifeProtocol.MixProject do
       {:crc32cer, "~> 0.1.8"},
       {:snappyer, "~> 1.2.7"},
       # Code generation
-      {:jason, "~> 1.4", only: :dev},
-      # Benchmarks and tests
-      {:benchee, "~> 1.0", only: :dev},
-      {:kafka_protocol, "~> 4.1", only: :dev},
-      {:varint, "~>1.2.0", only: :dev},
-      {:kayrock, "~> 0.1.15", only: :dev},
-      {:uuid, "~> 1.1", only: [:dev, :test]}
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+      {:jason, "~> 1.4", only: :dev}
     ]
   end
 end
