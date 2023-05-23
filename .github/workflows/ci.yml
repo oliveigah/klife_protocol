@@ -1,0 +1,28 @@
+name: ci
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.14.5'
+          otp-version: '26.0'
+      - uses: isbang/compose-action@v1.4.1
+        with:
+          compose-file: "./test/compose_files/docker-compose-kafka.yml"
+          down-flags: "--volumes"
+      - run: mix deps.get
+      # - run: CONN_MODE=SSL mix test
+      - run: mix test
+      - run: docker-compose -f "test/compose_files/docker-compose-kafka.yml" down
