@@ -190,6 +190,18 @@ defmodule KlifeProtocol.SerializerTest do
              <<0::32-signed>> = Serializer.execute(input, schema)
   end
 
+  test "bytes" do
+    input = %{a: <<1, 2, 3>>, b: nil, c: <<7, 8, 9, 10>>}
+
+    schema = [
+      a: {:bytes, @default_metadata},
+      b: {:bytes, %{is_nullable?: true}},
+      c: {:bytes, @default_metadata}
+    ]
+
+    assert <<3::32-signed, 1, 2, 3, -1::32-signed, 4::32-signed, 7, 8, 9, 10>> = Serializer.execute(input, schema)
+  end
+
   test "compact_bytes" do
     input = %{a: <<1, 2, 3>>, b: nil, c: <<7, 8, 9, 10>>}
 

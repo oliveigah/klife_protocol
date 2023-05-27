@@ -43,11 +43,13 @@ defmodule KlifeProtocol.Deserializer do
 
   defp do_deserialize_value(<<-1::16-signed, rest_data::binary>>, :string), do: {nil, rest_data}
 
-  defp do_deserialize_value(
-         <<len::16-signed, val::size(len)-binary, rest_data::binary>>,
-         :string
-       ),
-       do: {val, rest_data}
+  defp do_deserialize_value(<<len::16-signed, val::size(len)-binary, rest::binary>>, :string),
+    do: {val, rest}
+
+  defp do_deserialize_value(<<-1::32-signed, rest_data::binary>>, :bytes), do: {nil, rest_data}
+
+  defp do_deserialize_value(<<len::32-signed, val::size(len)-binary, rest::binary>>, :bytes),
+    do: {val, rest}
 
   defp do_deserialize_value(<<val::binary-size(16), rest_data::binary>>, :uuid) do
     <<
@@ -104,7 +106,8 @@ defmodule KlifeProtocol.Deserializer do
     if len > 0, do: deserialize_array(rest_binary, len - 1, schema, []), else: {nil, rest_binary}
   end
 
-  defp do_deserialize_value(<<data::binary>>, :unsigned_varint), do: deserialize_unsigned_varint(data)
+  defp do_deserialize_value(<<data::binary>>, :unsigned_varint),
+    do: deserialize_unsigned_varint(data)
 
   defp do_deserialize_value(<<data::binary>>, :varint) do
     case deserialize_unsigned_varint(data) do

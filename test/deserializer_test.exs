@@ -94,7 +94,7 @@ defmodule KlifeProtocol.DeserializerTest do
 
     assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
     assert %{a: 31.123, b: 123.0, c: 4.0} = response
-end
+  end
 
   test "string" do
     input = <<
@@ -116,6 +116,19 @@ end
 
     assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
     assert %{a: "abc", b: "defgh", c: nil, d: "ij"} = response
+  end
+
+  test "bytes" do
+    input = <<3::32-signed, 1, 2, 3, -1::32-signed, 4::32-signed, 7, 8, 9, 10>>
+
+    schema = [
+      a: {:bytes, @default_metadata},
+      b: {:bytes, %{is_nullable?: true}},
+      c: {:bytes, @default_metadata}
+    ]
+
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
+    assert %{a: <<1, 2, 3>>, b: nil, c: <<7, 8, 9, 10>>} = response
   end
 
   test "array - simple" do
