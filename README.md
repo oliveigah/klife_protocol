@@ -202,8 +202,6 @@ bash stop-kafka.sh
 
 In order to prevent race conditions with kafka initialization is recommended to wait a couple seconds between `bash run-kafka.sh` and `mix test`. 
 
-Running the tests may fail on the first attempt due to all topics being created while the tests are in progress. In such cases, running the tests again usually resolves the issue.
-
 If you want to run tests using a SSL connection, you can use an env var `CONN_MODE=SSL` like this:
 
 ```
@@ -215,5 +213,4 @@ bash stop-kafka.sh
 ## TODOs
 
 - Execute tests on CI
-- Create all test topics before executing
 - Publish hex package

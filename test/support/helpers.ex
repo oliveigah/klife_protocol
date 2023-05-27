@@ -239,16 +239,6 @@ defmodule KlifeProtocol.TestSupport.Helpers do
     end
   end
 
-  def generate_topic_name(test_ctx) do
-    base =
-      test_ctx.module
-      |> Atom.to_string()
-      |> String.split(".")
-      |> List.last()
-
-    String.replace("#{base}_#{test_ctx.test}", " ", "_")
-  end
-
   def get_metadata_for_topic_and_partition(topic_name, partition_index) do
     [topic_name: topic_name]
     |> metadata_request()

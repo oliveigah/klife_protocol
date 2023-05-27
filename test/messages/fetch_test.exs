@@ -5,9 +5,9 @@ defmodule Messages.FetchTest do
   alias KlifeProtocol.TestSupport.Helpers
   alias KlifeProtocol.RecordBatch
 
-  test "request and response v4", ctx do
+  test "request and response v4", _ctx do
     version = 4
-    topic_name = Helpers.generate_topic_name(ctx)
+    topic_name = "test_topic_default"
     message_data_1 = ["msg_1", "msg_2", "msg_3"]
     message_data_2 = ["msg_4", "msg_5", "msg_6"]
     message_data_3 = ["msg_7", "msg_8", "msg_9"]
@@ -202,9 +202,9 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
-  test "request and response v5", ctx do
+  test "request and response v5", _ctx do
     version = 5
-    topic_name = Helpers.generate_topic_name(ctx)
+    topic_name = "test_topic_default"
     message_data_1 = ["msg_1", "msg_2", "msg_3"]
     message_data_2 = ["msg_4", "msg_5", "msg_6"]
     message_data_3 = ["msg_7", "msg_8", "msg_9"]
@@ -400,9 +400,9 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
-  test "request and response v6", ctx do
+  test "request and response v6", _ctx do
     version = 6
-    topic_name = Helpers.generate_topic_name(ctx)
+    topic_name = "test_topic_default"
     message_data_1 = ["msg_1", "msg_2", "msg_3"]
     message_data_2 = ["msg_4", "msg_5", "msg_6"]
     message_data_3 = ["msg_7", "msg_8", "msg_9"]
@@ -598,9 +598,9 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
-  test "request and response v7", ctx do
+  test "request and response v7", _ctx do
     version = 7
-    topic_name = Helpers.generate_topic_name(ctx)
+    topic_name = "test_topic_default"
     message_data_1 = ["msg_1", "msg_2", "msg_3"]
     message_data_2 = ["msg_4", "msg_5", "msg_6"]
     message_data_3 = ["msg_7", "msg_8", "msg_9"]
@@ -800,9 +800,9 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
-  test "request and response v8", ctx do
+  test "request and response v8", _ctx do
     version = 8
-    topic_name = Helpers.generate_topic_name(ctx)
+    topic_name = "test_topic_default"
     message_data_1 = ["msg_1", "msg_2", "msg_3"]
     message_data_2 = ["msg_4", "msg_5", "msg_6"]
     message_data_3 = ["msg_7", "msg_8", "msg_9"]
@@ -1002,9 +1002,9 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
-  test "request and response v9", ctx do
+  test "request and response v9", _ctx do
     version = 9
-    topic_name = Helpers.generate_topic_name(ctx)
+    topic_name = "test_topic_default"
     message_data_1 = ["msg_1", "msg_2", "msg_3"]
     message_data_2 = ["msg_4", "msg_5", "msg_6"]
     message_data_3 = ["msg_7", "msg_8", "msg_9"]
@@ -1208,9 +1208,9 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
-  test "request and response v10", ctx do
+  test "request and response v10", _ctx do
     version = 10
-    topic_name = Helpers.generate_topic_name(ctx)
+    topic_name = "test_topic_default"
     message_data_1 = ["msg_1", "msg_2", "msg_3"]
     message_data_2 = ["msg_4", "msg_5", "msg_6"]
     message_data_3 = ["msg_7", "msg_8", "msg_9"]
@@ -1414,9 +1414,9 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
-  test "request and response v11", ctx do
+  test "request and response v11", _ctx do
     version = 11
-    topic_name = Helpers.generate_topic_name(ctx)
+    topic_name = "test_topic_default"
     message_data_1 = ["msg_1", "msg_2", "msg_3"]
     message_data_2 = ["msg_4", "msg_5", "msg_6"]
     message_data_3 = ["msg_7", "msg_8", "msg_9"]
@@ -1621,9 +1621,9 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
-  test "request and response v12", ctx do
+  test "request and response v12", _ctx do
     version = 12
-    topic_name = Helpers.generate_topic_name(ctx)
+    topic_name = "test_topic_default"
     message_data_1 = ["msg_1", "msg_2", "msg_3"]
     message_data_2 = ["msg_4", "msg_5", "msg_6"]
     message_data_3 = ["msg_7", "msg_8", "msg_9"]
@@ -1829,9 +1829,9 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
-  test "request and response v13", ctx do
+  test "request and response v13", _ctx do
     version = 13
-    topic_name = Helpers.generate_topic_name(ctx)
+    topic_name = "test_topic_default"
     message_data_1 = ["msg_1", "msg_2", "msg_3"]
     message_data_2 = ["msg_4", "msg_5", "msg_6"]
     message_data_3 = ["msg_7", "msg_8", "msg_9"]
@@ -2037,9 +2037,9 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
-  test "Partial messages", ctx do
+  test "Partial messages", _ctx do
     version = 13
-    topic_name = Helpers.generate_topic_name(ctx)
+    topic_name = "test_topic_default"
     message_data_1 = ["msg_1", "msg_2", "msg_3"]
     message_data_2 = ["msg_4", "msg_5", "msg_6"]
     message_data_3 = ["msg_7", "msg_8", "msg_9"]
@@ -2203,9 +2203,9 @@ defmodule Messages.FetchTest do
            ] = records_2
   end
 
-  test "Partial messages with compression", ctx do
+  test "Partial messages with compression", _ctx do
     version = 13
-    topic_name = Helpers.generate_topic_name(ctx)
+    topic_name = "test_topic_default"
     message_data_1 = ["msg_1", "msg_2", "msg_3"]
     message_data_2 = ["msg_4", "msg_5", "msg_6"]
     message_data_3 = ["msg_7", "msg_8", "msg_9"]
@@ -2371,9 +2371,9 @@ defmodule Messages.FetchTest do
            ] = records_2
   end
 
-  test "request and response v13 with gzip compression", ctx do
+  test "request and response v13 with gzip compression", _ctx do
     version = 13
-    topic_name = Helpers.generate_topic_name(ctx)
+    topic_name = "test_topic_default"
     message_data_1 = ["msg_1", "msg_2", "msg_3"]
     message_data_2 = ["msg_4", "msg_5", "msg_6"]
     message_data_3 = ["msg_7", "msg_8", "msg_9"]
@@ -2580,9 +2580,9 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
-  test "request and response v13 with snappy compression", ctx do
+  test "request and response v13 with snappy compression", _ctx do
     version = 13
-    topic_name = Helpers.generate_topic_name(ctx)
+    topic_name = "test_topic_default"
     message_data_1 = ["msg_1", "msg_2", "msg_3"]
     message_data_2 = ["msg_4", "msg_5", "msg_6"]
     message_data_3 = ["msg_7", "msg_8", "msg_9"]

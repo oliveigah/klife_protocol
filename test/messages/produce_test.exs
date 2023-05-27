@@ -4,8 +4,8 @@ defmodule Messages.ProduceTest do
   alias KlifeProtocol.Messages.Produce
   alias KlifeProtocol.TestSupport.Helpers
 
-  test "request and response v0", ctx do
-    topic_name = Helpers.generate_topic_name(ctx)
+  test "request and response v0", _ctx do
+    topic_name = "test_topic_default"
 
     version = 0
     partition_index = 0
@@ -86,8 +86,8 @@ defmodule Messages.ProduceTest do
            } = content
   end
 
-  test "request and response v1", ctx do
-    topic_name = Helpers.generate_topic_name(ctx)
+  test "request and response v1", _ctx do
+    topic_name = "test_topic_default"
 
     version = 1
     partition_index = 0
@@ -171,8 +171,8 @@ defmodule Messages.ProduceTest do
            ] = topics_responses
   end
 
-  test "request and response v2", ctx do
-    topic_name = Helpers.generate_topic_name(ctx)
+  test "request and response v2", _ctx do
+    topic_name = "test_topic_default"
 
     version = 2
     partition_index = 0
@@ -257,8 +257,8 @@ defmodule Messages.ProduceTest do
            ] = topics_responses
   end
 
-  test "request and response v3", ctx do
-    topic_name = Helpers.generate_topic_name(ctx)
+  test "request and response v3", _ctx do
+    topic_name = "test_topic_default"
 
     version = 3
     partition_index = 0
@@ -344,8 +344,8 @@ defmodule Messages.ProduceTest do
            ] = topics_responses
   end
 
-  test "request and response v4", ctx do
-    topic_name = Helpers.generate_topic_name(ctx)
+  test "request and response v4", _ctx do
+    topic_name = "test_topic_default"
 
     version = 4
     partition_index = 0
@@ -431,8 +431,8 @@ defmodule Messages.ProduceTest do
            ] = topics_responses
   end
 
-  test "request and response v5", ctx do
-    topic_name = Helpers.generate_topic_name(ctx)
+  test "request and response v5", _ctx do
+    topic_name = "test_topic_default"
 
     version = 5
     partition_index = 0
@@ -518,8 +518,8 @@ defmodule Messages.ProduceTest do
            ] = topics_responses
   end
 
-  test "request and response v6", ctx do
-    topic_name = Helpers.generate_topic_name(ctx)
+  test "request and response v6", _ctx do
+    topic_name = "test_topic_default"
 
     version = 6
     partition_index = 0
@@ -605,8 +605,8 @@ defmodule Messages.ProduceTest do
            ] = topics_responses
   end
 
-  test "request and response v7", ctx do
-    topic_name = Helpers.generate_topic_name(ctx)
+  test "request and response v7", _ctx do
+    topic_name = "test_topic_default"
 
     version = 7
     partition_index = 0
@@ -692,8 +692,8 @@ defmodule Messages.ProduceTest do
            ] = topics_responses
   end
 
-  test "request and response v8", ctx do
-    topic_name = Helpers.generate_topic_name(ctx)
+  test "request and response v8", _ctx do
+    topic_name = "test_topic_default"
 
     version = 8
     partition_index = 0
@@ -781,8 +781,8 @@ defmodule Messages.ProduceTest do
            ] = topics_responses
   end
 
-  test "request and response v9", ctx do
-    topic_name = Helpers.generate_topic_name(ctx)
+  test "request and response v9", _ctx do
+    topic_name = "test_topic_default"
 
     version = 9
     partition_index = 0
