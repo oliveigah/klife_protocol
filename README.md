@@ -212,5 +212,4 @@ bash stop-kafka.sh
 
 ## TODOs
 
-- Execute tests on CI
 - Publish hex package
