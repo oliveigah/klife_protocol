@@ -3,7 +3,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
   TEST PURPOSES ONLY!
   """
 
-  alias KlifeProtocol.Connection
+  alias KlifeProtocol.Socket
   alias KlifeProtocol.Messages
 
   # defined by the docker compose file
@@ -31,15 +31,22 @@ defmodule KlifeProtocol.TestSupport.Helpers do
       verify: :verify_peer,
       cacertfile: Path.relative("test/compose_files/truststore/ca.crt")
     ]
-
+    socket_backend = :ssl
+    opts = [backend: socket_backend, active: false] ++ ssl_opts
     Enum.each(@default_brokers_ssl, fn {broker, hostname} ->
-      write_to_shared(broker, Connection.new(hostname, ssl: true, ssl_opts: ssl_opts))
+      [host, port] = String.split(hostname, ":")
+      result = Socket.connect(host, String.to_integer(port), opts)
+      write_to_shared(broker, {socket_backend, result})
     end)
   end
 
   def initialize_connections(nil) do
+    socket_backend = :gen_tcp
+    opts = [backend: socket_backend, active: false]
     Enum.each(@default_brokers, fn {broker, hostname} ->
-      write_to_shared(broker, Connection.new(hostname, ssl: false))
+      [host, port] = String.split(hostname, ":")
+      result = Socket.connect(host, String.to_integer(port), opts)
+      write_to_shared(broker, {socket_backend, result})
     end)
   end
 
@@ -72,16 +79,16 @@ defmodule KlifeProtocol.TestSupport.Helpers do
       |> Enum.random()
       |> elem(0)
 
-    {:ok, conn} = read_from_shared(broker)
-    :ok = Connection.send_data(conn, data)
-    {:ok, response} = Connection.read_data(conn)
+    {backend, {:ok, socket}} = read_from_shared(broker)
+    :ok = backend.send(socket, data)
+    {:ok, response} = backend.recv(socket, 0, 5_000)
     response
   end
 
   def send_message_to_broker(data, broker) do
-    {:ok, conn} = read_from_shared(broker)
-    :ok = Connection.send_data(conn, data)
-    {:ok, response} = Connection.read_data(conn)
+    {backend, {:ok, socket}} = read_from_shared(broker)
+    :ok = backend.send(socket, data)
+    {:ok, response} = backend.recv(socket, 0, 5_000)
     response
   end
 

@@ -1,7 +1,7 @@
 alias Mix.Tasks.Help
 alias KlifeProtocol.TestSupport.Helpers
 alias KlifeProtocol.Messages
-alias KlifeProtocol.Connection
+alias KlifeProtocol.Socket
 
 Helpers.initialize_shared_storage()
 

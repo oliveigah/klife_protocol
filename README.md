@@ -15,15 +15,16 @@ This implementation of the Kafka protocol supports all currently available messa
 This is an example of usage that creates a connection with a broker, send the API version message and handle the response.
 
 ```elixir
-alias KlifeProtocol.Connection
+alias KlifeProtocol.Socket
 alias KlifeProtocol.Messages
 
-{:ok, conn} = Connection.new("localhost:19092")
+
+{:ok, socket} = Socket.connect("localhost", 19092, [backend: :gen_tcp, active: false])
 version = 0
 input = %{headers: %{correlation_id: 123}, content: %{}}
 serialized_msg = Messages.ApiVersions.serialize_request(input, version)
-:ok = Connection.send_data(conn, serialized_msg)
-{:ok, received_data} = Connection.read_data(conn)
+:ok = :gen_tcp.send(socket, serialized_msg)
+{:ok, received_data} = :gen_tcp.recv(socket, 0, 5_000)
 {:ok, response} = Messages.ApiVersions.deserialize_response(received_data, version)
 ```
 
@@ -189,7 +190,7 @@ The project is composed by 5 main components:
 
 - [Deserializer](./lib/klife_protocol/deserializer.ex): This module handles the conversion of binaries received from Kafka brokers into Elixir maps. It utilizes the schemas defined by the message modules.
 
-- [Connection](./lib/klife_protocol/connection.ex): Simple wrapper of `:gen_tcp` and `:ssl` erlang modules. Set socket opts that are needed to proper communicate with kafka broker (mainly `packet: 4`). Since it is a simple wrapper, clients may choose to set up their on connection or just initialize it with this module and extract the `socket` attribute and using it directly with `:gen_tcp` and `:ssl` modules.
+- [Socket](./lib/klife_protocol/Socket.ex): Simple wrapper of `:gen_tcp` and `:ssl` `connect/3` function that set socket opts that are needed to proper communicate with kafka broker `packet: 4` and `binary`. It is intended to be used only for the socket initialization, all other operations must be done using `:gen_tcp` or `:ssl` directly.
 
 ![](./overview.png "Project overview")
 ## Running Tests
