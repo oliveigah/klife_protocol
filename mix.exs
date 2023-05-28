@@ -56,9 +56,9 @@ defmodule KlifeProtocol.MixProject do
       {:crc32cer, "~> 0.1.8"},
       {:snappyer, "~> 1.2.7"},
       # Code generation
-      {:jason, "~> 1.4", only: :dev},
+      {:jason, "~> 1.4", only: :dev, runtime: false},
       # Benchmarks and tests
-      {:benchee, "~> 1.0", only: :dev},
+      {:benchee, "~> 1.0", only: :dev, runtime: false},
       # Docs
       {:ex_doc, "~> 0.27", only: :dev, runtime: false}
     ]

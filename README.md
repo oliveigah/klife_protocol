@@ -254,7 +254,3 @@ bash run-kafka.sh
 CONN_MODE=SSL mix test
 bash stop-kafka.sh
 ```
-
-## TODOs
-
-- Publish hex package
