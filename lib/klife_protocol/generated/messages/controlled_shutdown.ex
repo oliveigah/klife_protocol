@@ -27,8 +27,9 @@ defmodule KlifeProtocol.Messages.ControlledShutdown do
   @min_flexible_version_res 3
 
   @doc """
-  Content fields:
+  Receives a map and serialize it to kafka wire format of the given version.
 
+  Input content fields:
   - broker_id: The id of the broker for which controlled shutdown has been requested. (int32 | versions 0+)
   - broker_epoch: The broker epoch. (int64 | versions 2+)
 
@@ -42,7 +43,9 @@ defmodule KlifeProtocol.Messages.ControlledShutdown do
   end
 
   @doc """
-  Content fields:
+  Receive a binary in the kafka wire format and deserialize it into a map.
+
+  Response content fields:
 
   - error_code: The top-level error code. (int16 | versions 0+)
   - remaining_partitions: The partitions that the broker still leads. ([]RemainingPartition | versions 0+)
@@ -50,7 +53,9 @@ defmodule KlifeProtocol.Messages.ControlledShutdown do
       - partition_index: The index of the partition. (int32 | versions 0+)
 
   """
-  def deserialize_response(data, version) do
+  def deserialize_response(data, version, with_header? \\ true)
+
+  def deserialize_response(data, version, true) do
     {:ok, {headers, rest_data}} = Header.deserialize_response(data, res_header_version(version))
 
     case Deserializer.execute(rest_data, response_schema(version)) do
@@ -62,7 +67,24 @@ defmodule KlifeProtocol.Messages.ControlledShutdown do
     end
   end
 
+  def deserialize_response(data, version, false) do
+    case Deserializer.execute(data, response_schema(version)) do
+      {:ok, {content, <<>>}} ->
+        {:ok, %{content: content}}
+
+      {:error, _reason} = err ->
+        err
+    end
+  end
+
+  @doc """
+  Returns the current max supported version of this message.
+  """
   def max_supported_version(), do: 3
+
+  @doc """
+  Returns the current min supported version of this message.
+  """
   def min_supported_version(), do: 0
 
   defp req_header_version(msg_version) do

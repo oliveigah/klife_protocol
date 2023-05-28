@@ -40,8 +40,9 @@ defmodule KlifeProtocol.Messages.ListOffsets do
   @min_flexible_version_res 6
 
   @doc """
-  Content fields:
+  Receives a map and serialize it to kafka wire format of the given version.
 
+  Input content fields:
   - replica_id: The broker ID of the requestor, or -1 if this request is being made by a normal consumer. (int32 | versions 0+)
   - isolation_level: This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records (int8 | versions 2+)
   - topics: Each topic in the request. ([]ListOffsetsTopic | versions 0+)
@@ -62,7 +63,9 @@ defmodule KlifeProtocol.Messages.ListOffsets do
   end
 
   @doc """
-  Content fields:
+  Receive a binary in the kafka wire format and deserialize it into a map.
+
+  Response content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 2+)
   - topics: Each topic in the response. ([]ListOffsetsTopicResponse | versions 0+)
@@ -76,7 +79,9 @@ defmodule KlifeProtocol.Messages.ListOffsets do
           - leader_epoch:  (int32 | versions 4+)
 
   """
-  def deserialize_response(data, version) do
+  def deserialize_response(data, version, with_header? \\ true)
+
+  def deserialize_response(data, version, true) do
     {:ok, {headers, rest_data}} = Header.deserialize_response(data, res_header_version(version))
 
     case Deserializer.execute(rest_data, response_schema(version)) do
@@ -88,7 +93,24 @@ defmodule KlifeProtocol.Messages.ListOffsets do
     end
   end
 
+  def deserialize_response(data, version, false) do
+    case Deserializer.execute(data, response_schema(version)) do
+      {:ok, {content, <<>>}} ->
+        {:ok, %{content: content}}
+
+      {:error, _reason} = err ->
+        err
+    end
+  end
+
+  @doc """
+  Returns the current max supported version of this message.
+  """
   def max_supported_version(), do: 8
+
+  @doc """
+  Returns the current min supported version of this message.
+  """
   def min_supported_version(), do: 0
 
   defp req_header_version(msg_version),

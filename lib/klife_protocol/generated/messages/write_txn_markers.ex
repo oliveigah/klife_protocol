@@ -22,8 +22,9 @@ defmodule KlifeProtocol.Messages.WriteTxnMarkers do
   @min_flexible_version_res 1
 
   @doc """
-  Content fields:
+  Receives a map and serialize it to kafka wire format of the given version.
 
+  Input content fields:
   - markers: The transaction markers to be written. ([]WritableTxnMarker | versions 0+)
       - producer_id: The current producer ID. (int64 | versions 0+)
       - producer_epoch: The current epoch associated with the producer ID. (int16 | versions 0+)
@@ -43,7 +44,9 @@ defmodule KlifeProtocol.Messages.WriteTxnMarkers do
   end
 
   @doc """
-  Content fields:
+  Receive a binary in the kafka wire format and deserialize it into a map.
+
+  Response content fields:
 
   - markers: The results for writing makers. ([]WritableTxnMarkerResult | versions 0+)
       - producer_id: The current producer ID in use by the transactional ID. (int64 | versions 0+)
@@ -54,7 +57,9 @@ defmodule KlifeProtocol.Messages.WriteTxnMarkers do
               - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
 
   """
-  def deserialize_response(data, version) do
+  def deserialize_response(data, version, with_header? \\ true)
+
+  def deserialize_response(data, version, true) do
     {:ok, {headers, rest_data}} = Header.deserialize_response(data, res_header_version(version))
 
     case Deserializer.execute(rest_data, response_schema(version)) do
@@ -66,7 +71,24 @@ defmodule KlifeProtocol.Messages.WriteTxnMarkers do
     end
   end
 
+  def deserialize_response(data, version, false) do
+    case Deserializer.execute(data, response_schema(version)) do
+      {:ok, {content, <<>>}} ->
+        {:ok, %{content: content}}
+
+      {:error, _reason} = err ->
+        err
+    end
+  end
+
+  @doc """
+  Returns the current max supported version of this message.
+  """
   def max_supported_version(), do: 1
+
+  @doc """
+  Returns the current min supported version of this message.
+  """
   def min_supported_version(), do: 0
 
   defp req_header_version(msg_version),

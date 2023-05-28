@@ -50,16 +50,27 @@ Inside the `response` variable you will get something like this:
 
 Each message has it's own set of fields, as described in the Kafka official documentation. On this library, each message has it's own module within `KlifeProtocol.Messages` namespace. In the previous example we used `KlifeProtocol.Messages.ApiVersions` which stands for the [API version message](https://kafka.apache.org/protocol.html#The_Messages_ApiVersions).
 
-You can find the available fields directly on the Kafka documentation or inside the message module documentation, which contains all the possible fields, along with extra comments describing each one of them. All fields can be provided (for serialization) or returned (for deseriaization) inside the content map attribute.
+Each message contains 2 main functions:
+
+- `serialize_request/2`: Receives a map and serialize it to kafka wire format of the given version.
+- `deserialize_response/3`: Receive a binary in the kafka wire format and deserialize it into a map.
+
+You can find the available fields directly on the Kafka documentation or inside the message module documentation which contains all the possible fields, along with extra comments describing each one of them. All fields can be provided (for serialization) or returned (for deseriaization) inside the content map attribute.
+
+### Serialize Request
+
+It expects a map containing 2 attributes `headers` and `content` that are also maps. The required fields of each map depends on the version being handled and can be found on the documentation.
+
+It returns the binary in the kafka's wire format.
 
 For instance the `Messages.ApiVersions.serialize_request/2` has the following documentation:
+
 ```elixir
   @doc """
   Content fields:
 
   - client_software_name: The name of the client. (string | versions 3+)
   - client_software_version: The version of the client. (string | versions 3+)
-
   """
 ```
 
@@ -70,7 +81,15 @@ input = %{headers: %{correlation_id: 123}, content: %{client_software_name: "som
 serialized_msg = Messages.ApiVersions.serialize_request(input, 3)
 ```
 
-The `Messages.ApiVersions.deserialize_response/2` schema works the same, but instead of the input map, it affects the returning map.
+### Deserialize Response
+
+It expects the binary, version and a boolean indicating if the given binary contains the header or not (defaults to true, meaning that the header data is expected to be present).
+
+It returns a tuple `{:ok, map}` and the map always have the `content` attribute and may have the `headers` attribute depending on the `with_header?` boolean of the input.
+
+The possible content fields are describe the same way of the serialization process.
+
+For instance the `Messages.ApiVersions.deserialize_response/3` has the following documentation:
 
 ```elixir
   @doc """
@@ -95,8 +114,6 @@ The `Messages.ApiVersions.deserialize_response/2` schema works the same, but ins
   """
 ```
 
-Which means that on the returning value of the deserialization function will return all this fields. Like this:
-
 ```elixir
 {:ok, %{ headers: headers, content: content }} = Messages.ApiVersions.deserialize_response(binary, 3)
 
@@ -108,6 +125,33 @@ Which means that on the returning value of the deserialization function will ret
 } = content
 
 ```
+
+### Headerless deserialization
+
+If for some reason you need to take a peek at the message header before fully deserialize it you can use the `KlifeProtocol.Header.deserialize_response/2` function.
+
+It expects a binary and version, returning the header map and the remaning binary. But notice that the header version is different from the message version.
+
+```elixir
+alias KlifeProtocol.Socket
+alias KlifeProtocol.Messages
+
+{:ok, socket} = Socket.connect("localhost", 19092, [backend: :gen_tcp, active: false])
+version = 0
+input = %{headers: %{correlation_id: 123}, content: %{}}
+serialized_msg = Messages.ApiVersions.serialize_request(input, version)
+:ok = :gen_tcp.send(socket, serialized_msg)
+{:ok, received_data} = :gen_tcp.recv(socket, 0, 5_000)
+{:ok, {headers_map, rest_data}} =  KlifeProtocol.Header.deserialize_response(received_data, 0)
+```
+
+After, you can use the `deserialize_response/3` function of the messages API, passing false on the third argument to prevent header deserailization again and deserialize the remaing of the binary.
+
+```elixir
+{:ok, %{content: content}} = Messages.ApiVersions.deserialize_response(rest_data, version, false)
+```
+
+
 ## Compression and Record Batch Attributes
 
 Currently supports two compression methods: `snappy` using [sanppyer library](https://github.com/zmstone/snappyer) and `gzip` using [erlang zlib library](https://www.erlang.org/doc/man/zlib.html).
@@ -182,17 +226,17 @@ bash stop-kafka.sh
 
 The project is composed by 5 main components:
 
-- [Module generator](./lib/mix/tasks/generate_files.ex): This component performs a variety of tasks to convert Kafka's message definitions into message modules.
+- Module generator: This component performs a variety of tasks to convert Kafka's message definitions into message modules.
 
-- [Message Modules](./lib/klife_protocol/generated/messages/): These modules serve as the primary interface for clients using this library. They enable the serialization and deserialization of specific messages in the Kafka protocol.
+- Message Modules: These modules serve as the primary interface for clients using this library. They enable the serialization and deserialization of specific messages in the Kafka protocol.
 
-- [Serializer](./lib/klife_protocol/serializer.ex): This module is responsible for transforming Elixir maps into appropriate binaries using the schemas defined by the message modules. These binaries can then be sent across the wire to Kafka brokers.
+- Serializer: This module is responsible for transforming Elixir maps into appropriate binaries using the schemas defined by the message modules. These binaries can then be sent across the wire to Kafka brokers.
 
-- [Deserializer](./lib/klife_protocol/deserializer.ex): This module handles the conversion of binaries received from Kafka brokers into Elixir maps. It utilizes the schemas defined by the message modules.
+- Deserializer: This module handles the conversion of binaries received from Kafka brokers into Elixir maps. It utilizes the schemas defined by the message modules.
 
-- [Socket](./lib/klife_protocol/Socket.ex): Simple wrapper of `:gen_tcp` and `:ssl` `connect/3` function that set socket opts that are needed to proper communicate with kafka broker `packet: 4` and `binary`. It is intended to be used only for the socket initialization, all other operations must be done using `:gen_tcp` or `:ssl` directly.
+- Socket: Simple wrapper of `:gen_tcp` and `:ssl` `connect/3` function that set socket opts that are needed to proper communicate with kafka broker `packet: 4` and `binary`. It is intended to be used only for the socket initialization, all other operations must be done using `:gen_tcp` or `:ssl` directly.
 
-![](./overview.png "Project overview")
+![](./assets/overview.png "Project overview")
 ## Running Tests
 
 ```

@@ -8,7 +8,22 @@ defmodule KlifeProtocol.MixProject do
       elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      elixirc_paths: elixirc_paths(Mix.env())
+      elixirc_paths: elixirc_paths(Mix.env()),
+      # hex
+      description: description(),
+      package: package(),
+      # docs
+      name: "Klife Protocol",
+      source_url: "https://github.com/oliveigah/klife_protocol",
+      docs: [
+        main: "readme",
+        extras: ["README.md"],
+        assets: "assets",
+        api_reference: true,
+        filter_modules: ~r"KlifeProtocol.Messages.*|KlifeProtocol.Header",
+        nest_modules_by_prefix: [KlifeProtocol.Messages]
+      ],
+
     ]
   end
 
@@ -23,6 +38,18 @@ defmodule KlifeProtocol.MixProject do
     ]
   end
 
+  defp description() do
+    "An Elixir implementation of the Kafka protocol. It enables communication with Kafka brokers using standard Elixir data structures without the need for manual serialization."
+  end
+
+  defp package() do
+    [
+      # These are the default files included in the package
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/oliveigah/klife_protocol"}
+    ]
+  end
+
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
@@ -31,7 +58,9 @@ defmodule KlifeProtocol.MixProject do
       # Code generation
       {:jason, "~> 1.4", only: :dev},
       # Benchmarks and tests
-      {:benchee, "~> 1.0", only: :dev}
+      {:benchee, "~> 1.0", only: :dev},
+      # Docs
+      {:ex_doc, "~> 0.27", only: :dev, runtime: false}
     ]
   end
 end

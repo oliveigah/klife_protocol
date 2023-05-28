@@ -13,42 +13,39 @@ if Mix.env() == :dev do
       "default" => "lib/klife_protocol/generated/messages/"
     }
 
-    @doc """
-    There is a simple rule that define the request header version to be used
-    for all the messages. This rule is coded inside the eex template
 
-    But for ControlledShutdown in version 0 is always 0
+    # There is a simple rule that define the request header version to be used
+    # for all the messages. This rule is coded inside the eex template
 
-    Other messages can be added to the map in order to
-    achieve a similar behaviour.
-    """
+    # But for ControlledShutdown in version 0 is always 0
+
+    # Other messages can be added to the map in order to
+    # achieve a similar behaviour.
     @req_header_exceptions %{
       "ControlledShutdown" => {:versions, [0], 0}
     }
-    @doc """
-    There is a simple rule that define the response header version to be used
-    for all the messages. This rule is coded inside the eex template
 
-    But ApiVersions message is always 0
+    # There is a simple rule that define the response header version to be used
+    # for all the messages. This rule is coded inside the eex template
 
-    Other messages can be added to the map in order to
-    achieve a similar behaviour.
-    """
+    # But ApiVersions message is always 0
+
+    # Other messages can be added to the map in order to
+    # achieve a similar behaviour.
     @res_header_exceptions %{
       "ApiVersions" => {:fixed, 0}
     }
 
-    @doc """
-    By default all messages are supported.
 
-    But Fetch versions below 4 uses a different serialization
-    for record batch that are not supported yet.
+    # By default all messages are supported.
 
-    This configuration prev prevent the generation for such versions.
+    # But Fetch versions below 4 uses a different serialization
+    # for record batch that are not supported yet.
 
-    Other messages can be added to the map in order to
-    achieve a similar behaviour.
-    """
+    # This configuration prev prevent the generation for such versions.
+
+    # Other messages can be added to the map in order to
+    # achieve a similar behaviour.
     @version_exceptions %{
       "Fetch" => [0, 1, 2, 3]
     }
@@ -138,7 +135,9 @@ if Mix.env() == :dev do
           "priv/header_module_template.eex" ->
             [
               request_schemas: request_schemas,
-              response_schemas: response_schemas
+              response_schemas: response_schemas,
+              req_field_comments: get_fields_comments(req_map),
+              res_field_comments: get_fields_comments(res_map)
             ]
         end
 

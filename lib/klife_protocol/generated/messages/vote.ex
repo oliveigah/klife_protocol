@@ -21,8 +21,9 @@ defmodule KlifeProtocol.Messages.Vote do
   @min_flexible_version_res 0
 
   @doc """
-  Content fields:
+  Receives a map and serialize it to kafka wire format of the given version.
 
+  Input content fields:
   - cluster_id:  (string | versions 0+)
   - topics:  ([]TopicData | versions 0+)
       - topic_name: The topic name. (string | versions 0+)
@@ -43,7 +44,9 @@ defmodule KlifeProtocol.Messages.Vote do
   end
 
   @doc """
-  Content fields:
+  Receive a binary in the kafka wire format and deserialize it into a map.
+
+  Response content fields:
 
   - error_code: The top level error code. (int16 | versions 0+)
   - topics:  ([]TopicData | versions 0+)
@@ -56,7 +59,9 @@ defmodule KlifeProtocol.Messages.Vote do
           - vote_granted: True if the vote was granted and false otherwise (bool | versions 0+)
 
   """
-  def deserialize_response(data, version) do
+  def deserialize_response(data, version, with_header? \\ true)
+
+  def deserialize_response(data, version, true) do
     {:ok, {headers, rest_data}} = Header.deserialize_response(data, res_header_version(version))
 
     case Deserializer.execute(rest_data, response_schema(version)) do
@@ -68,7 +73,24 @@ defmodule KlifeProtocol.Messages.Vote do
     end
   end
 
+  def deserialize_response(data, version, false) do
+    case Deserializer.execute(data, response_schema(version)) do
+      {:ok, {content, <<>>}} ->
+        {:ok, %{content: content}}
+
+      {:error, _reason} = err ->
+        err
+    end
+  end
+
+  @doc """
+  Returns the current max supported version of this message.
+  """
   def max_supported_version(), do: 0
+
+  @doc """
+  Returns the current min supported version of this message.
+  """
   def min_supported_version(), do: 0
 
   defp req_header_version(msg_version),

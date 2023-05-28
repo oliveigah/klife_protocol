@@ -21,8 +21,9 @@ defmodule KlifeProtocol.Messages.FetchSnapshot do
   @min_flexible_version_res 0
 
   @doc """
-  Content fields:
+  Receives a map and serialize it to kafka wire format of the given version.
 
+  Input content fields:
   - cluster_id: The clusterId if known, this is used to validate metadata fetches prior to broker registration (string | versions 0+)
   - replica_id: The broker ID of the follower (int32 | versions 0+)
   - max_bytes: The maximum bytes to fetch from all of the snapshots (int32 | versions 0+)
@@ -46,7 +47,9 @@ defmodule KlifeProtocol.Messages.FetchSnapshot do
   end
 
   @doc """
-  Content fields:
+  Receive a binary in the kafka wire format and deserialize it into a map.
+
+  Response content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code: The top level response error code. (int16 | versions 0+)
@@ -66,7 +69,9 @@ defmodule KlifeProtocol.Messages.FetchSnapshot do
           - unaligned_records: Snapshot data in records format which may not be aligned on an offset boundary (records | versions 0+)
 
   """
-  def deserialize_response(data, version) do
+  def deserialize_response(data, version, with_header? \\ true)
+
+  def deserialize_response(data, version, true) do
     {:ok, {headers, rest_data}} = Header.deserialize_response(data, res_header_version(version))
 
     case Deserializer.execute(rest_data, response_schema(version)) do
@@ -78,7 +83,24 @@ defmodule KlifeProtocol.Messages.FetchSnapshot do
     end
   end
 
+  def deserialize_response(data, version, false) do
+    case Deserializer.execute(data, response_schema(version)) do
+      {:ok, {content, <<>>}} ->
+        {:ok, %{content: content}}
+
+      {:error, _reason} = err ->
+        err
+    end
+  end
+
+  @doc """
+  Returns the current max supported version of this message.
+  """
   def max_supported_version(), do: 0
+
+  @doc """
+  Returns the current min supported version of this message.
+  """
   def min_supported_version(), do: 0
 
   defp req_header_version(msg_version),

@@ -23,8 +23,9 @@ defmodule KlifeProtocol.Messages.Envelope do
   @min_flexible_version_res 0
 
   @doc """
-  Content fields:
+  Receives a map and serialize it to kafka wire format of the given version.
 
+  Input content fields:
   - request_data: The embedded request header and data. (bytes | versions 0+)
   - request_principal: Value of the initial client principal when the request is redirected by a broker. (bytes | versions 0+)
   - client_host_address: The original client's address in bytes. (bytes | versions 0+)
@@ -39,13 +40,17 @@ defmodule KlifeProtocol.Messages.Envelope do
   end
 
   @doc """
-  Content fields:
+  Receive a binary in the kafka wire format and deserialize it into a map.
+
+  Response content fields:
 
   - response_data: The embedded response header and data. (bytes | versions 0+)
   - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
 
   """
-  def deserialize_response(data, version) do
+  def deserialize_response(data, version, with_header? \\ true)
+
+  def deserialize_response(data, version, true) do
     {:ok, {headers, rest_data}} = Header.deserialize_response(data, res_header_version(version))
 
     case Deserializer.execute(rest_data, response_schema(version)) do
@@ -57,7 +62,24 @@ defmodule KlifeProtocol.Messages.Envelope do
     end
   end
 
+  def deserialize_response(data, version, false) do
+    case Deserializer.execute(data, response_schema(version)) do
+      {:ok, {content, <<>>}} ->
+        {:ok, %{content: content}}
+
+      {:error, _reason} = err ->
+        err
+    end
+  end
+
+  @doc """
+  Returns the current max supported version of this message.
+  """
   def max_supported_version(), do: 0
+
+  @doc """
+  Returns the current min supported version of this message.
+  """
   def min_supported_version(), do: 0
 
   defp req_header_version(msg_version),

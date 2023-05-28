@@ -29,8 +29,9 @@ defmodule KlifeProtocol.Messages.StopReplica do
   @min_flexible_version_res 2
 
   @doc """
-  Content fields:
+  Receives a map and serialize it to kafka wire format of the given version.
 
+  Input content fields:
   - controller_id: The controller id. (int32 | versions 0+)
   - is_k_raft_controller: If KRaft controller id is used during migration. See KIP-866 (bool | versions 4+)
   - controller_epoch: The controller epoch. (int32 | versions 0+)
@@ -59,7 +60,9 @@ defmodule KlifeProtocol.Messages.StopReplica do
   end
 
   @doc """
-  Content fields:
+  Receive a binary in the kafka wire format and deserialize it into a map.
+
+  Response content fields:
 
   - error_code: The top-level error code, or 0 if there was no top-level error. (int16 | versions 0+)
   - partition_errors: The responses for each partition. ([]StopReplicaPartitionError | versions 0+)
@@ -68,7 +71,9 @@ defmodule KlifeProtocol.Messages.StopReplica do
       - error_code: The partition error code, or 0 if there was no partition error. (int16 | versions 0+)
 
   """
-  def deserialize_response(data, version) do
+  def deserialize_response(data, version, with_header? \\ true)
+
+  def deserialize_response(data, version, true) do
     {:ok, {headers, rest_data}} = Header.deserialize_response(data, res_header_version(version))
 
     case Deserializer.execute(rest_data, response_schema(version)) do
@@ -80,7 +85,24 @@ defmodule KlifeProtocol.Messages.StopReplica do
     end
   end
 
+  def deserialize_response(data, version, false) do
+    case Deserializer.execute(data, response_schema(version)) do
+      {:ok, {content, <<>>}} ->
+        {:ok, %{content: content}}
+
+      {:error, _reason} = err ->
+        err
+    end
+  end
+
+  @doc """
+  Returns the current max supported version of this message.
+  """
   def max_supported_version(), do: 4
+
+  @doc """
+  Returns the current min supported version of this message.
+  """
   def min_supported_version(), do: 0
 
   defp req_header_version(msg_version),

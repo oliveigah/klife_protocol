@@ -29,8 +29,9 @@ defmodule KlifeProtocol.Messages.ApiVersions do
   @min_flexible_version_req 3
 
   @doc """
-  Content fields:
+  Receives a map and serialize it to kafka wire format of the given version.
 
+  Input content fields:
   - client_software_name: The name of the client. (string | versions 3+)
   - client_software_version: The version of the client. (string | versions 3+)
 
@@ -44,7 +45,9 @@ defmodule KlifeProtocol.Messages.ApiVersions do
   end
 
   @doc """
-  Content fields:
+  Receive a binary in the kafka wire format and deserialize it into a map.
+
+  Response content fields:
 
   - error_code: The top-level error code. (int16 | versions 0+)
   - api_keys: The APIs supported by the broker. ([]ApiVersion | versions 0+)
@@ -64,7 +67,9 @@ defmodule KlifeProtocol.Messages.ApiVersions do
   - zk_migration_ready: Set by a KRaft controller if the required configurations for ZK migration are present (bool | versions 3+)
 
   """
-  def deserialize_response(data, version) do
+  def deserialize_response(data, version, with_header? \\ true)
+
+  def deserialize_response(data, version, true) do
     {:ok, {headers, rest_data}} = Header.deserialize_response(data, res_header_version(version))
 
     case Deserializer.execute(rest_data, response_schema(version)) do
@@ -76,7 +81,24 @@ defmodule KlifeProtocol.Messages.ApiVersions do
     end
   end
 
+  def deserialize_response(data, version, false) do
+    case Deserializer.execute(data, response_schema(version)) do
+      {:ok, {content, <<>>}} ->
+        {:ok, %{content: content}}
+
+      {:error, _reason} = err ->
+        err
+    end
+  end
+
+  @doc """
+  Returns the current max supported version of this message.
+  """
   def max_supported_version(), do: 3
+
+  @doc """
+  Returns the current min supported version of this message.
+  """
   def min_supported_version(), do: 0
 
   defp req_header_version(msg_version),

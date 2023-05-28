@@ -1,4 +1,8 @@
 defmodule KlifeProtocol.Header do
+    @moduledoc """
+    Kafka protocol header
+    """
+
     alias KlifeProtocol.Deserializer
     alias KlifeProtocol.Serializer
 
@@ -14,9 +18,44 @@ defmodule KlifeProtocol.Header do
         """
     end) %>
 
+    @doc """
+    Receives a map and serialize it to kafka wire format of the given version.
+    
+    Input content fields:
+    <%= Enum.map(req_field_comments, fn {line, depth} ->
+        if depth == 0 do
+            line <>  "\n"
+        else
+            base_space = "    "
+            extra_space = 
+            Enum.map(1..depth, fn _ -> base_space end) 
+            |> Enum.join()
+            
+            base_space <> extra_space <> line <> "\n"
+        end
+    end) %>
+    """
     def serialize_request(data, version),
     do: Serializer.execute(data, request_schema(version))
 
+    @doc """
+    Receive a binary in the kafka wire format and deserialize it into a map and return remaining binary data.
+    
+    Response content fields:
+
+    <%= Enum.map(res_field_comments, fn {line, depth} ->
+        if depth == 0 do
+            line <>  "\n"
+        else
+            base_space = "    "
+            extra_space = 
+            Enum.map(1..depth, fn _ -> base_space end) 
+            |> Enum.join()
+            
+            base_space <> extra_space <> line <> "\n"
+        end
+    end) %>
+    """
     def deserialize_response(data, version),
     do: Deserializer.execute(data, response_schema(version))
     
