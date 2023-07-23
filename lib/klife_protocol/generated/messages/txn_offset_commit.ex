@@ -92,6 +92,11 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
   end
 
   @doc """
+  Returns the message api key number.
+  """
+  def api_key(), do: @api_key
+
+  @doc """
   Returns the current max supported version of this message.
   """
   def max_supported_version(), do: 3
