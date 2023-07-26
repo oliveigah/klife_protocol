@@ -4,7 +4,7 @@ defmodule KlifeProtocol.MixProject do
   def project do
     [
       app: :klife_protocol,
-      version: "0.2.0",
+      version: "0.2.1",
       elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -22,8 +22,7 @@ defmodule KlifeProtocol.MixProject do
         api_reference: true,
         filter_modules: ~r"KlifeProtocol.Messages.*|KlifeProtocol.Header",
         nest_modules_by_prefix: [KlifeProtocol.Messages]
-      ],
-
+      ]
     ]
   end
 
