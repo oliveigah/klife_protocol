@@ -13,7 +13,6 @@ if Mix.env() == :dev do
       "default" => "lib/klife_protocol/generated/messages/"
     }
 
-
     # There is a simple rule that define the request header version to be used
     # for all the messages. This rule is coded inside the eex template
 
@@ -35,7 +34,6 @@ if Mix.env() == :dev do
     @res_header_exceptions %{
       "ApiVersions" => {:fixed, 0}
     }
-
 
     # By default all messages are supported.
 

@@ -31,8 +31,10 @@ defmodule KlifeProtocol.TestSupport.Helpers do
       verify: :verify_peer,
       cacertfile: Path.relative("test/compose_files/truststore/ca.crt")
     ]
+
     socket_backend = :ssl
     opts = [backend: socket_backend, active: false] ++ ssl_opts
+
     Enum.each(@default_brokers_ssl, fn {broker, hostname} ->
       [host, port] = String.split(hostname, ":")
       result = Socket.connect(host, String.to_integer(port), opts)
@@ -43,6 +45,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
   def initialize_connections(nil) do
     socket_backend = :gen_tcp
     opts = [backend: socket_backend, active: false]
+
     Enum.each(@default_brokers, fn {broker, hostname} ->
       [host, port] = String.split(hostname, ":")
       result = Socket.connect(host, String.to_integer(port), opts)

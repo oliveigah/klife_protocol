@@ -122,8 +122,8 @@ defmodule KlifeProtocol.RecordBatch do
 
     serialized_rest = Serializer.execute(rest_input, @rest_schema)
 
-    for_length_serialized = serialized_rest <> for_crc_serialized
-    batch_length = byte_size(for_length_serialized)
+    for_length_serialized = [serialized_rest, for_crc_serialized]
+    batch_length = :erlang.iolist_size(for_length_serialized)
 
     base_input = %{
       base_offset: input.base_offset,
@@ -132,7 +132,7 @@ defmodule KlifeProtocol.RecordBatch do
 
     serialized_base = Serializer.execute(base_input, @base_batch_schema)
 
-    serialized_base <> for_length_serialized
+    [serialized_base | for_length_serialized]
   end
 
   def deserialize(<<input::binary>>) do

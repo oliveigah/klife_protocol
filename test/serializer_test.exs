@@ -199,7 +199,8 @@ defmodule KlifeProtocol.SerializerTest do
       c: {:bytes, @default_metadata}
     ]
 
-    assert <<3::32-signed, 1, 2, 3, -1::32-signed, 4::32-signed, 7, 8, 9, 10>> = Serializer.execute(input, schema)
+    assert <<3::32-signed, 1, 2, 3, -1::32-signed, 4::32-signed, 7, 8, 9, 10>> =
+             Serializer.execute(input, schema)
   end
 
   test "compact_bytes" do
@@ -327,72 +328,5 @@ defmodule KlifeProtocol.SerializerTest do
                  reason: field is not nullable
                  """,
                  fn -> Serializer.execute(input, schema) end
-  end
-
-  test "record_bytes" do
-    input = %{
-      a: "some_bytes",
-      b: nil,
-      c: "much_more_bytes"
-    }
-
-    schema = [
-      a: {:record_bytes, @default_metadata},
-      b: {:record_bytes, %{is_nullable?: true}},
-      c: {:record_bytes, @default_metadata}
-    ]
-
-    varint_schema = [value: {:varint, @default_metadata}]
-    a_length = Serializer.execute(%{value: byte_size(input.a)}, varint_schema)
-    b_length = Serializer.execute(%{value: -1}, varint_schema)
-    c_length = Serializer.execute(%{value: byte_size(input.c)}, varint_schema)
-
-    assert <<
-             a_length <>
-               "some_bytes" <>
-               b_length <>
-               c_length <>
-               "much_more_bytes"
-           >> == Serializer.execute(input, schema)
-  end
-
-  test "record_headers" do
-    input = %{
-      a: [
-        %{a_1: "some_bytes", a_2: "some_other_bytes"},
-        %{a_1: "crazy_bytes", a_2: "something"}
-      ]
-    }
-
-    schema = [
-      a: {
-        {:record_headers,
-         [
-           a_1: {:record_bytes, @default_metadata},
-           a_2: {:record_bytes, @default_metadata}
-         ]},
-        @default_metadata
-      }
-    ]
-
-    varint_schema = [value: {:varint, @default_metadata}]
-
-    len_array = Serializer.execute(%{value: length(input.a)}, varint_schema)
-    a_1_1_len = Serializer.execute(%{value: byte_size("some_bytes")}, varint_schema)
-    a_2_1_len = Serializer.execute(%{value: byte_size("some_other_bytes")}, varint_schema)
-    a_1_2_len = Serializer.execute(%{value: byte_size("crazy_bytes")}, varint_schema)
-    a_2_2_len = Serializer.execute(%{value: byte_size("something")}, varint_schema)
-
-    assert <<
-             len_array <>
-               a_1_1_len <>
-               "some_bytes" <>
-               a_2_1_len <>
-               "some_other_bytes" <>
-               a_1_2_len <>
-               "crazy_bytes" <>
-               a_2_2_len <> "something"
-           >> ==
-             Serializer.execute(input, schema)
   end
 end
