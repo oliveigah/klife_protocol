@@ -109,7 +109,7 @@ defmodule KlifeProtocol.RecordBatch do
           serialized_records_metadata =
             Serializer.execute(records_metadata_input, @records_metadata_schema)
 
-          serialized_records_metadata <> serialized_records
+          [serialized_records_metadata, serialized_records]
       end
 
     crc = :crc32cer.nif(for_crc_serialized)
@@ -132,7 +132,7 @@ defmodule KlifeProtocol.RecordBatch do
 
     serialized_base = Serializer.execute(base_input, @base_batch_schema)
 
-    [serialized_base | for_length_serialized]
+    [serialized_base, for_length_serialized]
   end
 
   def deserialize(<<input::binary>>) do
@@ -205,13 +205,14 @@ defmodule KlifeProtocol.RecordBatch do
     }
   end
 
+  # TODO: Remove the io_list_to_binary call for compress/2
   defp compress(serialized_records, 1) do
-    <<records_length::32-signed, records::binary>> = serialized_records
+    <<records_length::32-signed, records::binary>> = :erlang.iolist_to_binary(serialized_records)
     <<records_length::32-signed, :zlib.gzip(records)::binary>>
   end
 
   defp compress(serialized_records, 2) do
-    <<records_length::32-signed, records::binary>> = serialized_records
+    <<records_length::32-signed, records::binary>> = :erlang.iolist_to_binary(serialized_records)
     {:ok, compressed_records} = :snappyer.compress(records)
     <<records_length::32-signed, compressed_records::binary>>
   end

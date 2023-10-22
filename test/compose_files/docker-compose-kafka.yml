@@ -42,7 +42,6 @@ services:
     image: confluentinc/cp-kafka:7.4.0
     depends_on:
     - zookeeper
-    - kafka1
     ports:
     - "29092:9092"
     - "29093:9093"
@@ -66,7 +65,6 @@ services:
     image: confluentinc/cp-kafka:7.4.0
     depends_on:
     - zookeeper
-    - kafka2
     ports:
     - "39092:9092"
     - "39093:9093"

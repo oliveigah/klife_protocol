@@ -193,8 +193,6 @@ defmodule KlifeProtocol.Deserializer do
     end
   end
 
-  # TODO: Improve deserialize_array/4 algorithm to insert elements in the array with proper order
-  # so we can remove the call to Enum.reverse/1 on return
   defp deserialize_array(<<rest_data::binary>>, 0, _schema, result),
     do: {Enum.reverse(result), rest_data}
 

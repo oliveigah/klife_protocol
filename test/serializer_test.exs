@@ -14,7 +14,7 @@ defmodule KlifeProtocol.SerializerTest do
       c: {:boolean, @default_metadata}
     ]
 
-    assert <<1, 0, 1>> = Serializer.execute(input, schema)
+    assert <<1, 0, 1>> = Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "int8" do
@@ -26,7 +26,7 @@ defmodule KlifeProtocol.SerializerTest do
       c: {:int8, @default_metadata}
     ]
 
-    assert <<31, 123, 4>> = Serializer.execute(input, schema)
+    assert <<31, 123, 4>> = Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "int16" do
@@ -38,7 +38,8 @@ defmodule KlifeProtocol.SerializerTest do
       c: {:int16, @default_metadata}
     ]
 
-    assert <<31::16-signed, 123::16-signed, 4::16-signed>> = Serializer.execute(input, schema)
+    assert <<31::16-signed, 123::16-signed, 4::16-signed>> =
+             Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "int32" do
@@ -50,7 +51,8 @@ defmodule KlifeProtocol.SerializerTest do
       c: {:int32, @default_metadata}
     ]
 
-    assert <<31::32-signed, 123::32-signed, 4::32-signed>> = Serializer.execute(input, schema)
+    assert <<31::32-signed, 123::32-signed, 4::32-signed>> =
+             Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "uint32" do
@@ -62,7 +64,8 @@ defmodule KlifeProtocol.SerializerTest do
       c: {:uint32, %{is_nullable?: false}}
     ]
 
-    assert <<0::32-signed, 2::8-signed, 4_223_817_021::32>> = Serializer.execute(input, schema)
+    assert <<0::32-signed, 2::8-signed, 4_223_817_021::32>> =
+             Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "int64" do
@@ -74,7 +77,8 @@ defmodule KlifeProtocol.SerializerTest do
       c: {:int64, @default_metadata}
     ]
 
-    assert <<31::64-signed, 123::64-signed, 4::64-signed>> = Serializer.execute(input, schema)
+    assert <<31::64-signed, 123::64-signed, 4::64-signed>> =
+             Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "float64" do
@@ -86,7 +90,8 @@ defmodule KlifeProtocol.SerializerTest do
       c: {:float64, @default_metadata}
     ]
 
-    assert <<31.123::float, 123.0::float, 4.0::float>> = Serializer.execute(input, schema)
+    assert <<31.123::float, 123.0::float, 4.0::float>> =
+             Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "string" do
@@ -106,7 +111,8 @@ defmodule KlifeProtocol.SerializerTest do
              <<^size_b::16-signed>> <>
              "defgh" <>
              <<-1::16-signed>> <>
-             <<^size_d::16-signed>> <> "ij" = Serializer.execute(input, schema)
+             <<^size_d::16-signed>> <> "ij" =
+             Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "array - simple" do
@@ -130,7 +136,7 @@ defmodule KlifeProtocol.SerializerTest do
              <<^size_b::16-signed>> <>
              "b" <>
              <<^size_c::16-signed>> <>
-             "c" = Serializer.execute(input, schema)
+             "c" = Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "array - nested" do
@@ -187,7 +193,7 @@ defmodule KlifeProtocol.SerializerTest do
              "c" <>
              <<3::16-signed>> <>
              <<-1::32-signed>> <>
-             <<0::32-signed>> = Serializer.execute(input, schema)
+             <<0::32-signed>> = Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "bytes" do
@@ -200,7 +206,7 @@ defmodule KlifeProtocol.SerializerTest do
     ]
 
     assert <<3::32-signed, 1, 2, 3, -1::32-signed, 4::32-signed, 7, 8, 9, 10>> =
-             Serializer.execute(input, schema)
+             Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "compact_bytes" do
@@ -212,7 +218,8 @@ defmodule KlifeProtocol.SerializerTest do
       c: {:compact_bytes, @default_metadata}
     ]
 
-    assert <<4, 1, 2, 3, 0, 5, 7, 8, 9, 10>> = Serializer.execute(input, schema)
+    assert <<4, 1, 2, 3, 0, 5, 7, 8, 9, 10>> =
+             Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "compact_string" do
@@ -224,7 +231,8 @@ defmodule KlifeProtocol.SerializerTest do
       c: {:compact_string, @default_metadata}
     ]
 
-    assert <<4, "aaa", 0, 10, "abcabcabc">> = Serializer.execute(input, schema)
+    assert <<4, "aaa", 0, 10, "abcabcabc">> =
+             Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "compact_array - simple" do
@@ -238,7 +246,7 @@ defmodule KlifeProtocol.SerializerTest do
 
     assert <<3, 10::16-signed, 20::16-signed>> <>
              <<4, 2, "a", 2, "b", 2, "c">> <>
-             <<0>> = Serializer.execute(input, schema)
+             <<0>> = Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "compact_array - nested" do
@@ -258,7 +266,7 @@ defmodule KlifeProtocol.SerializerTest do
 
     assert <<3, 2, 10::16-signed, 3, 20::16-signed, 30::16-signed>> <>
              <<3, 4, 2, "a", 3, "bb", 4, "ccc", 3, 2, "d", 3, "ee">> =
-             Serializer.execute(input, schema)
+             Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "unsigned_varint" do
@@ -271,7 +279,8 @@ defmodule KlifeProtocol.SerializerTest do
       d: {:unsigned_varint, @default_metadata}
     ]
 
-    assert <<10, 120, 172, 2, 192, 132, 61>> = Serializer.execute(input, schema)
+    assert <<10, 120, 172, 2, 192, 132, 61>> =
+             Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "varint" do
@@ -284,7 +293,8 @@ defmodule KlifeProtocol.SerializerTest do
       d: {:varint, @default_metadata}
     ]
 
-    assert <<19, 239, 1, 215, 4, 160, 156, 1>> = Serializer.execute(input, schema)
+    assert <<19, 239, 1, 215, 4, 160, 156, 1>> =
+             Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "tag_buffer" do
@@ -300,7 +310,8 @@ defmodule KlifeProtocol.SerializerTest do
          ]}
     ]
 
-    assert <<2, 0, 5, 4, "aaa", 2, 3, 123::16-signed>> = Serializer.execute(input, schema)
+    assert <<2, 0, 5, 4, "aaa", 2, 3, 123::16-signed>> =
+             Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "empty tag_buffer" do
@@ -308,7 +319,7 @@ defmodule KlifeProtocol.SerializerTest do
 
     schema = [tag_buffer: {:tag_buffer, []}]
 
-    assert <<0>> = Serializer.execute(input, schema)
+    assert <<0>> = Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 
   test "raise not null exception with key" do

@@ -56,11 +56,10 @@ if Mix.env() in [:dev] do
     end
 
     def do_run_bench("test") do
-      input = %{a: 1, b: 2, c: 3}
-
       Benchee.run(
         %{
-          "test" => fn -> Map.get(input, :b) end
+          "prepend" => fn -> Enum.reduce(1..1000, [], fn i, acc -> [i | acc] end) end,
+          "new_list" => fn -> Enum.reduce(1..1000, [], fn i, acc -> [acc, i] end) end
         },
         time: 10,
         memory_time: 2

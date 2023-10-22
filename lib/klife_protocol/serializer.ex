@@ -1,8 +1,8 @@
 defmodule KlifeProtocol.Serializer do
   alias KlifeProtocol.RecordBatch
 
-  def execute(%{} = input, schema, append_binary \\ <<>>) do
-    do_serialize(schema, input, append_binary)
+  def execute(%{} = input, schema, append_list \\ []) do
+    do_serialize(schema, input, append_list)
   end
 
   #  Base case for the main function
@@ -14,7 +14,7 @@ defmodule KlifeProtocol.Serializer do
   defp do_serialize([{_key, {:tag_buffer, _} = type} | rest_schema], %{} = input_map, acc_data) do
     input_map
     |> do_serialize_value(type)
-    |> then(&do_serialize(rest_schema, input_map, acc_data <> &1))
+    |> then(&do_serialize(rest_schema, input_map, [acc_data, &1]))
   end
 
   # Main function - The recursion always start here
@@ -22,7 +22,7 @@ defmodule KlifeProtocol.Serializer do
     input_map
     |> Map.get(key)
     |> serialize_value({key, type})
-    |> then(&do_serialize(rest_schema, input_map, acc_data <> &1))
+    |> then(&do_serialize(rest_schema, input_map, [acc_data, &1]))
   end
 
   # Used for arrays of complex data types
@@ -36,28 +36,7 @@ defmodule KlifeProtocol.Serializer do
   defp do_serialize(type, [val | rest_val], acc_data) do
     val
     |> do_serialize_value(type)
-    |> then(&do_serialize(type, rest_val, acc_data <> &1))
-  end
-
-  # Base case for main func iolist
-  defp do_serialize_to_iolist([], map, result_data) when is_map(map), do: result_data
-
-  # Base case for array iolist
-  defp do_serialize_to_iolist(_schema, [], result_data), do: result_data
-
-  # Main function for iolist - The recursion always start here
-  defp do_serialize_to_iolist([{key, type} | rest_schema], %{} = input_map, acc_data) do
-    input_map
-    |> Map.get(key)
-    |> serialize_value({key, type})
-    |> then(&do_serialize_to_iolist(rest_schema, input_map, [&1 | acc_data]))
-  end
-
-  # Used for arrays of complex data types
-  defp do_serialize_to_iolist(schema, [val | rest_val], acc_data) when is_list(schema) do
-    schema
-    |> do_serialize_to_iolist(val, [])
-    |> then(&do_serialize_to_iolist(schema, rest_val, [&1 | acc_data]))
+    |> then(&do_serialize(type, rest_val, [acc_data, &1]))
   end
 
   defp serialize_value(nil, {key, {_, %{is_nullable?: false}} = type}) do
@@ -70,7 +49,7 @@ defmodule KlifeProtocol.Serializer do
     """
   end
 
-  defp serialize_value(val, {_key, {type, _metadata}}), do: do_serialize_value(val, type)
+  defp serialize_value(val, {_key, {type, _metadata}}), do: [do_serialize_value(val, type)]
 
   defp do_serialize_value(true, :boolean), do: <<1>>
   defp do_serialize_value(false, :boolean), do: <<0>>
@@ -87,7 +66,7 @@ defmodule KlifeProtocol.Serializer do
   defp do_serialize_value(nil, :string), do: <<-1::16-signed>>
 
   defp do_serialize_value(val, :string) when is_binary(val),
-    do: <<byte_size(val)::16-signed>> <> val
+    do: [<<byte_size(val)::16-signed>>, val]
 
   defp do_serialize_value(val, :uuid) when is_binary(val) do
     val
@@ -98,7 +77,7 @@ defmodule KlifeProtocol.Serializer do
 
   defp do_serialize_value(nil, :bytes), do: <<-1::32-signed>>
 
-  defp do_serialize_value(val, :bytes), do: <<byte_size(val)::32-signed>> <> val
+  defp do_serialize_value(val, :bytes), do: [<<byte_size(val)::32-signed>>, val]
 
   defp do_serialize_value(nil, {:array, _schema}), do: <<-1::32-signed>>
 
@@ -108,12 +87,12 @@ defmodule KlifeProtocol.Serializer do
   defp do_serialize_value(nil, :compact_bytes), do: do_serialize_value(0, :unsigned_varint)
 
   defp do_serialize_value(val, :compact_bytes),
-    do: do_serialize_value(byte_size(val) + 1, :unsigned_varint) <> val
+    do: [do_serialize_value(byte_size(val) + 1, :unsigned_varint), val]
 
   defp do_serialize_value(nil, :compact_string), do: do_serialize_value(0, :unsigned_varint)
 
   defp do_serialize_value(val, :compact_string),
-    do: do_serialize_value(byte_size(val) + 1, :unsigned_varint) <> val
+    do: [do_serialize_value(byte_size(val) + 1, :unsigned_varint), val]
 
   defp do_serialize_value(nil, {:compact_array, _schema}),
     do: do_serialize_value(0, :unsigned_varint)
@@ -151,20 +130,20 @@ defmodule KlifeProtocol.Serializer do
   defp do_serialize_value(nil, :record_bytes), do: [do_serialize_value(-1, :varint)]
 
   defp do_serialize_value(val, :record_bytes),
-    do: [val, do_serialize_value(byte_size(val), :varint)]
+    do: [do_serialize_value(byte_size(val), :varint), val]
 
   defp do_serialize_value(nil, {:record_headers, schema}) do
     do_serialize_value([], {:record_headers, schema})
   end
 
   defp do_serialize_value(val, {:record_headers, schema}) do
-    do_serialize_to_iolist(schema, val, [do_serialize_value(length(val), :varint)])
+    do_serialize(schema, val, [do_serialize_value(length(val), :varint)])
   end
 
   defp do_serialize_value(val, :unsigned_varint) when val <= 127, do: <<val>>
 
   defp do_serialize_value(val, :unsigned_varint),
-    do: <<1::1, val::7, do_serialize_value(Bitwise.bsr(val, 7), :unsigned_varint)::binary>>
+    do: [<<1::1, val::7>>, do_serialize_value(Bitwise.bsr(val, 7), :unsigned_varint)]
 
   defp do_serialize_value(val, :varint) when val >= 0,
     do: do_serialize_value(2 * val, :unsigned_varint)
@@ -191,24 +170,19 @@ defmodule KlifeProtocol.Serializer do
     raw_value = Map.fetch!(input_map, key)
 
     value = serialize_value(raw_value, {key, {type, metadata}})
-    size = do_serialize_value(byte_size(value) + 1, :unsigned_varint)
+    size = do_serialize_value(:erlang.iolist_size(value) + 1, :unsigned_varint)
     tag = do_serialize_value(tag, :unsigned_varint)
 
-    final_val = tag <> size <> value
+    final_val = [tag, size, value]
 
-    serialize_tag_buffer(rest_schema, input_map, acc_data <> final_val)
+    serialize_tag_buffer(rest_schema, input_map, [acc_data, final_val])
   end
 
-  defp serialize_records(_schema, [], acc_data),
-    do:
-      acc_data
-      |> List.flatten()
-      |> Enum.reverse()
-      |> :erlang.iolist_to_binary()
+  defp serialize_records(_schema, [], acc_data), do: acc_data
 
   defp serialize_records(schema, [val | rest_val], acc_data) when is_list(schema) do
-    serialized_record = do_serialize_to_iolist(schema, val, [])
+    serialized_record = do_serialize(schema, val, [])
     serialized_len = do_serialize_value(:erlang.iolist_size(serialized_record), :varint)
-    serialize_records(schema, rest_val, [serialized_record, serialized_len | acc_data])
+    serialize_records(schema, rest_val, [acc_data, serialized_len, serialized_record])
   end
 end
