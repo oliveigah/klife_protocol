@@ -27,7 +27,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
   - Version 6 enables flexible versions.
   - Version 7 is the same as version 6 (KIP-734).
   - Version 8 enables listing offsets by local log start offset.
-  This is the ealiest log start offset in the local log. (KIP-405).
+  This is the earliest log start offset in the local log. (KIP-405).
 
   """
 
@@ -43,7 +43,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
   Receives a map and serialize it to kafka wire format of the given version.
 
   Input content fields:
-  - replica_id: The broker ID of the requestor, or -1 if this request is being made by a normal consumer. (int32 | versions 0+)
+  - replica_id: The broker ID of the requester, or -1 if this request is being made by a normal consumer. (int32 | versions 0+)
   - isolation_level: This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records (int8 | versions 2+)
   - topics: Each topic in the request. ([]ListOffsetsTopic | versions 0+)
       - name: The topic name. (string | versions 0+)

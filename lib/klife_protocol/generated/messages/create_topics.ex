@@ -24,7 +24,7 @@ defmodule KlifeProtocol.Messages.CreateTopics do
   Version 5 also returns topic configs in the response (KIP-525).
   - Version 6 is identical to version 5 but may return a THROTTLING_QUOTA_EXCEEDED error
   in the response if the topics creation is throttled (KIP-599).
-  - Version 7 returns the topic ID of the newly created topic if creation is sucessful.
+  - Version 7 returns the topic ID of the newly created topic if creation is successful.
 
   """
 

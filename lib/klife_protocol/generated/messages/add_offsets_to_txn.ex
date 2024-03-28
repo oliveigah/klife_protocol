@@ -10,11 +10,13 @@ defmodule KlifeProtocol.Messages.AddOffsetsToTxn do
   - Version 1 is the same as version 0.
   - Version 2 adds the support for new error code PRODUCER_FENCED.
   - Version 3 enables flexible versions.
+  - Version 4 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
 
   Response versions summary:
   - Starting in version 1, on quota violation brokers send out responses before throttling.
   - Version 2 adds the support for new error code PRODUCER_FENCED.
   - Version 3 enables flexible versions.
+  - Version 4 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
 
   """
 
@@ -85,7 +87,7 @@ defmodule KlifeProtocol.Messages.AddOffsetsToTxn do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 3
+  def max_supported_version(), do: 4
 
   @doc """
   Returns the current min supported version of this message.
@@ -131,6 +133,15 @@ defmodule KlifeProtocol.Messages.AddOffsetsToTxn do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(4),
+    do: [
+      transactional_id: {:compact_string, %{is_nullable?: false}},
+      producer_id: {:int64, %{is_nullable?: false}},
+      producer_epoch: {:int16, %{is_nullable?: false}},
+      group_id: {:compact_string, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   defp request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message AddOffsetsToTxn")
 
@@ -153,6 +164,13 @@ defmodule KlifeProtocol.Messages.AddOffsetsToTxn do
     ]
 
   defp response_schema(3),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  defp response_schema(4),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},

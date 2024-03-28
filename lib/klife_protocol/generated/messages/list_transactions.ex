@@ -7,8 +7,10 @@ defmodule KlifeProtocol.Messages.ListTransactions do
   Kafka protocol ListTransactions message
 
   Request versions summary:   
+  - Version 1: adds DurationFilter to list transactions older than specified duration
 
   Response versions summary:
+  - Version 1 is the same as version 0 (KIP-994).
 
   """
 
@@ -26,6 +28,7 @@ defmodule KlifeProtocol.Messages.ListTransactions do
   Input content fields:
   - state_filters: The transaction states to filter by: if empty, all transactions are returned; if non-empty, then only transactions matching one of the filtered states will be returned ([]string | versions 0+)
   - producer_id_filters: The producerIds to filter by: if empty, all transactions will be returned; if non-empty, only transactions which match one of the filtered producerIds will be returned ([]int64 | versions 0+)
+  - duration_filter: Duration (in millis) to filter by: if < 0, all transactions will be returned; otherwise, only transactions running longer than this duration will be returned (int64 | versions 1+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -82,7 +85,7 @@ defmodule KlifeProtocol.Messages.ListTransactions do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 0
+  def max_supported_version(), do: 1
 
   @doc """
   Returns the current min supported version of this message.
@@ -102,10 +105,34 @@ defmodule KlifeProtocol.Messages.ListTransactions do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(1),
+    do: [
+      state_filters: {{:compact_array, :compact_string}, %{is_nullable?: false}},
+      producer_id_filters: {{:compact_array, :int64}, %{is_nullable?: false}},
+      duration_filter: {:int64, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   defp request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message ListTransactions")
 
   defp response_schema(0),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      unknown_state_filters: {{:compact_array, :compact_string}, %{is_nullable?: false}},
+      transaction_states:
+        {{:compact_array,
+          [
+            transactional_id: {:compact_string, %{is_nullable?: false}},
+            producer_id: {:int64, %{is_nullable?: false}},
+            transaction_state: {:compact_string, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  defp response_schema(1),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},

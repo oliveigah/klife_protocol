@@ -8,6 +8,9 @@ defmodule KlifeProtocol.Messages.DescribeLogDirs do
 
   Request versions summary:   
   - Version 1 is the same as version 0.
+  Version 2 is the first flexible version.
+  Version 3 is the same as version 2 (new field in response).
+  Version 4 is the same as version 2 (new fields in response).
 
   Response versions summary:
   - Starting in version 1, on quota violation, brokers send out responses before throttling.

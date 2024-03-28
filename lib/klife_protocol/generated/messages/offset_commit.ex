@@ -14,6 +14,8 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   - Version 6 adds the leader epoch for fencing.
   - version 7 adds a new field called groupInstanceId to indicate member identity across restarts.
   - Version 8 is the first flexible version.
+  - Version 9 is the first version that can be used with the new consumer group protocol (KIP-848). The
+  request is the same as version 8.
 
   Response versions summary:
   - Versions 1 and 2 are the same as version 0.
@@ -22,6 +24,9 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   - Versions 5 and 6 are the same as version 4.
   - Version 7 offsetCommitRequest supports a new field called groupInstanceId to indicate member identity across restarts.
   - Version 8 is the first flexible version.
+  - Version 9 is the first version that can be used with the new consumer group protocol (KIP-848). The response is
+  the same as version 8 but can return STALE_MEMBER_EPOCH when the new consumer group protocol is used and
+  GROUP_ID_NOT_FOUND when the group does not exist for both protocols.
 
   """
 
@@ -38,7 +43,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
 
   Input content fields:
   - group_id: The unique group identifier. (string | versions 0+)
-  - generation_id: The generation of the group. (int32 | versions 1+)
+  - generation_id_or_member_epoch: The generation of the group if using the classic group protocol or the member epoch if using the consumer protocol. (int32 | versions 1+)
   - member_id: The member ID assigned by the group coordinator. (string | versions 1+)
   - group_instance_id: The unique identifier of the consumer instance provided by end user. (string | versions 7+)
   - retention_time_ms: The time period in ms to retain the offset. (int64 | versions 2-4)
@@ -105,7 +110,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 8
+  def max_supported_version(), do: 9
 
   @doc """
   Returns the current min supported version of this message.
@@ -138,7 +143,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   defp request_schema(1),
     do: [
       group_id: {:string, %{is_nullable?: false}},
-      generation_id: {:int32, %{is_nullable?: false}},
+      generation_id_or_member_epoch: {:int32, %{is_nullable?: false}},
       member_id: {:string, %{is_nullable?: false}},
       topics:
         {{:array,
@@ -158,7 +163,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   defp request_schema(2),
     do: [
       group_id: {:string, %{is_nullable?: false}},
-      generation_id: {:int32, %{is_nullable?: false}},
+      generation_id_or_member_epoch: {:int32, %{is_nullable?: false}},
       member_id: {:string, %{is_nullable?: false}},
       retention_time_ms: {:int64, %{is_nullable?: false}},
       topics:
@@ -178,7 +183,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   defp request_schema(3),
     do: [
       group_id: {:string, %{is_nullable?: false}},
-      generation_id: {:int32, %{is_nullable?: false}},
+      generation_id_or_member_epoch: {:int32, %{is_nullable?: false}},
       member_id: {:string, %{is_nullable?: false}},
       retention_time_ms: {:int64, %{is_nullable?: false}},
       topics:
@@ -198,7 +203,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   defp request_schema(4),
     do: [
       group_id: {:string, %{is_nullable?: false}},
-      generation_id: {:int32, %{is_nullable?: false}},
+      generation_id_or_member_epoch: {:int32, %{is_nullable?: false}},
       member_id: {:string, %{is_nullable?: false}},
       retention_time_ms: {:int64, %{is_nullable?: false}},
       topics:
@@ -218,7 +223,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   defp request_schema(5),
     do: [
       group_id: {:string, %{is_nullable?: false}},
-      generation_id: {:int32, %{is_nullable?: false}},
+      generation_id_or_member_epoch: {:int32, %{is_nullable?: false}},
       member_id: {:string, %{is_nullable?: false}},
       topics:
         {{:array,
@@ -237,7 +242,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   defp request_schema(6),
     do: [
       group_id: {:string, %{is_nullable?: false}},
-      generation_id: {:int32, %{is_nullable?: false}},
+      generation_id_or_member_epoch: {:int32, %{is_nullable?: false}},
       member_id: {:string, %{is_nullable?: false}},
       topics:
         {{:array,
@@ -257,7 +262,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   defp request_schema(7),
     do: [
       group_id: {:string, %{is_nullable?: false}},
-      generation_id: {:int32, %{is_nullable?: false}},
+      generation_id_or_member_epoch: {:int32, %{is_nullable?: false}},
       member_id: {:string, %{is_nullable?: false}},
       group_instance_id: {:string, %{is_nullable?: true}},
       topics:
@@ -278,7 +283,31 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   defp request_schema(8),
     do: [
       group_id: {:compact_string, %{is_nullable?: false}},
-      generation_id: {:int32, %{is_nullable?: false}},
+      generation_id_or_member_epoch: {:int32, %{is_nullable?: false}},
+      member_id: {:compact_string, %{is_nullable?: false}},
+      group_instance_id: {:compact_string, %{is_nullable?: true}},
+      topics:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  committed_offset: {:int64, %{is_nullable?: false}},
+                  committed_leader_epoch: {:int32, %{is_nullable?: false}},
+                  committed_metadata: {:compact_string, %{is_nullable?: true}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  defp request_schema(9),
+    do: [
+      group_id: {:compact_string, %{is_nullable?: false}},
+      generation_id_or_member_epoch: {:int32, %{is_nullable?: false}},
       member_id: {:compact_string, %{is_nullable?: false}},
       group_instance_id: {:compact_string, %{is_nullable?: true}},
       topics:
@@ -428,6 +457,25 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
     ]
 
   defp response_schema(8),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  defp response_schema(9),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       topics:

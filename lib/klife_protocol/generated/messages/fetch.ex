@@ -8,7 +8,7 @@ defmodule KlifeProtocol.Messages.Fetch do
 
   Request versions summary:   
   - Version 1 is the same as version 0.
-  - Starting in Version 2, the requestor must be able to handle Kafka Log
+  - Starting in Version 2, the requester must be able to handle Kafka Log
   Message format version 1.
   - Version 3 adds MaxBytes.  Starting in version 3, the partition ordering in
   the request is now relevant.  Partitions will be processed in the order
@@ -29,6 +29,7 @@ defmodule KlifeProtocol.Messages.Fetch do
   - Version 14 is the same as version 13 but it also receives a new error called OffsetMovedToTieredStorageException(KIP-405)
   - Version 15 adds the ReplicaState which includes new field ReplicaEpoch and the ReplicaId. Also,
   deprecate the old ReplicaId field and set its default value to -1. (KIP-903)
+  - Version 16 is the same as version 15 (KIP-951).
 
   Response versions summary:
   - Version 1 adds throttle time.
@@ -47,6 +48,7 @@ defmodule KlifeProtocol.Messages.Fetch do
   - Version 13 replaces the topic name field with topic ID (KIP-516).
   - Version 14 is the same as version 13 but it also receives a new error called OffsetMovedToTieredStorageException (KIP-405)
   - Version 15 is the same as version 14 (KIP-903).
+  - Version 16 adds the 'NodeEndpoints' field (KIP-951).
 
   """
 
@@ -129,6 +131,11 @@ defmodule KlifeProtocol.Messages.Fetch do
               - first_offset: The first offset in the aborted transaction. (int64 | versions 4+)
           - preferred_read_replica: The preferred read replica for the consumer to use on its next fetch request (int32 | versions 11+)
           - records: The record data. (records | versions 0+)
+  - node_endpoints: Endpoints for all current-leaders enumerated in PartitionData, with errors NOT_LEADER_OR_FOLLOWER & FENCED_LEADER_EPOCH. ([]NodeEndpoint | versions 16+)
+      - node_id: The ID of the associated node. (int32 | versions 16+)
+      - host: The node's hostname. (string | versions 16+)
+      - port: The node's port. (int32 | versions 16+)
+      - rack: The rack of the node, or null if it has not been assigned to a rack. (string | versions 16+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)
@@ -163,7 +170,7 @@ defmodule KlifeProtocol.Messages.Fetch do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 15
+  def max_supported_version(), do: 16
 
   @doc """
   Returns the current min supported version of this message.
@@ -507,6 +514,54 @@ defmodule KlifeProtocol.Messages.Fetch do
     ]
 
   defp request_schema(15),
+    do: [
+      max_wait_ms: {:int32, %{is_nullable?: false}},
+      min_bytes: {:int32, %{is_nullable?: false}},
+      max_bytes: {:int32, %{is_nullable?: false}},
+      isolation_level: {:int8, %{is_nullable?: false}},
+      session_id: {:int32, %{is_nullable?: false}},
+      session_epoch: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition: {:int32, %{is_nullable?: false}},
+                  current_leader_epoch: {:int32, %{is_nullable?: false}},
+                  fetch_offset: {:int64, %{is_nullable?: false}},
+                  last_fetched_epoch: {:int32, %{is_nullable?: false}},
+                  log_start_offset: {:int64, %{is_nullable?: false}},
+                  partition_max_bytes: {:int32, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      forgotten_topics_data:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions: {{:compact_array, :int32}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      rack_id: {:compact_string, %{is_nullable?: false}},
+      tag_buffer:
+        {:tag_buffer,
+         [
+           cluster_id: {{0, :compact_string}, %{is_nullable?: true}},
+           replica_state:
+             {{1,
+               {:object,
+                [
+                  replica_id: {:int32, %{is_nullable?: false}},
+                  replica_epoch: {:int64, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}}, %{is_nullable?: false}}
+         ]}
+    ]
+
+  defp request_schema(16),
     do: [
       max_wait_ms: {:int32, %{is_nullable?: false}},
       min_bytes: {:int32, %{is_nullable?: false}},
@@ -1013,6 +1068,79 @@ defmodule KlifeProtocol.Messages.Fetch do
             tag_buffer: {:tag_buffer, %{}}
           ]}, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  defp response_schema(16),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      session_id: {:int32, %{is_nullable?: false}},
+      responses:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  high_watermark: {:int64, %{is_nullable?: false}},
+                  last_stable_offset: {:int64, %{is_nullable?: false}},
+                  log_start_offset: {:int64, %{is_nullable?: false}},
+                  aborted_transactions:
+                    {{:compact_array,
+                      [
+                        producer_id: {:int64, %{is_nullable?: false}},
+                        first_offset: {:int64, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, %{}}
+                      ]}, %{is_nullable?: true}},
+                  preferred_read_replica: {:int32, %{is_nullable?: false}},
+                  records: {:compact_record_batch, %{is_nullable?: true}},
+                  tag_buffer:
+                    {:tag_buffer,
+                     %{
+                       0 =>
+                         {{:diverging_epoch,
+                           {:object,
+                            [
+                              epoch: {:int32, %{is_nullable?: false}},
+                              end_offset: {:int64, %{is_nullable?: false}},
+                              tag_buffer: {:tag_buffer, %{}}
+                            ]}}, %{is_nullable?: false}},
+                       1 =>
+                         {{:current_leader,
+                           {:object,
+                            [
+                              leader_id: {:int32, %{is_nullable?: false}},
+                              leader_epoch: {:int32, %{is_nullable?: false}},
+                              tag_buffer: {:tag_buffer, %{}}
+                            ]}}, %{is_nullable?: false}},
+                       2 =>
+                         {{:snapshot_id,
+                           {:object,
+                            [
+                              end_offset: {:int64, %{is_nullable?: false}},
+                              epoch: {:int32, %{is_nullable?: false}},
+                              tag_buffer: {:tag_buffer, %{}}
+                            ]}}, %{is_nullable?: false}}
+                     }}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer:
+        {:tag_buffer,
+         %{
+           0 =>
+             {{:node_endpoints,
+               {:compact_array,
+                [
+                  node_id: {:int32, %{is_nullable?: false}},
+                  host: {:compact_string, %{is_nullable?: false}},
+                  port: {:int32, %{is_nullable?: false}},
+                  rack: {:compact_string, %{is_nullable?: true}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}}, %{is_nullable?: false}}
+         }}
     ]
 
   defp response_schema(unkown_version),

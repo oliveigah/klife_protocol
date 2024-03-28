@@ -11,6 +11,7 @@ defmodule KlifeProtocol.Messages.AddPartitionsToTxn do
   - Version 2 adds the support for new error code PRODUCER_FENCED.
   - Version 3 enables flexible versions.
   - Version 4 adds VerifyOnly field to check if partitions are already in transaction and adds support to batch multiple transactions.
+  - Version 5 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
   Versions 3 and below will be exclusively used by clients and versions 4 and above will be used by brokers.
 
   Response versions summary:
@@ -18,6 +19,7 @@ defmodule KlifeProtocol.Messages.AddPartitionsToTxn do
   - Version 2 adds the support for new error code PRODUCER_FENCED.
   - Version 3 enables flexible versions.
   - Version 4 adds support to batch multiple transactions and a top level error code.
+  - Version 5 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
 
   """
 
@@ -106,7 +108,7 @@ defmodule KlifeProtocol.Messages.AddPartitionsToTxn do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 4
+  def max_supported_version(), do: 5
 
   @doc """
   Returns the current min supported version of this message.
@@ -174,6 +176,27 @@ defmodule KlifeProtocol.Messages.AddPartitionsToTxn do
     ]
 
   defp request_schema(4),
+    do: [
+      transactions:
+        {{:compact_array,
+          [
+            transactional_id: {:compact_string, %{is_nullable?: false}},
+            producer_id: {:int64, %{is_nullable?: false}},
+            producer_epoch: {:int16, %{is_nullable?: false}},
+            verify_only: {:boolean, %{is_nullable?: false}},
+            topics:
+              {{:compact_array,
+                [
+                  name: {:compact_string, %{is_nullable?: false}},
+                  partitions: {{:compact_array, :int32}, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  defp request_schema(5),
     do: [
       transactions:
         {{:compact_array,
@@ -265,6 +288,32 @@ defmodule KlifeProtocol.Messages.AddPartitionsToTxn do
     ]
 
   defp response_schema(4),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      results_by_transaction:
+        {{:compact_array,
+          [
+            transactional_id: {:compact_string, %{is_nullable?: false}},
+            topic_results:
+              {{:compact_array,
+                [
+                  name: {:compact_string, %{is_nullable?: false}},
+                  results_by_partition:
+                    {{:compact_array,
+                      [
+                        partition_index: {:int32, %{is_nullable?: false}},
+                        partition_error_code: {:int16, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, %{}}
+                      ]}, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  defp response_schema(5),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},

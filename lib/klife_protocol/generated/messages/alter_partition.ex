@@ -15,7 +15,7 @@ defmodule KlifeProtocol.Messages.AlterPartition do
   - Version 1 adds LeaderRecoveryState field (KIP-704).
   - Version 2 adds TopicId field to replace TopicName field, can return the following new errors:
   INELIGIBLE_REPLICA, NEW_LEADER_ELECTED and UNKNOWN_TOPIC_ID (KIP-841).
-  - Version 3 is the same as vesion 2 (KIP-903).
+  - Version 3 is the same as version 2 (KIP-903).
 
   """
 

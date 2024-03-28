@@ -11,12 +11,14 @@ defmodule KlifeProtocol.Messages.FindCoordinator do
   - Version 2 is the same as version 1.
   - Version 3 is the first flexible version.
   - Version 4 adds support for batching via CoordinatorKeys (KIP-699)
+  - Version 5 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
 
   Response versions summary:
   - Version 1 adds throttle time and error messages.
   - Starting in version 2, on quota violation, brokers send out responses before throttling.
   - Version 3 is the first flexible version.
   - Version 4 adds support for batching via Coordinators (KIP-699)
+  - Version 5 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
 
   """
 
@@ -97,7 +99,7 @@ defmodule KlifeProtocol.Messages.FindCoordinator do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 4
+  def max_supported_version(), do: 5
 
   @doc """
   Returns the current min supported version of this message.
@@ -126,6 +128,13 @@ defmodule KlifeProtocol.Messages.FindCoordinator do
     ]
 
   defp request_schema(4),
+    do: [
+      key_type: {:int8, %{is_nullable?: false}},
+      coordinator_keys: {{:compact_array, :compact_string}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  defp request_schema(5),
     do: [
       key_type: {:int8, %{is_nullable?: false}},
       coordinator_keys: {{:compact_array, :compact_string}, %{is_nullable?: false}},
@@ -175,6 +184,23 @@ defmodule KlifeProtocol.Messages.FindCoordinator do
     ]
 
   defp response_schema(4),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      coordinators:
+        {{:compact_array,
+          [
+            key: {:compact_string, %{is_nullable?: false}},
+            node_id: {:int32, %{is_nullable?: false}},
+            host: {:compact_string, %{is_nullable?: false}},
+            port: {:int32, %{is_nullable?: false}},
+            error_code: {:int16, %{is_nullable?: false}},
+            error_message: {:compact_string, %{is_nullable?: true}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  defp response_schema(5),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       coordinators:

@@ -10,12 +10,15 @@ defmodule KlifeProtocol.Messages.ListGroups do
   - Version 1 and 2 are the same as version 0.
   - Version 3 is the first flexible version.
   - Version 4 adds the StatesFilter field (KIP-518).
+  - Version 5 adds the TypesFilter field (KIP-848).
 
   Response versions summary:
   - Version 1 adds the throttle time.
-  - Starting in version 2, on quota violation, brokers send out responses before throttling.
+  - Starting in version 2, on quota violation, brokers send out
+  responses before throttling.
   - Version 3 is the first flexible version.
   - Version 4 adds the GroupState field (KIP-518).
+  - Version 5 adds the GroupType field (KIP-848).
 
   """
 
@@ -31,7 +34,8 @@ defmodule KlifeProtocol.Messages.ListGroups do
   Receives a map and serialize it to kafka wire format of the given version.
 
   Input content fields:
-  - states_filter: The states of the groups we want to list. If empty all groups are returned with their state. ([]string | versions 4+)
+  - states_filter: The states of the groups we want to list. If empty, all groups are returned with their state. ([]string | versions 4+)
+  - types_filter: The types of the groups we want to list. If empty, all groups are returned with their type. ([]string | versions 5+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -53,6 +57,7 @@ defmodule KlifeProtocol.Messages.ListGroups do
       - group_id: The group ID. (string | versions 0+)
       - protocol_type: The group protocol type. (string | versions 0+)
       - group_state: The group state name. (string | versions 4+)
+      - group_type: The group type name. (string | versions 5+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)
@@ -87,7 +92,7 @@ defmodule KlifeProtocol.Messages.ListGroups do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 4
+  def max_supported_version(), do: 5
 
   @doc """
   Returns the current min supported version of this message.
@@ -108,6 +113,13 @@ defmodule KlifeProtocol.Messages.ListGroups do
   defp request_schema(4),
     do: [
       states_filter: {{:compact_array, :compact_string}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  defp request_schema(5),
+    do: [
+      states_filter: {{:compact_array, :compact_string}, %{is_nullable?: false}},
+      types_filter: {{:compact_array, :compact_string}, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, []}
     ]
 
@@ -173,6 +185,22 @@ defmodule KlifeProtocol.Messages.ListGroups do
             group_id: {:compact_string, %{is_nullable?: false}},
             protocol_type: {:compact_string, %{is_nullable?: false}},
             group_state: {:compact_string, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  defp response_schema(5),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      groups:
+        {{:compact_array,
+          [
+            group_id: {:compact_string, %{is_nullable?: false}},
+            protocol_type: {:compact_string, %{is_nullable?: false}},
+            group_state: {:compact_string, %{is_nullable?: false}},
+            group_type: {:compact_string, %{is_nullable?: false}},
             tag_buffer: {:tag_buffer, %{}}
           ]}, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, %{}}

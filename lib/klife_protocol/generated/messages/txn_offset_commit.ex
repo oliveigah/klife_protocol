@@ -10,11 +10,13 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
   - Version 1 is the same as version 0.
   - Version 2 adds the committed leader epoch.
   - Version 3 adds the member.id, group.instance.id and generation.id.
+  - Version 4 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
 
   Response versions summary:
   - Starting in version 1, on quota violation, brokers send out responses before throttling.
   - Version 2 is the same as version 1.
   - Version 3 adds illegal generation, fenced instance id, and unknown member id errors.
+  - Version 4 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
 
   """
 
@@ -39,7 +41,7 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
   - group_instance_id: The unique identifier of the consumer instance provided by end user. (string | versions 3+)
   - topics: Each topic that we want to commit offsets for. ([]TxnOffsetCommitRequestTopic | versions 0+)
       - name: The topic name. (string | versions 0+)
-      - partitions: The partitions inside the topic that we want to committ offsets for. ([]TxnOffsetCommitRequestPartition | versions 0+)
+      - partitions: The partitions inside the topic that we want to commit offsets for. ([]TxnOffsetCommitRequestPartition | versions 0+)
           - partition_index: The index of the partition within the topic. (int32 | versions 0+)
           - committed_offset: The message offset to be committed. (int64 | versions 0+)
           - committed_leader_epoch: The leader epoch of the last consumed record. (int32 | versions 2+)
@@ -99,7 +101,7 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 3
+  def max_supported_version(), do: 4
 
   @doc """
   Returns the current min supported version of this message.
@@ -200,6 +202,33 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(4),
+    do: [
+      transactional_id: {:compact_string, %{is_nullable?: false}},
+      group_id: {:compact_string, %{is_nullable?: false}},
+      producer_id: {:int64, %{is_nullable?: false}},
+      producer_epoch: {:int16, %{is_nullable?: false}},
+      generation_id: {:int32, %{is_nullable?: false}},
+      member_id: {:compact_string, %{is_nullable?: false}},
+      group_instance_id: {:compact_string, %{is_nullable?: true}},
+      topics:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  committed_offset: {:int64, %{is_nullable?: false}},
+                  committed_leader_epoch: {:int32, %{is_nullable?: false}},
+                  committed_metadata: {:compact_string, %{is_nullable?: true}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   defp request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message TxnOffsetCommit")
 
@@ -252,6 +281,25 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
     ]
 
   defp response_schema(3),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  defp response_schema(4),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       topics:

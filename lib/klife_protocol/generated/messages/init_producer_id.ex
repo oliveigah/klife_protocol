@@ -11,12 +11,14 @@ defmodule KlifeProtocol.Messages.InitProducerId do
   - Version 2 is the first flexible version.
   - Version 3 adds ProducerId and ProducerEpoch, allowing producers to try to resume after an INVALID_PRODUCER_EPOCH error
   - Version 4 adds the support for new error code PRODUCER_FENCED.
+  - Verison 5 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
 
   Response versions summary:
   - Starting in version 1, on quota violation, brokers send out responses before throttling.
   - Version 2 is the first flexible version.
   - Version 3 is the same as version 2.
   - Version 4 adds the support for new error code PRODUCER_FENCED.
+  - Version 5 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
 
   """
 
@@ -89,7 +91,7 @@ defmodule KlifeProtocol.Messages.InitProducerId do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 4
+  def max_supported_version(), do: 5
 
   @doc """
   Returns the current min supported version of this message.
@@ -139,6 +141,15 @@ defmodule KlifeProtocol.Messages.InitProducerId do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(5),
+    do: [
+      transactional_id: {:compact_string, %{is_nullable?: true}},
+      transaction_timeout_ms: {:int32, %{is_nullable?: false}},
+      producer_id: {:int64, %{is_nullable?: false}},
+      producer_epoch: {:int16, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   defp request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message InitProducerId")
 
@@ -177,6 +188,15 @@ defmodule KlifeProtocol.Messages.InitProducerId do
     ]
 
   defp response_schema(4),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      producer_id: {:int64, %{is_nullable?: false}},
+      producer_epoch: {:int16, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  defp response_schema(5),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},

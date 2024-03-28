@@ -172,7 +172,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
   end
 
   def get_cluster_controller_broker() do
-    version = Messages.DescribeCluster.max_supported_version()
+    version = 0
     headers = genereate_headers()
 
     content = %{
@@ -263,7 +263,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
   def produce_message(topic_name, vals, opts \\ [])
 
   def produce_message(topic_name, vals, opts) when is_list(vals) do
-    version = Messages.Produce.max_supported_version()
+    version = 9
     partition_index = Keyword.get(opts, :index, 0)
     ts = Keyword.get(opts, :timestamp, DateTime.to_unix(DateTime.utc_now()))
     {:ok, _} = get_or_create_topic(topic_name, opts)

@@ -7,8 +7,11 @@ defmodule KlifeProtocol.Messages.DescribeCluster do
   Kafka protocol DescribeCluster message
 
   Request versions summary:   
+  - Version 1 adds EndpointType for KIP-919 support.
 
   Response versions summary:
+  - Version 1 adds the EndpointType field, and makes MISMATCHED_ENDPOINT_TYPE and
+  UNSUPPORTED_ENDPOINT_TYPE valid top-level response error codes.
 
   """
 
@@ -25,6 +28,7 @@ defmodule KlifeProtocol.Messages.DescribeCluster do
 
   Input content fields:
   - include_cluster_authorized_operations: Whether to include cluster authorized operations. (bool | versions 0+)
+  - endpoint_type: The endpoint type to describe. 1=brokers, 2=controllers. (int8 | versions 1+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -43,6 +47,7 @@ defmodule KlifeProtocol.Messages.DescribeCluster do
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code: The top-level error code, or 0 if there was no error (int16 | versions 0+)
   - error_message: The top-level error message, or null if there was no error. (string | versions 0+)
+  - endpoint_type: The endpoint type that was described. 1=brokers, 2=controllers. (int8 | versions 1+)
   - cluster_id: The cluster ID that responding broker belongs to. (string | versions 0+)
   - controller_id: The ID of the controller broker. (int32 | versions 0+)
   - brokers: Each broker in the response. ([]DescribeClusterBroker | versions 0+)
@@ -85,7 +90,7 @@ defmodule KlifeProtocol.Messages.DescribeCluster do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 0
+  def max_supported_version(), do: 1
 
   @doc """
   Returns the current min supported version of this message.
@@ -104,6 +109,13 @@ defmodule KlifeProtocol.Messages.DescribeCluster do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  defp request_schema(1),
+    do: [
+      include_cluster_authorized_operations: {:boolean, %{is_nullable?: false}},
+      endpoint_type: {:int8, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   defp request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message DescribeCluster")
 
@@ -112,6 +124,27 @@ defmodule KlifeProtocol.Messages.DescribeCluster do
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
       error_message: {:compact_string, %{is_nullable?: true}},
+      cluster_id: {:compact_string, %{is_nullable?: false}},
+      controller_id: {:int32, %{is_nullable?: false}},
+      brokers:
+        {{:compact_array,
+          [
+            broker_id: {:int32, %{is_nullable?: false}},
+            host: {:compact_string, %{is_nullable?: false}},
+            port: {:int32, %{is_nullable?: false}},
+            rack: {:compact_string, %{is_nullable?: true}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      cluster_authorized_operations: {:int32, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  defp response_schema(1),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      error_message: {:compact_string, %{is_nullable?: true}},
+      endpoint_type: {:int8, %{is_nullable?: false}},
       cluster_id: {:compact_string, %{is_nullable?: false}},
       controller_id: {:int32, %{is_nullable?: false}},
       brokers:

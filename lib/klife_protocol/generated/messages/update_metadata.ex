@@ -34,6 +34,7 @@ defmodule KlifeProtocol.Messages.UpdateMetadata do
   Input content fields:
   - controller_id: The controller id. (int32 | versions 0+)
   - is_k_raft_controller: If KRaft controller id is used during migration. See KIP-866 (bool | versions 8+)
+  - type: Indicates if this request is a Full metadata snapshot (2), Incremental (1), or Unknown (0). Using during ZK migration, see KIP-866 (int8 | versions 8+)
   - controller_epoch: The controller epoch. (int32 | versions 0+)
   - broker_epoch: The broker epoch. (int64 | versions 5+)
   - ungrouped_partition_states: In older versions of this RPC, each partition that we would like to update. ([]UpdateMetadataPartitionState | versions 0-4)
@@ -450,7 +451,7 @@ defmodule KlifeProtocol.Messages.UpdateMetadata do
             rack: {:compact_string, %{is_nullable?: true}},
             tag_buffer: {:tag_buffer, []}
           ]}, %{is_nullable?: false}},
-      tag_buffer: {:tag_buffer, []}
+      tag_buffer: {:tag_buffer, [type: {{0, :int8}, %{is_nullable?: false}}]}
     ]
 
   defp request_schema(unkown_version),
