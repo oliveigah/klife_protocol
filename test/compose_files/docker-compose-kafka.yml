@@ -35,8 +35,8 @@ services:
       KAFKA_SSL_KEYSTORE_PASSWORD: klifeprotocol
       KAFKA_SSL_TRUSTSTORE_PASSWORD: klifeprotocol
     volumes:
-    - ./keystore/kafka.keystore.jks:/secrets/kafka.keystore.jks:ro,z
-    - ./truststore/kafka.truststore.jks:/secrets/kafka.truststore.jks:ro,z
+    - ./ssl/localhost.keystore.jks:/secrets/kafka.keystore.jks:ro,z
+    - ./ssl/localhost.truststore.jks:/secrets/kafka.truststore.jks:ro,z
 
   kafka2:
     image: confluentinc/cp-kafka:7.4.0
@@ -58,8 +58,8 @@ services:
       KAFKA_SSL_KEYSTORE_PASSWORD: klifeprotocol
       KAFKA_SSL_TRUSTSTORE_PASSWORD: klifeprotocol
     volumes:
-    - ./keystore/kafka.keystore.jks:/secrets/kafka.keystore.jks:ro,z
-    - ./truststore/kafka.truststore.jks:/secrets/kafka.truststore.jks:ro,z
+    - ./ssl/localhost.keystore.jks:/secrets/kafka.keystore.jks:ro,z
+    - ./ssl/localhost.truststore.jks:/secrets/kafka.truststore.jks:ro,z
 
   kafka3:
     image: confluentinc/cp-kafka:7.4.0
@@ -81,5 +81,5 @@ services:
       KAFKA_SSL_KEYSTORE_PASSWORD: klifeprotocol
       KAFKA_SSL_TRUSTSTORE_PASSWORD: klifeprotocol
     volumes:
-    - ./keystore/kafka.keystore.jks:/secrets/kafka.keystore.jks:ro,z
-    - ./truststore/kafka.truststore.jks:/secrets/kafka.truststore.jks:ro,z
+    - ./ssl/localhost.keystore.jks:/secrets/kafka.keystore.jks:ro,z
+    - ./ssl/localhost.truststore.jks:/secrets/kafka.truststore.jks:ro,z
