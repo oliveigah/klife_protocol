@@ -1,27 +1,27 @@
-version: '3.3'
+version: "3.3"
 
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     ports:
-    - "2181:2181"
-    - "2888:2888"
-    - "3888:3888"
+      - "2181:2181"
+      - "2888:2888"
+      - "3888:3888"
     environment:
-    - ZOOKEEPER_SERVER_ID=1
-    - ZOOKEEPER_CLIENT_PORT=2181
-    - ZOOKEEPER_TICK_TIME=2000
-    - ZOOKEEPER_INIT_LIMIT=5
-    - ZOOKEEPER_SYNC_LIMIT=2
-    - ZOOKEEPER_SERVERS=zookeeper:2888:3888
+      - ZOOKEEPER_SERVER_ID=1
+      - ZOOKEEPER_CLIENT_PORT=2181
+      - ZOOKEEPER_TICK_TIME=2000
+      - ZOOKEEPER_INIT_LIMIT=5
+      - ZOOKEEPER_SYNC_LIMIT=2
+      - ZOOKEEPER_SERVERS=zookeeper:2888:3888
 
   kafka1:
     image: confluentinc/cp-kafka:latest
     depends_on:
-    - zookeeper
+      - zookeeper
     ports:
-    - "19092:9092"
-    - "19093:9093"
+      - "19092:9092"
+      - "19093:9093"
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       ZOOKEEPER: zookeeper:2181
@@ -35,16 +35,16 @@ services:
       KAFKA_SSL_KEYSTORE_PASSWORD: klifeprotocol
       KAFKA_SSL_TRUSTSTORE_PASSWORD: klifeprotocol
     volumes:
-    - ./ssl/localhost.keystore.jks:/secrets/kafka.keystore.jks:ro,z
-    - ./ssl/localhost.truststore.jks:/secrets/kafka.truststore.jks:ro,z
+      - ./ssl/localhost.keystore.jks:/secrets/kafka.keystore.jks:ro,z
+      - ./ssl/localhost.truststore.jks:/secrets/kafka.truststore.jks:ro,z
 
   kafka2:
     image: confluentinc/cp-kafka:latest
     depends_on:
-    - zookeeper
+      - zookeeper
     ports:
-    - "29092:9092"
-    - "29093:9093"
+      - "29092:9092"
+      - "29093:9093"
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       ZOOKEEPER: zookeeper:2181
@@ -58,16 +58,16 @@ services:
       KAFKA_SSL_KEYSTORE_PASSWORD: klifeprotocol
       KAFKA_SSL_TRUSTSTORE_PASSWORD: klifeprotocol
     volumes:
-    - ./ssl/localhost.keystore.jks:/secrets/kafka.keystore.jks:ro,z
-    - ./ssl/localhost.truststore.jks:/secrets/kafka.truststore.jks:ro,z
+      - ./ssl/localhost.keystore.jks:/secrets/kafka.keystore.jks:ro,z
+      - ./ssl/localhost.truststore.jks:/secrets/kafka.truststore.jks:ro,z
 
   kafka3:
     image: confluentinc/cp-kafka:latest
     depends_on:
-    - zookeeper
+      - zookeeper
     ports:
-    - "39092:9092"
-    - "39093:9093"
+      - "39092:9092"
+      - "39093:9093"
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       ZOOKEEPER: zookeeper:2181
@@ -81,5 +81,5 @@ services:
       KAFKA_SSL_KEYSTORE_PASSWORD: klifeprotocol
       KAFKA_SSL_TRUSTSTORE_PASSWORD: klifeprotocol
     volumes:
-    - ./ssl/localhost.keystore.jks:/secrets/kafka.keystore.jks:ro,z
-    - ./ssl/localhost.truststore.jks:/secrets/kafka.truststore.jks:ro,z
+      - ./ssl/localhost.keystore.jks:/secrets/kafka.keystore.jks:ro,z
+      - ./ssl/localhost.truststore.jks:/secrets/kafka.truststore.jks:ro,z
