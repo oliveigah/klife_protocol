@@ -1,9 +1,9 @@
 name: ci
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 permissions:
   contents: read
@@ -12,61 +12,25 @@ jobs:
   tests:
     name: test
     runs-on: ubuntu-latest
-    services:
-      zookeeper:
-        image: confluentinc/cp-zookeeper:7.4.0
-        ports:
-          - "2181:2181"
-          - "2888:2888"
-          - "3888:3888"
-        env:
-          ZOOKEEPER_SERVER_ID: 1
-          ZOOKEEPER_CLIENT_PORT: 2181
-          ZOOKEEPER_TICK_TIME: 2000
-          ZOOKEEPER_INIT_LIMIT: 5
-          ZOOKEEPER_SYNC_LIMIT: 2
-          ZOOKEEPER_SERVERS: zookeeper:2888:3888
-      kafka1:
-        image: confluentinc/cp-kafka:7.4.0
-        ports:
-          - "19092:9092"
-        env:
-          KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-          ZOOKEEPER: zookeeper:2181
-          BOOTSTRAP_SERVERS: kafka1:9091,kafka2:9091,kafka3:9091
-          KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka1:9091,EXTERNAL_PLAIN://kafka1:9092
-          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL_PLAIN:PLAINTEXT
-          KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-      
-      kafka2:
-        image: confluentinc/cp-kafka:7.4.0
-        ports:
-          - "29092:9092"
-        env:
-          KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-          ZOOKEEPER: zookeeper:2181
-          BOOTSTRAP_SERVERS: kafka1:9091,kafka2:9091,kafka3:9091
-          KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka2:9091,EXTERNAL_PLAIN://kafka2:9092
-          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL_PLAIN:PLAINTEXT
-          KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-
-      kafka3:
-        image: confluentinc/cp-kafka:7.4.0
-        ports:
-          - "39092:9092"
-        env:
-          KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-          ZOOKEEPER: zookeeper:2181
-          BOOTSTRAP_SERVERS: kafka1:9091,kafka2:9091,kafka3:9091
-          KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka3:9091,EXTERNAL_PLAIN://kafka3:9092
-          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL_PLAIN:PLAINTEXT
-          KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - elixir: 1.17.0
+            otp: 27.0
+          - elixir: 1.16.3
+            otp: 26.1.2
+          - elixir: 1.15.6
+            otp: 24.3.4.13
+          - elixir: 1.11.4
+            otp: 21.3.8.24
     steps:
       - uses: actions/checkout@v3
       - uses: erlef/setup-beam@v1
         with:
-          elixir-version: '1.14.5'
-          otp-version: '26.0'
+          elixir-version: "1.14.5"
+          otp-version: "26.0"
+      - run: docker compose -f "test/compose_files/docker-compose-kafka.yml" up -d
       - run: mix deps.get
       - run: mix compile --warning-as-errors
       - run: mix test
