@@ -15,7 +15,7 @@ defmodule Messages.ProduceTest do
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       acks: 1,
@@ -97,7 +97,7 @@ defmodule Messages.ProduceTest do
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       acks: 1,
@@ -182,7 +182,7 @@ defmodule Messages.ProduceTest do
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       acks: 1,
@@ -268,7 +268,7 @@ defmodule Messages.ProduceTest do
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       transactional_id: "some_transactional_id",
@@ -355,7 +355,7 @@ defmodule Messages.ProduceTest do
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       transactional_id: "some_transactional_id",
@@ -442,7 +442,7 @@ defmodule Messages.ProduceTest do
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       transactional_id: "some_transactional_id",
@@ -529,7 +529,7 @@ defmodule Messages.ProduceTest do
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       transactional_id: "some_transactional_id",
@@ -616,7 +616,7 @@ defmodule Messages.ProduceTest do
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       transactional_id: "some_transactional_id",
@@ -703,7 +703,7 @@ defmodule Messages.ProduceTest do
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       transactional_id: "some_transactional_id",
@@ -792,7 +792,7 @@ defmodule Messages.ProduceTest do
 
     broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       transactional_id: "some_transactional_id",

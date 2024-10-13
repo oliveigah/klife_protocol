@@ -6,7 +6,7 @@ defmodule Messages.ApiVersionsTest do
 
   test "request and response v0" do
     version = 0
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     {:ok, result} =
       %{headers: headers, content: %{}}
@@ -35,7 +35,7 @@ defmodule Messages.ApiVersionsTest do
 
   test "request and response v1" do
     version = 1
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     {:ok, result} =
       %{headers: headers, content: %{}}
@@ -65,7 +65,7 @@ defmodule Messages.ApiVersionsTest do
 
   test "request and response v2" do
     version = 2
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     {:ok, result} =
       %{headers: headers, content: %{}}
@@ -96,7 +96,7 @@ defmodule Messages.ApiVersionsTest do
   test "request and response v3" do
     version = 3
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       client_software_name: "klife",

@@ -67,7 +67,7 @@ if Mix.env() in [:dev] do
     end
 
     def do_run_bench("produce_serialization") do
-      headers = Helpers.genereate_headers()
+      headers = Helpers.generate_headers()
 
       input_1_500 = %{
         headers: headers,
@@ -144,7 +144,7 @@ if Mix.env() in [:dev] do
          offset: offset_4
        }} = Helpers.produce_message(topic_name, produce_content.(50, 10_000))
 
-      headers = Helpers.genereate_headers()
+      headers = Helpers.generate_headers()
 
       content_1 = %{
         replica_id: -1,

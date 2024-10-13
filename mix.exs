@@ -52,7 +52,9 @@ defmodule KlifeProtocol.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      # CRC
       {:crc32cer, "~> 0.1.8"},
+      # Compression
       {:snappyer, "~> 1.2.7"},
       # Code generation
       {:jason, "~> 1.4", only: :dev, runtime: false},

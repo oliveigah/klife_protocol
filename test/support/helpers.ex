@@ -140,7 +140,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
     :atomics.put(ref, 1, val)
   end
 
-  def genereate_headers(opts \\ []) do
+  def generate_headers(opts \\ []) do
     %{
       correlation_id: generate_correlation_id(),
       client_id: Keyword.get(opts, :client_id, "klife_test_client")
@@ -148,7 +148,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
   end
 
   def metadata_request(opts) do
-    headers = genereate_headers()
+    headers = generate_headers()
     default_id = "00000000-0000-0000-0000-000000000000"
 
     version = Messages.Metadata.max_supported_version()
@@ -173,7 +173,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
 
   def get_cluster_controller_broker() do
     version = 0
-    headers = genereate_headers()
+    headers = generate_headers()
 
     content = %{
       include_cluster_authorized_operations: true
@@ -207,7 +207,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
   def get_or_create_topic(topic_name, opts \\ []) do
     version = Messages.CreateTopics.max_supported_version()
 
-    headers = genereate_headers()
+    headers = generate_headers()
 
     content = %{
       topics: [
@@ -272,7 +272,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
       get_metadata_for_topic_and_partition(topic_name, partition_index)
 
     broker = get_broker_for_topic_partition(topic_name, partition_index)
-    headers = genereate_headers(opts)
+    headers = generate_headers(opts)
     vals_len = length(vals)
 
     content = %{
@@ -350,7 +350,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
 
     Enum.each(partitions, fn p ->
       version = Messages.DescribeProducers.max_supported_version()
-      headers = genereate_headers()
+      headers = generate_headers()
 
       content = %{
         topics: [

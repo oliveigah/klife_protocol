@@ -35,7 +35,7 @@ defmodule Messages.FetchTest do
        offset: offset_3
      }} = Helpers.produce_message(topic_name, message_data_3)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       replica_id: -1,
@@ -232,7 +232,7 @@ defmodule Messages.FetchTest do
        offset: offset_3
      }} = Helpers.produce_message(topic_name, message_data_3)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       replica_id: -1,
@@ -430,7 +430,7 @@ defmodule Messages.FetchTest do
        offset: offset_3
      }} = Helpers.produce_message(topic_name, message_data_3)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       replica_id: -1,
@@ -628,7 +628,7 @@ defmodule Messages.FetchTest do
        offset: offset_3
      }} = Helpers.produce_message(topic_name, message_data_3)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       replica_id: -1,
@@ -830,7 +830,7 @@ defmodule Messages.FetchTest do
        offset: offset_3
      }} = Helpers.produce_message(topic_name, message_data_3)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       replica_id: -1,
@@ -1032,7 +1032,7 @@ defmodule Messages.FetchTest do
        offset: offset_3
      }} = Helpers.produce_message(topic_name, message_data_3)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     %{leader_epoch: leader_epoch} =
       Helpers.get_metadata_for_topic_and_partition(topic_name, partition_index)
@@ -1238,7 +1238,7 @@ defmodule Messages.FetchTest do
        offset: offset_3
      }} = Helpers.produce_message(topic_name, message_data_3)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     %{leader_epoch: leader_epoch} =
       Helpers.get_metadata_for_topic_and_partition(topic_name, partition_index)
@@ -1444,7 +1444,7 @@ defmodule Messages.FetchTest do
        offset: offset_3
      }} = Helpers.produce_message(topic_name, message_data_3)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     %{leader_epoch: leader_epoch} =
       Helpers.get_metadata_for_topic_and_partition(topic_name, partition_index)
@@ -1651,7 +1651,7 @@ defmodule Messages.FetchTest do
        offset: offset_3
      }} = Helpers.produce_message(topic_name, message_data_3)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     %{leader_epoch: leader_epoch} =
       Helpers.get_metadata_for_topic_and_partition(topic_name, partition_index)
@@ -1862,7 +1862,7 @@ defmodule Messages.FetchTest do
     %{leader_epoch: leader_epoch} =
       Helpers.get_metadata_for_topic_and_partition(topic_name, partition_index)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       replica_id: -1,
@@ -2067,7 +2067,7 @@ defmodule Messages.FetchTest do
        offset: _offset_3
      }} = Helpers.produce_message(topic_name, message_data_3)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     %{leader_epoch: leader_epoch} =
       Helpers.get_metadata_for_topic_and_partition(topic_name, partition_index)
@@ -2235,7 +2235,7 @@ defmodule Messages.FetchTest do
        offset: _offset_3
      }} = Helpers.produce_message(topic_name, message_data_3, attributes: attr)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     %{leader_epoch: leader_epoch} =
       Helpers.get_metadata_for_topic_and_partition(topic_name, partition_index)
@@ -2405,7 +2405,7 @@ defmodule Messages.FetchTest do
     %{leader_epoch: leader_epoch} =
       Helpers.get_metadata_for_topic_and_partition(topic_name, partition_index)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       replica_id: -1,
@@ -2614,7 +2614,7 @@ defmodule Messages.FetchTest do
     %{leader_epoch: leader_epoch} =
       Helpers.get_metadata_for_topic_and_partition(topic_name, partition_index)
 
-    headers = %{correlation_id: correlation_id} = Helpers.genereate_headers()
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
 
     content = %{
       replica_id: -1,
