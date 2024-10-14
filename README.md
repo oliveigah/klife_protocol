@@ -154,7 +154,7 @@ After, you can use the `deserialize_response/3` function of the messages API, pa
 
 ## SASL
 
-SASL is handled by the `KlifeProtocol.Socket` module and client libraries can pass use it in 2 ways:
+SASL is handled by the `KlifeProtocol.Socket` module and client libraries can use it in 2 ways:
 
 - Passing SASL options to `connect/3` function when creationg a new socket
 - Passing an already open socket and SASL opts to `authenticate/3` function

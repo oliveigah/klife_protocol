@@ -7,8 +7,8 @@ defmodule KlifeProtocol.Socket do
   - backend: `:gen_tcp` or `:ssl` (defaults to `:gen_tcp`)
   - sasl_opts: optional. sasl only. Is a keyword list containing:
     - mechanism: sasl mechanism string (eg. "PLAIN"),
-    - sasl_auth_vsn: api version number to use for SaslAuthenticate messages,
-    - sasl_handshake_vsn: api version number to use for SaslHandshake messages,
+    - auth_vsn: api version number to use for SaslAuthenticate messages,
+    - handshake_vsn: api version number to use for SaslHandshake messages,
     - mechanism_opts: mechanism specific keywordlist
   - any other option will be forwarded to the backend module `connect/3` function
   """
