@@ -94,8 +94,8 @@ defmodule KlifeProtocol.SaslTest do
 
     sasl_opts = [
       mechanism: "PLAIN",
-      sasl_auth_vsn: 2,
-      sasl_handshake_vsn: 1,
+      auth_vsn: 2,
+      handshake_vsn: 1,
       mechanism_opts: [
         username: "klifeusr",
         password: "klifepwd"
@@ -109,6 +109,41 @@ defmodule KlifeProtocol.SaslTest do
       Enum.map(@brokers_sasl, fn {_broker, hostname} ->
         [host, port] = String.split(hostname, ":")
         {:ok, socket} = Socket.connect(host, String.to_integer(port), opts)
+        socket
+      end)
+
+    Enum.each(sockets, fn socket ->
+      {data, version} = get_produce_msg_binary()
+      :ok = apply(socket_backend, :send, [socket, data])
+      {:ok, rcv_bin} = apply(socket_backend, :recv, [socket, 0, 5000])
+      {:ok, _rcv_data} = Produce.deserialize_response(rcv_bin, version)
+    end)
+  end
+
+  test "success with plain sasl opts 2 step auth" do
+    ssl_opts = [
+      verify: :verify_peer,
+      cacertfile: Path.relative("test/compose_files/ssl/ca.crt")
+    ]
+
+    sasl_opts = [
+      mechanism: "PLAIN",
+      auth_vsn: 2,
+      handshake_vsn: 1,
+      mechanism_opts: [
+        username: "klifeusr",
+        password: "klifepwd"
+      ]
+    ]
+
+    socket_backend = :ssl
+    opts = [backend: socket_backend, active: false] ++ ssl_opts
+
+    sockets =
+      Enum.map(@brokers_sasl, fn {_broker, hostname} ->
+        [host, port] = String.split(hostname, ":")
+        {:ok, socket} = Socket.connect(host, String.to_integer(port), opts)
+        :ok = Socket.authenticate(socket, socket_backend, sasl_opts)
         socket
       end)
 

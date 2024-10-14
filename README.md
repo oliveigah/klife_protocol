@@ -154,7 +154,10 @@ After, you can use the `deserialize_response/3` function of the messages API, pa
 
 ## SASL
 
-SASL is handled by the `KlifeProtocol.Socket` module and client libraries can pass SASL options to `connect/3` function.
+SASL is handled by the `KlifeProtocol.Socket` module and client libraries can pass use it in 2 ways:
+
+- Passing SASL options to `connect/3` function when creationg a new socket
+- Passing an already open socket and SASL opts to `authenticate/3` function
 
 For now the only supported mechanism is PLAIN and you can use it like this:
 
@@ -171,7 +174,12 @@ sasl_opts = [
   ]
 ]
 
+# On socket initialization
 {:ok, socket} = Socket.connect("localhost", 9092, [backend: :ssl, sasl_opts: sasl_opts])
+
+# After socket initialization
+{:ok, socket} = Socket.connect("localhost", 9092, [backend: :ssl])
+:ok = Socket.authenticate(socket, :ssl, sasl_opts)
 ```
 
 ## Compression and Record Batch Attributes

@@ -13,8 +13,7 @@ defmodule KlifeProtocol.Socket do
   - any other option will be forwarded to the backend module `connect/3` function
   """
 
-  alias KlifeProtocol.Messages.SaslAuthenticate
-  alias KlifeProtocol.Messages.SaslHandshake
+  alias KlifeProtocol.SASL
 
   def connect(host, port, opts \\ []) do
     {backend, opts} = Keyword.pop(opts, :backend, :gen_tcp)
@@ -23,7 +22,7 @@ defmodule KlifeProtocol.Socket do
 
     case backend.connect(String.to_charlist(host), port, opts ++ must_have_opts) do
       {:ok, socket} ->
-        :ok = maybe_handle_sasl(socket, backend, sasl_opts)
+        :ok = authenticate(socket, backend, sasl_opts)
         {:ok, socket}
 
       err ->
@@ -31,12 +30,12 @@ defmodule KlifeProtocol.Socket do
     end
   end
 
-  defp maybe_handle_sasl(_socket, _backend, []), do: :ok
+  def authenticate(_socket, _backend, []), do: :ok
 
-  defp maybe_handle_sasl(socket, backend, sasl_opts) do
-    mechanism = Keyword.fetch!(sasl_opts, :mechanism)
-    sasl_auth_vsn = Keyword.fetch!(sasl_opts, :sasl_auth_vsn)
-    sasl_handshake_vsn = Keyword.fetch!(sasl_opts, :sasl_handshake_vsn)
+  def authenticate(socket, backend, sasl_opts) do
+    mech = Keyword.fetch!(sasl_opts, :mechanism)
+    handshake_vsn = Keyword.fetch!(sasl_opts, :handshake_vsn)
+    auth_vsn = Keyword.fetch!(sasl_opts, :auth_vsn)
     mechanism_opts = Keyword.get(sasl_opts, :mechanism_opts, [])
 
     send_recv_raw_fun = fn data ->
@@ -45,56 +44,6 @@ defmodule KlifeProtocol.Socket do
       rcv_bin
     end
 
-    :ok = sasl_handshake(send_recv_raw_fun, mechanism, sasl_handshake_vsn)
-
-    send_recv_fun = fn data ->
-      to_send = %{content: %{auth_bytes: data}, headers: %{correlation_id: 123}}
-      to_send_raw = SaslAuthenticate.serialize_request(to_send, sasl_auth_vsn)
-      rcv_bin = send_recv_raw_fun.(to_send_raw)
-
-      {:ok, %{content: resp}} =
-        SaslAuthenticate.deserialize_response(rcv_bin, sasl_auth_vsn)
-
-      case resp do
-        %{error_code: 0, auth_bytes: auth_bytes} ->
-          auth_bytes
-
-        %{error_code: ec} ->
-          raise """
-          Unexpected error on SASL authentication message. ErrorCode: #{inspect(ec)}
-          """
-      end
-    end
-
-    case mechanism do
-      "PLAIN" ->
-        KlifeProtocol.SASLMechanism.Plain.execute_auth(send_recv_fun, mechanism_opts)
-
-      other ->
-        raise "Unsupported SASL mechanism #{inspect(other)}"
-    end
-  end
-
-  defp sasl_handshake(send_rcv_raw_fun, mechanism, sasl_handshake_vsn) do
-    to_send = %{content: %{mechanism: mechanism}, headers: %{correlation_id: 123}}
-    to_send_raw = SaslHandshake.serialize_request(to_send, sasl_handshake_vsn)
-    recv_bin = send_rcv_raw_fun.(to_send_raw)
-
-    {:ok, %{content: resp}} =
-      SaslHandshake.deserialize_response(recv_bin, sasl_handshake_vsn)
-
-    case resp do
-      %{error_code: 0, mechanisms: server_enabled_mechanisms} ->
-        if mechanism in server_enabled_mechanisms do
-          :ok
-        else
-          raise "Server does not support SASL mechanism #{mechanism}. Supported mechanisms are: #{inspect(server_enabled_mechanisms)}"
-        end
-
-      %{error_code: ec} ->
-        raise """
-        Unexpected error on SASL handhsake message. ErrorCode: #{inspect(ec)}
-        """
-    end
+    :ok = SASL.authenticate(mech, handshake_vsn, auth_vsn, mechanism_opts, send_recv_raw_fun)
   end
 end

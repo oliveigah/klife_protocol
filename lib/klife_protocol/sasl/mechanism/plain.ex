@@ -1,5 +1,5 @@
-defmodule KlifeProtocol.SASLMechanism.Plain do
-  @behaviour KlifeProtocol.SASLMechanism.Behaviour
+defmodule KlifeProtocol.SASL.Mechanism.Plain do
+  @behaviour KlifeProtocol.SASL.Mechanism.Behaviour
 
   def execute_auth(send_recv_fun, opts) do
     usr = Keyword.fetch!(opts, :username)
