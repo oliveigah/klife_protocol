@@ -55,7 +55,7 @@ defmodule KlifeProtocol.MixProject do
       # CRC
       {:crc32cer, "~> 0.1.11"},
       # Compression
-      {:snappyer, "~> 1.2.7"},
+      {:snappyer, "~> 1.2.10"},
       # Code generation
       {:jason, "~> 1.4", only: :dev, runtime: false},
       # Benchmarks and tests
