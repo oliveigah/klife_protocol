@@ -27,6 +27,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ matrix.otp }}
       - run: docker compose -f "test/compose_files/docker-compose-kafka-3.9.yml" up -d
       - run: mix deps.get
       - run: mix compile --warning-as-errors
