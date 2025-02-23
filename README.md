@@ -274,9 +274,9 @@ The project is composed by 5 main components:
 ## Running Tests
 
 ```
-bash run-kafka.sh
+bash run-kafka.sh ${KAFKA_VERSION}
 mix test
-bash stop-kafka.sh
+bash stop-kafka.sh ${KAFKA_VERSION}
 ```
 
 In order to prevent race conditions with kafka initialization is recommended to wait a couple seconds between `bash run-kafka.sh` and `mix test`.
@@ -284,7 +284,7 @@ In order to prevent race conditions with kafka initialization is recommended to 
 If you want to run tests using a SSL connection, you can use an env var `CONN_MODE=SSL` like this:
 
 ```
-bash run-kafka.sh
+bash run-kafka.sh ${KAFKA_VERSION}
 CONN_MODE=SSL mix test
-bash stop-kafka.sh
+bash stop-kafka.sh ${KAFKA_VERSION}
 ```

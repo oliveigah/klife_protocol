@@ -9,8 +9,8 @@ permissions:
   contents: read
 
 jobs:
-  tests:
-    name: test
+  tests-v3_9:
+    name: test-3.9
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -27,10 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: erlef/setup-beam@v1
-        with:
-          elixir-version: "1.14.5"
-          otp-version: "26.0"
-      - run: docker compose -f "test/compose_files/docker-compose-kafka.yml" up -d
+      - run: docker compose -f "test/compose_files/docker-compose-kafka-3.9.yml" up -d
       - run: mix deps.get
       - run: mix compile --warning-as-errors
       - run: mix test
