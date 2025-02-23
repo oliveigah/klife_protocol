@@ -96,65 +96,71 @@ if Mix.env() == :dev do
       request_schemas = parse_message_schema(req_map)
       response_schemas = parse_message_schema(res_map)
 
-      template_path = @template_by_module[module_name] || @template_by_module["default"]
-      write_base_path = @write_path_by_module[module_name] || @write_path_by_module["default"]
+      case {request_schemas, response_schemas} do
+        {:skip, :skip} ->
+          "#{req_file_path} - SKIPPED"
 
-      req_flex_version =
-        case parse_versions_string(req_map.flexibleVersions) do
-          {:min, v} -> v
-          v -> v
-        end
+        {request_schemas, response_schemas} ->
+          template_path = @template_by_module[module_name] || @template_by_module["default"]
+          write_base_path = @write_path_by_module[module_name] || @write_path_by_module["default"]
 
-      res_flex_version =
-        case parse_versions_string(res_map.flexibleVersions) do
-          {:min, v} -> v
-          v -> v
-        end
+          req_flex_version =
+            case parse_versions_string(req_map.flexibleVersions) do
+              {:min, v} -> v
+              v -> v
+            end
 
-      bindings =
-        case template_path do
-          "priv/message_module_template.eex" ->
-            [
-              module_name: module_name,
-              api_key: req_map.apiKey,
-              request_schemas: request_schemas,
-              response_schemas: response_schemas,
-              req_flexible_version: req_flex_version,
-              res_flexible_version: res_flex_version,
-              req_header_exceptions: Map.get(@req_header_exceptions, module_name),
-              res_header_exceptions: Map.get(@res_header_exceptions, module_name),
-              req_versions_comments: get_versions_comments(req_file_path),
-              res_versions_comments: get_versions_comments(res_file_path),
-              req_field_comments: get_fields_comments(req_map),
-              res_field_comments: get_fields_comments(res_map),
-              version_exceptions: Map.get(@version_exceptions, module_name, [])
-            ]
+          res_flex_version =
+            case parse_versions_string(res_map.flexibleVersions) do
+              {:min, v} -> v
+              v -> v
+            end
 
-          "priv/header_module_template.eex" ->
-            [
-              request_schemas: request_schemas,
-              response_schemas: response_schemas,
-              req_field_comments: get_fields_comments(req_map),
-              res_field_comments: get_fields_comments(res_map)
-            ]
-        end
+          bindings =
+            case template_path do
+              "priv/message_module_template.eex" ->
+                [
+                  module_name: module_name,
+                  api_key: req_map.apiKey,
+                  request_schemas: request_schemas,
+                  response_schemas: response_schemas,
+                  req_flexible_version: req_flex_version,
+                  res_flexible_version: res_flex_version,
+                  req_header_exceptions: Map.get(@req_header_exceptions, module_name),
+                  res_header_exceptions: Map.get(@res_header_exceptions, module_name),
+                  req_versions_comments: get_versions_comments(req_file_path),
+                  res_versions_comments: get_versions_comments(res_file_path),
+                  req_field_comments: get_fields_comments(req_map),
+                  res_field_comments: get_fields_comments(res_map),
+                  version_exceptions: Map.get(@version_exceptions, module_name, [])
+                ]
 
-      module_content =
-        template_path
-        |> Path.relative()
-        |> File.read!()
-        |> EEx.eval_string(bindings)
-        |> Code.format_string!()
+              "priv/header_module_template.eex" ->
+                [
+                  request_schemas: request_schemas,
+                  response_schemas: response_schemas,
+                  req_field_comments: get_fields_comments(req_map),
+                  res_field_comments: get_fields_comments(res_map)
+                ]
+            end
 
-      file_name = to_snake_case(module_name)
+          module_content =
+            template_path
+            |> Path.relative()
+            |> File.read!()
+            |> EEx.eval_string(bindings)
+            |> Code.format_string!()
 
-      File.mkdir_p!(write_base_path)
+          file_name = to_snake_case(module_name)
 
-      (write_base_path <> "#{file_name}.ex")
-      |> Path.relative()
-      |> File.write!(module_content)
+          File.mkdir_p!(write_base_path)
 
-      write_base_path <> "#{file_name}.ex"
+          (write_base_path <> "#{file_name}.ex")
+          |> Path.relative()
+          |> File.write!(module_content)
+
+          write_base_path <> "#{file_name}.ex"
+      end
     rescue
       e ->
         IO.puts("Error while parsing file #{req_file_path}")
@@ -241,35 +247,39 @@ if Mix.env() == :dev do
 
       message_type = message.type |> to_snake_case() |> String.to_atom()
 
-      [min_version, max_version] = get_versions(message.validVersions)
+      case get_versions(message.validVersions) do
+        [min_version, max_version] ->
+          schema_array =
+            Enum.map(min_version..max_version, fn version ->
+              is_flexible = is_flexible_version?(message, version)
 
-      schema_array =
-        Enum.map(min_version..max_version, fn version ->
-          is_flexible = is_flexible_version?(message, version)
+              msg_metadata = %{
+                type: type,
+                version: version,
+                is_flexible: is_flexible,
+                message_type: message_type
+              }
 
-          msg_metadata = %{
-            type: type,
-            version: version,
-            is_flexible: is_flexible,
-            message_type: message_type
-          }
+              # Common structs are complex types that can be reused on multiple fields of the message
+              # and because of it, the field that refers to a common struct does not have
+              # the key `fields` that usually indicates the schema of that complex type.
+              # Therefore we need to handle the common structs first nd add it to the msg metadata
+              # in order to copy their schema into the field when they are used.
+              # Ex: ConsumerGroupHeartbeatResponse, DescribeQuorumResponse and many others
+              common_structs = parse_commom_structs(message[:commonStructs] || [], msg_metadata)
+              msg_metadata = Map.put(msg_metadata, :common_structs, common_structs)
 
-          # Common structs are complex types that can be reused on multiple fields of the message
-          # and because of it, the field that refers to a common struct does not have
-          # the key `fields` that usually indicates the schema of that complex type.
-          # Therefore we need to handle the common structs first nd add it to the msg metadata
-          # in order to copy their schema into the field when they are used.
-          # Ex: ConsumerGroupHeartbeatResponse, DescribeQuorumResponse and many others
-          common_structs = parse_commom_structs(message[:commonStructs] || [], msg_metadata)
-          msg_metadata = Map.put(msg_metadata, :common_structs, common_structs)
+              # Traverse the list of fields for properly build the schema
+              schema = parse_schema(message.fields, msg_metadata)
 
-          # Traverse the list of fields for properly build the schema
-          schema = parse_schema(message.fields, msg_metadata)
+              {version, schema}
+            end)
 
-          {version, schema}
-        end)
+          schema_array
 
-      schema_array
+        :skip ->
+          :skip
+      end
     end
 
     defp parse_commom_structs(common_structs, msg_metadata) do
@@ -435,15 +445,25 @@ if Mix.env() == :dev do
     end
 
     defp get_versions(valid_versions) do
-      if String.contains?(valid_versions, "-"),
-        do:
+      is_range? = String.contains?(valid_versions, "-")
+      is_none? = valid_versions == "none"
+
+      cond do
+        is_range? ->
           valid_versions
           |> String.split("-")
-          |> Enum.map(&String.to_integer/1),
-        else: [
-          String.to_integer(valid_versions),
-          String.to_integer(valid_versions)
-        ]
+          |> Enum.map(&String.to_integer/1)
+
+        is_none? ->
+          # To remove from the file generation.
+          :skip
+
+        true ->
+          [
+            String.to_integer(valid_versions),
+            String.to_integer(valid_versions)
+          ]
+      end
     end
 
     defp available_in_version?(field, current_version) do

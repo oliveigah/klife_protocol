@@ -6,13 +6,13 @@ defmodule KlifeProtocol.Header do
     alias KlifeProtocol.Deserializer
     alias KlifeProtocol.Serializer
 
-    <%= Enum.map(request_schemas, fn {version, schema} -> 
+    <%= Enum.map(request_schemas, fn {version, schema} ->
         """
         defp request_schema(#{version}), do: #{inspect(schema)}
         """
     end) %>
 
-    <%= Enum.map(response_schemas, fn {version, schema} -> 
+    <%= Enum.map(response_schemas, fn {version, schema} ->
         """
         defp response_schema(#{version}), do: #{inspect(schema)}
         """
@@ -20,17 +20,17 @@ defmodule KlifeProtocol.Header do
 
     @doc """
     Receives a map and serialize it to kafka wire format of the given version.
-    
+
     Input content fields:
     <%= Enum.map(req_field_comments, fn {line, depth} ->
         if depth == 0 do
             line <>  "\n"
         else
             base_space = "    "
-            extra_space = 
-            Enum.map(1..depth, fn _ -> base_space end) 
+            extra_space =
+            Enum.map(1..depth, fn _ -> base_space end)
             |> Enum.join()
-            
+
             base_space <> extra_space <> line <> "\n"
         end
     end) %>
@@ -40,7 +40,7 @@ defmodule KlifeProtocol.Header do
 
     @doc """
     Receive a binary in the kafka wire format and deserialize it into a map and return remaining binary data.
-    
+
     Response content fields:
 
     <%= Enum.map(res_field_comments, fn {line, depth} ->
@@ -48,15 +48,15 @@ defmodule KlifeProtocol.Header do
             line <>  "\n"
         else
             base_space = "    "
-            extra_space = 
-            Enum.map(1..depth, fn _ -> base_space end) 
+            extra_space =
+            Enum.map(1..depth, fn _ -> base_space end)
             |> Enum.join()
-            
+
             base_space <> extra_space <> line <> "\n"
         end
     end) %>
     """
     def deserialize_response(data, version),
     do: Deserializer.execute(data, response_schema(version))
-    
+
 end
