@@ -148,7 +148,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0),
+  def request_schema(0),
     do: [
       controller_id: {:int32, %{is_nullable?: false}},
       controller_epoch: {:int32, %{is_nullable?: false}},
@@ -173,7 +173,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(1),
+  def request_schema(1),
     do: [
       controller_id: {:int32, %{is_nullable?: false}},
       controller_epoch: {:int32, %{is_nullable?: false}},
@@ -199,7 +199,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(2),
+  def request_schema(2),
     do: [
       controller_id: {:int32, %{is_nullable?: false}},
       controller_epoch: {:int32, %{is_nullable?: false}},
@@ -230,7 +230,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(3),
+  def request_schema(3),
     do: [
       controller_id: {:int32, %{is_nullable?: false}},
       controller_epoch: {:int32, %{is_nullable?: false}},
@@ -263,7 +263,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(4),
+  def request_schema(4),
     do: [
       controller_id: {:int32, %{is_nullable?: false}},
       controller_epoch: {:int32, %{is_nullable?: false}},
@@ -300,7 +300,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(5),
+  def request_schema(5),
     do: [
       controller_id: {:int32, %{is_nullable?: false}},
       controller_epoch: {:int32, %{is_nullable?: false}},
@@ -339,7 +339,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(6),
+  def request_schema(6),
     do: [
       controller_id: {:int32, %{is_nullable?: false}},
       controller_epoch: {:int32, %{is_nullable?: false}},
@@ -379,7 +379,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(7),
+  def request_schema(7),
     do: [
       controller_id: {:int32, %{is_nullable?: false}},
       is_k_raft_controller: {:boolean, %{is_nullable?: false}},
@@ -420,10 +420,10 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(unkown_version),
+  def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message LeaderAndIsr")
 
-  defp response_schema(0),
+  def response_schema(0),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       partition_errors:
@@ -435,7 +435,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(1),
+  def response_schema(1),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       partition_errors:
@@ -447,7 +447,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(2),
+  def response_schema(2),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       partition_errors:
@@ -459,7 +459,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(3),
+  def response_schema(3),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       partition_errors:
@@ -471,7 +471,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(4),
+  def response_schema(4),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       partition_errors:
@@ -485,7 +485,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(5),
+  def response_schema(5),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       topics:
@@ -504,7 +504,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(6),
+  def response_schema(6),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       topics:
@@ -523,7 +523,7 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(7),
+  def response_schema(7),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       topics:
@@ -542,6 +542,6 @@ defmodule KlifeProtocol.Messages.LeaderAndIsr do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(unkown_version),
+  def response_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message LeaderAndIsr")
 end

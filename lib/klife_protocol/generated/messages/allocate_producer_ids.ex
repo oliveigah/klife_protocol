@@ -92,17 +92,17 @@ defmodule KlifeProtocol.Messages.AllocateProducerIds do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0),
+  def request_schema(0),
     do: [
       broker_id: {:int32, %{is_nullable?: false}},
       broker_epoch: {:int64, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(unkown_version),
+  def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message AllocateProducerIds")
 
-  defp response_schema(0),
+  def response_schema(0),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -111,6 +111,6 @@ defmodule KlifeProtocol.Messages.AllocateProducerIds do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(unkown_version),
+  def response_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message AllocateProducerIds")
 end

@@ -6,14 +6,14 @@ defmodule KlifeProtocol.Header do
   alias KlifeProtocol.Deserializer
   alias KlifeProtocol.Serializer
 
-  defp request_schema(0),
+  def request_schema(0),
     do: [
       request_api_key: {:int16, %{is_nullable?: false}},
       request_api_version: {:int16, %{is_nullable?: false}},
       correlation_id: {:int32, %{is_nullable?: false}}
     ]
 
-  defp request_schema(1),
+  def request_schema(1),
     do: [
       request_api_key: {:int16, %{is_nullable?: false}},
       request_api_version: {:int16, %{is_nullable?: false}},
@@ -21,7 +21,7 @@ defmodule KlifeProtocol.Header do
       client_id: {:string, %{is_nullable?: true}}
     ]
 
-  defp request_schema(2),
+  def request_schema(2),
     do: [
       request_api_key: {:int16, %{is_nullable?: false}},
       request_api_version: {:int16, %{is_nullable?: false}},
@@ -30,9 +30,9 @@ defmodule KlifeProtocol.Header do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp response_schema(0), do: [correlation_id: {:int32, %{is_nullable?: false}}]
+  def response_schema(0), do: [correlation_id: {:int32, %{is_nullable?: false}}]
 
-  defp response_schema(1),
+  def response_schema(1),
     do: [correlation_id: {:int32, %{is_nullable?: false}}, tag_buffer: {:tag_buffer, %{}}]
 
   @doc """

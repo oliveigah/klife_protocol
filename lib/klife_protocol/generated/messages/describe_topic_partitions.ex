@@ -112,7 +112,7 @@ defmodule KlifeProtocol.Messages.DescribeTopicPartitions do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0),
+  def request_schema(0),
     do: [
       topics:
         {{:compact_array,
@@ -129,10 +129,10 @@ defmodule KlifeProtocol.Messages.DescribeTopicPartitions do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(unkown_version),
+  def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message DescribeTopicPartitions")
 
-  defp response_schema(0),
+  def response_schema(0),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       topics:
@@ -169,6 +169,6 @@ defmodule KlifeProtocol.Messages.DescribeTopicPartitions do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(unkown_version),
+  def response_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message DescribeTopicPartitions")
 end

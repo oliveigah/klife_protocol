@@ -168,25 +168,25 @@ defmodule KlifeProtocol.Messages.<%= module_name %> do
     <%= Enum.map(request_schemas, fn {version, schema} ->
         if version not in version_exceptions do
         """
-        defp request_schema(#{version}), do: #{inspect(schema)}
+        def request_schema(#{version}), do: #{inspect(schema)}
         """
         else
         ""
         end
     end) %>
 
-    defp request_schema(unkown_version), do: raise("Unknown version #{unkown_version} for message <%= module_name %>")
+    def request_schema(unkown_version), do: raise("Unknown version #{unkown_version} for message <%= module_name %>")
 
 
     <%= Enum.map(response_schemas, fn {version, schema} ->
         if version not in version_exceptions do
         """
-        defp response_schema(#{version}), do: #{inspect(schema)}
+        def response_schema(#{version}), do: #{inspect(schema)}
         """
         else
         ""
         end
     end) %>
 
-    defp response_schema(unkown_version), do: raise("Unknown version #{unkown_version} for message <%= module_name %>")
+    def response_schema(unkown_version), do: raise("Unknown version #{unkown_version} for message <%= module_name %>")
 end

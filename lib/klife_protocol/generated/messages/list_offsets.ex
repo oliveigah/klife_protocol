@@ -126,7 +126,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0),
+  def request_schema(0),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       topics:
@@ -143,7 +143,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(1),
+  def request_schema(1),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       topics:
@@ -159,24 +159,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(2),
-    do: [
-      replica_id: {:int32, %{is_nullable?: false}},
-      isolation_level: {:int8, %{is_nullable?: false}},
-      topics:
-        {{:array,
-          [
-            name: {:string, %{is_nullable?: false}},
-            partitions:
-              {{:array,
-                [
-                  partition_index: {:int32, %{is_nullable?: false}},
-                  timestamp: {:int64, %{is_nullable?: false}}
-                ]}, %{is_nullable?: false}}
-          ]}, %{is_nullable?: false}}
-    ]
-
-  defp request_schema(3),
+  def request_schema(2),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       isolation_level: {:int8, %{is_nullable?: false}},
@@ -193,7 +176,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(4),
+  def request_schema(3),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       isolation_level: {:int8, %{is_nullable?: false}},
@@ -205,13 +188,12 @@ defmodule KlifeProtocol.Messages.ListOffsets do
               {{:array,
                 [
                   partition_index: {:int32, %{is_nullable?: false}},
-                  current_leader_epoch: {:int32, %{is_nullable?: false}},
                   timestamp: {:int64, %{is_nullable?: false}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(5),
+  def request_schema(4),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       isolation_level: {:int8, %{is_nullable?: false}},
@@ -229,7 +211,25 @@ defmodule KlifeProtocol.Messages.ListOffsets do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(6),
+  def request_schema(5),
+    do: [
+      replica_id: {:int32, %{is_nullable?: false}},
+      isolation_level: {:int8, %{is_nullable?: false}},
+      topics:
+        {{:array,
+          [
+            name: {:string, %{is_nullable?: false}},
+            partitions:
+              {{:array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  current_leader_epoch: {:int32, %{is_nullable?: false}},
+                  timestamp: {:int64, %{is_nullable?: false}}
+                ]}, %{is_nullable?: false}}
+          ]}, %{is_nullable?: false}}
+    ]
+
+  def request_schema(6),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       isolation_level: {:int8, %{is_nullable?: false}},
@@ -250,7 +250,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(7),
+  def request_schema(7),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       isolation_level: {:int8, %{is_nullable?: false}},
@@ -271,7 +271,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(8),
+  def request_schema(8),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       isolation_level: {:int8, %{is_nullable?: false}},
@@ -292,7 +292,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(9),
+  def request_schema(9),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       isolation_level: {:int8, %{is_nullable?: false}},
@@ -313,10 +313,10 @@ defmodule KlifeProtocol.Messages.ListOffsets do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(unkown_version),
+  def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message ListOffsets")
 
-  defp response_schema(0),
+  def response_schema(0),
     do: [
       topics:
         {{:array,
@@ -332,7 +332,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(1),
+  def response_schema(1),
     do: [
       topics:
         {{:array,
@@ -349,25 +349,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(2),
-    do: [
-      throttle_time_ms: {:int32, %{is_nullable?: false}},
-      topics:
-        {{:array,
-          [
-            name: {:string, %{is_nullable?: false}},
-            partitions:
-              {{:array,
-                [
-                  partition_index: {:int32, %{is_nullable?: false}},
-                  error_code: {:int16, %{is_nullable?: false}},
-                  timestamp: {:int64, %{is_nullable?: false}},
-                  offset: {:int64, %{is_nullable?: false}}
-                ]}, %{is_nullable?: false}}
-          ]}, %{is_nullable?: false}}
-    ]
-
-  defp response_schema(3),
+  def response_schema(2),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       topics:
@@ -385,7 +367,25 @@ defmodule KlifeProtocol.Messages.ListOffsets do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(4),
+  def response_schema(3),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:array,
+          [
+            name: {:string, %{is_nullable?: false}},
+            partitions:
+              {{:array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  timestamp: {:int64, %{is_nullable?: false}},
+                  offset: {:int64, %{is_nullable?: false}}
+                ]}, %{is_nullable?: false}}
+          ]}, %{is_nullable?: false}}
+    ]
+
+  def response_schema(4),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       topics:
@@ -404,7 +404,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(5),
+  def response_schema(5),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       topics:
@@ -423,7 +423,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(6),
+  def response_schema(6),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       topics:
@@ -445,7 +445,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(7),
+  def response_schema(7),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       topics:
@@ -467,7 +467,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(8),
+  def response_schema(8),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       topics:
@@ -489,7 +489,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(9),
+  def response_schema(9),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       topics:
@@ -511,6 +511,6 @@ defmodule KlifeProtocol.Messages.ListOffsets do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(unkown_version),
+  def response_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message ListOffsets")
 end

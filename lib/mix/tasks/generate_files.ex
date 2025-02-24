@@ -101,6 +101,54 @@ if Mix.env() == :dev do
           "#{req_file_path} - SKIPPED"
 
         {request_schemas, response_schemas} ->
+          # In order to keep backward compatibility we must keep
+          # versions that may be removed by the current kafka
+          # release. So we need to manually get the current version
+          # of the schemas and keep them on the new file.
+
+          {mod, curr_min_v, curr_max_v} =
+            if module_name == "Header" do
+              mod = String.to_atom("Elixir.KlifeProtocol.#{module_name}")
+
+              {mod, 0, 2}
+            else
+              mod = String.to_atom("Elixir.KlifeProtocol.Messages.#{module_name}")
+              curr_min_v = apply(mod, :min_supported_version, [])
+              curr_max_v = apply(mod, :max_supported_version, [])
+
+              {mod, curr_min_v, curr_max_v}
+            end
+
+          {max_request_version, _schema} = List.last(request_schemas)
+
+          compatible_request_schemas =
+            Enum.map(0..max_request_version, fn v ->
+              new_val = Enum.find(request_schemas, fn {k, _v} -> k == v end)
+              already_on_schema? = new_val != nil
+              current_exists? = v >= curr_min_v and v <= curr_max_v
+
+              cond do
+                already_on_schema? -> new_val
+                current_exists? -> {v, apply(mod, :request_schema, [v])}
+                true -> raise "Unexpected gap for file #{req_file_path}"
+              end
+            end)
+
+          {max_response_version, _schema} = List.last(response_schemas)
+
+          compatible_response_schemas =
+            Enum.map(0..max_response_version, fn v ->
+              new_val = Enum.find(response_schemas, fn {k, _v} -> k == v end)
+              already_on_schema? = new_val != nil
+              current_exists? = v >= curr_min_v and v <= curr_max_v
+
+              cond do
+                already_on_schema? -> new_val
+                current_exists? -> {v, apply(mod, :response_schema, [v])}
+                true -> raise "Unexpected gap for file #{req_file_path}"
+              end
+            end)
+
           template_path = @template_by_module[module_name] || @template_by_module["default"]
           write_base_path = @write_path_by_module[module_name] || @write_path_by_module["default"]
 
@@ -122,8 +170,8 @@ if Mix.env() == :dev do
                 [
                   module_name: module_name,
                   api_key: req_map.apiKey,
-                  request_schemas: request_schemas,
-                  response_schemas: response_schemas,
+                  request_schemas: compatible_request_schemas,
+                  response_schemas: compatible_response_schemas,
                   req_flexible_version: req_flex_version,
                   res_flexible_version: res_flex_version,
                   req_header_exceptions: Map.get(@req_header_exceptions, module_name),

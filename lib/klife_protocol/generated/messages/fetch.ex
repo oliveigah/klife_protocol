@@ -186,7 +186,7 @@ defmodule KlifeProtocol.Messages.Fetch do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(4),
+  def request_schema(4),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       max_wait_ms: {:int32, %{is_nullable?: false}},
@@ -207,29 +207,7 @@ defmodule KlifeProtocol.Messages.Fetch do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(5),
-    do: [
-      replica_id: {:int32, %{is_nullable?: false}},
-      max_wait_ms: {:int32, %{is_nullable?: false}},
-      min_bytes: {:int32, %{is_nullable?: false}},
-      max_bytes: {:int32, %{is_nullable?: false}},
-      isolation_level: {:int8, %{is_nullable?: false}},
-      topics:
-        {{:array,
-          [
-            topic: {:string, %{is_nullable?: false}},
-            partitions:
-              {{:array,
-                [
-                  partition: {:int32, %{is_nullable?: false}},
-                  fetch_offset: {:int64, %{is_nullable?: false}},
-                  log_start_offset: {:int64, %{is_nullable?: false}},
-                  partition_max_bytes: {:int32, %{is_nullable?: false}}
-                ]}, %{is_nullable?: false}}
-          ]}, %{is_nullable?: false}}
-    ]
-
-  defp request_schema(6),
+  def request_schema(5),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       max_wait_ms: {:int32, %{is_nullable?: false}},
@@ -251,7 +229,29 @@ defmodule KlifeProtocol.Messages.Fetch do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(7),
+  def request_schema(6),
+    do: [
+      replica_id: {:int32, %{is_nullable?: false}},
+      max_wait_ms: {:int32, %{is_nullable?: false}},
+      min_bytes: {:int32, %{is_nullable?: false}},
+      max_bytes: {:int32, %{is_nullable?: false}},
+      isolation_level: {:int8, %{is_nullable?: false}},
+      topics:
+        {{:array,
+          [
+            topic: {:string, %{is_nullable?: false}},
+            partitions:
+              {{:array,
+                [
+                  partition: {:int32, %{is_nullable?: false}},
+                  fetch_offset: {:int64, %{is_nullable?: false}},
+                  log_start_offset: {:int64, %{is_nullable?: false}},
+                  partition_max_bytes: {:int32, %{is_nullable?: false}}
+                ]}, %{is_nullable?: false}}
+          ]}, %{is_nullable?: false}}
+    ]
+
+  def request_schema(7),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       max_wait_ms: {:int32, %{is_nullable?: false}},
@@ -281,7 +281,7 @@ defmodule KlifeProtocol.Messages.Fetch do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(8),
+  def request_schema(8),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       max_wait_ms: {:int32, %{is_nullable?: false}},
@@ -311,38 +311,7 @@ defmodule KlifeProtocol.Messages.Fetch do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(9),
-    do: [
-      replica_id: {:int32, %{is_nullable?: false}},
-      max_wait_ms: {:int32, %{is_nullable?: false}},
-      min_bytes: {:int32, %{is_nullable?: false}},
-      max_bytes: {:int32, %{is_nullable?: false}},
-      isolation_level: {:int8, %{is_nullable?: false}},
-      session_id: {:int32, %{is_nullable?: false}},
-      session_epoch: {:int32, %{is_nullable?: false}},
-      topics:
-        {{:array,
-          [
-            topic: {:string, %{is_nullable?: false}},
-            partitions:
-              {{:array,
-                [
-                  partition: {:int32, %{is_nullable?: false}},
-                  current_leader_epoch: {:int32, %{is_nullable?: false}},
-                  fetch_offset: {:int64, %{is_nullable?: false}},
-                  log_start_offset: {:int64, %{is_nullable?: false}},
-                  partition_max_bytes: {:int32, %{is_nullable?: false}}
-                ]}, %{is_nullable?: false}}
-          ]}, %{is_nullable?: false}},
-      forgotten_topics_data:
-        {{:array,
-          [
-            topic: {:string, %{is_nullable?: false}},
-            partitions: {{:array, :int32}, %{is_nullable?: false}}
-          ]}, %{is_nullable?: false}}
-    ]
-
-  defp request_schema(10),
+  def request_schema(9),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       max_wait_ms: {:int32, %{is_nullable?: false}},
@@ -373,7 +342,38 @@ defmodule KlifeProtocol.Messages.Fetch do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(11),
+  def request_schema(10),
+    do: [
+      replica_id: {:int32, %{is_nullable?: false}},
+      max_wait_ms: {:int32, %{is_nullable?: false}},
+      min_bytes: {:int32, %{is_nullable?: false}},
+      max_bytes: {:int32, %{is_nullable?: false}},
+      isolation_level: {:int8, %{is_nullable?: false}},
+      session_id: {:int32, %{is_nullable?: false}},
+      session_epoch: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:array,
+          [
+            topic: {:string, %{is_nullable?: false}},
+            partitions:
+              {{:array,
+                [
+                  partition: {:int32, %{is_nullable?: false}},
+                  current_leader_epoch: {:int32, %{is_nullable?: false}},
+                  fetch_offset: {:int64, %{is_nullable?: false}},
+                  log_start_offset: {:int64, %{is_nullable?: false}},
+                  partition_max_bytes: {:int32, %{is_nullable?: false}}
+                ]}, %{is_nullable?: false}}
+          ]}, %{is_nullable?: false}},
+      forgotten_topics_data:
+        {{:array,
+          [
+            topic: {:string, %{is_nullable?: false}},
+            partitions: {{:array, :int32}, %{is_nullable?: false}}
+          ]}, %{is_nullable?: false}}
+    ]
+
+  def request_schema(11),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       max_wait_ms: {:int32, %{is_nullable?: false}},
@@ -405,7 +405,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       rack_id: {:string, %{is_nullable?: false}}
     ]
 
-  defp request_schema(12),
+  def request_schema(12),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       max_wait_ms: {:int32, %{is_nullable?: false}},
@@ -442,7 +442,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       tag_buffer: {:tag_buffer, [cluster_id: {{0, :compact_string}, %{is_nullable?: true}}]}
     ]
 
-  defp request_schema(13),
+  def request_schema(13),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       max_wait_ms: {:int32, %{is_nullable?: false}},
@@ -479,7 +479,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       tag_buffer: {:tag_buffer, [cluster_id: {{0, :compact_string}, %{is_nullable?: true}}]}
     ]
 
-  defp request_schema(14),
+  def request_schema(14),
     do: [
       replica_id: {:int32, %{is_nullable?: false}},
       max_wait_ms: {:int32, %{is_nullable?: false}},
@@ -516,7 +516,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       tag_buffer: {:tag_buffer, [cluster_id: {{0, :compact_string}, %{is_nullable?: true}}]}
     ]
 
-  defp request_schema(15),
+  def request_schema(15),
     do: [
       max_wait_ms: {:int32, %{is_nullable?: false}},
       min_bytes: {:int32, %{is_nullable?: false}},
@@ -564,7 +564,7 @@ defmodule KlifeProtocol.Messages.Fetch do
          ]}
     ]
 
-  defp request_schema(16),
+  def request_schema(16),
     do: [
       max_wait_ms: {:int32, %{is_nullable?: false}},
       min_bytes: {:int32, %{is_nullable?: false}},
@@ -612,7 +612,7 @@ defmodule KlifeProtocol.Messages.Fetch do
          ]}
     ]
 
-  defp request_schema(17),
+  def request_schema(17),
     do: [
       max_wait_ms: {:int32, %{is_nullable?: false}},
       min_bytes: {:int32, %{is_nullable?: false}},
@@ -661,10 +661,10 @@ defmodule KlifeProtocol.Messages.Fetch do
          ]}
     ]
 
-  defp request_schema(unkown_version),
+  def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message Fetch")
 
-  defp response_schema(4),
+  def response_schema(4),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       responses:
@@ -689,33 +689,7 @@ defmodule KlifeProtocol.Messages.Fetch do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(5),
-    do: [
-      throttle_time_ms: {:int32, %{is_nullable?: false}},
-      responses:
-        {{:array,
-          [
-            topic: {:string, %{is_nullable?: false}},
-            partitions:
-              {{:array,
-                [
-                  partition_index: {:int32, %{is_nullable?: false}},
-                  error_code: {:int16, %{is_nullable?: false}},
-                  high_watermark: {:int64, %{is_nullable?: false}},
-                  last_stable_offset: {:int64, %{is_nullable?: false}},
-                  log_start_offset: {:int64, %{is_nullable?: false}},
-                  aborted_transactions:
-                    {{:array,
-                      [
-                        producer_id: {:int64, %{is_nullable?: false}},
-                        first_offset: {:int64, %{is_nullable?: false}}
-                      ]}, %{is_nullable?: true}},
-                  records: {:record_batch, %{is_nullable?: true}}
-                ]}, %{is_nullable?: false}}
-          ]}, %{is_nullable?: false}}
-    ]
-
-  defp response_schema(6),
+  def response_schema(5),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       responses:
@@ -741,7 +715,33 @@ defmodule KlifeProtocol.Messages.Fetch do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(7),
+  def response_schema(6),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      responses:
+        {{:array,
+          [
+            topic: {:string, %{is_nullable?: false}},
+            partitions:
+              {{:array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  high_watermark: {:int64, %{is_nullable?: false}},
+                  last_stable_offset: {:int64, %{is_nullable?: false}},
+                  log_start_offset: {:int64, %{is_nullable?: false}},
+                  aborted_transactions:
+                    {{:array,
+                      [
+                        producer_id: {:int64, %{is_nullable?: false}},
+                        first_offset: {:int64, %{is_nullable?: false}}
+                      ]}, %{is_nullable?: true}},
+                  records: {:record_batch, %{is_nullable?: true}}
+                ]}, %{is_nullable?: false}}
+          ]}, %{is_nullable?: false}}
+    ]
+
+  def response_schema(7),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -769,7 +769,7 @@ defmodule KlifeProtocol.Messages.Fetch do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(8),
+  def response_schema(8),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -797,7 +797,7 @@ defmodule KlifeProtocol.Messages.Fetch do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(9),
+  def response_schema(9),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -825,7 +825,7 @@ defmodule KlifeProtocol.Messages.Fetch do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(10),
+  def response_schema(10),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -853,7 +853,7 @@ defmodule KlifeProtocol.Messages.Fetch do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(11),
+  def response_schema(11),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -882,7 +882,7 @@ defmodule KlifeProtocol.Messages.Fetch do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(12),
+  def response_schema(12),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -942,7 +942,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(13),
+  def response_schema(13),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -1002,7 +1002,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(14),
+  def response_schema(14),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -1062,7 +1062,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(15),
+  def response_schema(15),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -1122,7 +1122,7 @@ defmodule KlifeProtocol.Messages.Fetch do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(16),
+  def response_schema(16),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -1195,7 +1195,7 @@ defmodule KlifeProtocol.Messages.Fetch do
          }}
     ]
 
-  defp response_schema(17),
+  def response_schema(17),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -1268,6 +1268,6 @@ defmodule KlifeProtocol.Messages.Fetch do
          }}
     ]
 
-  defp response_schema(unkown_version),
+  def response_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message Fetch")
 end

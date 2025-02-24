@@ -95,23 +95,23 @@ defmodule KlifeProtocol.Messages.SaslAuthenticate do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0), do: [auth_bytes: {:bytes, %{is_nullable?: false}}]
-  defp request_schema(1), do: [auth_bytes: {:bytes, %{is_nullable?: false}}]
+  def request_schema(0), do: [auth_bytes: {:bytes, %{is_nullable?: false}}]
+  def request_schema(1), do: [auth_bytes: {:bytes, %{is_nullable?: false}}]
 
-  defp request_schema(2),
+  def request_schema(2),
     do: [auth_bytes: {:compact_bytes, %{is_nullable?: false}}, tag_buffer: {:tag_buffer, []}]
 
-  defp request_schema(unkown_version),
+  def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message SaslAuthenticate")
 
-  defp response_schema(0),
+  def response_schema(0),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       error_message: {:string, %{is_nullable?: true}},
       auth_bytes: {:bytes, %{is_nullable?: false}}
     ]
 
-  defp response_schema(1),
+  def response_schema(1),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       error_message: {:string, %{is_nullable?: true}},
@@ -119,7 +119,7 @@ defmodule KlifeProtocol.Messages.SaslAuthenticate do
       session_lifetime_ms: {:int64, %{is_nullable?: false}}
     ]
 
-  defp response_schema(2),
+  def response_schema(2),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       error_message: {:compact_string, %{is_nullable?: true}},
@@ -128,6 +128,6 @@ defmodule KlifeProtocol.Messages.SaslAuthenticate do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(unkown_version),
+  def response_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message SaslAuthenticate")
 end

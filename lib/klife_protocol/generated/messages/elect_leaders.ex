@@ -103,7 +103,7 @@ defmodule KlifeProtocol.Messages.ElectLeaders do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0),
+  def request_schema(0),
     do: [
       topic_partitions:
         {{:array,
@@ -114,7 +114,7 @@ defmodule KlifeProtocol.Messages.ElectLeaders do
       timeout_ms: {:int32, %{is_nullable?: false}}
     ]
 
-  defp request_schema(1),
+  def request_schema(1),
     do: [
       election_type: {:int8, %{is_nullable?: false}},
       topic_partitions:
@@ -126,7 +126,7 @@ defmodule KlifeProtocol.Messages.ElectLeaders do
       timeout_ms: {:int32, %{is_nullable?: false}}
     ]
 
-  defp request_schema(2),
+  def request_schema(2),
     do: [
       election_type: {:int8, %{is_nullable?: false}},
       topic_partitions:
@@ -140,10 +140,10 @@ defmodule KlifeProtocol.Messages.ElectLeaders do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(unkown_version),
+  def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message ElectLeaders")
 
-  defp response_schema(0),
+  def response_schema(0),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       replica_election_results:
@@ -160,7 +160,7 @@ defmodule KlifeProtocol.Messages.ElectLeaders do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(1),
+  def response_schema(1),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -178,7 +178,7 @@ defmodule KlifeProtocol.Messages.ElectLeaders do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(2),
+  def response_schema(2),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -199,6 +199,6 @@ defmodule KlifeProtocol.Messages.ElectLeaders do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(unkown_version),
+  def response_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message ElectLeaders")
 end

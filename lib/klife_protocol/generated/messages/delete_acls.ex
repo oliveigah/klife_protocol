@@ -115,7 +115,7 @@ defmodule KlifeProtocol.Messages.DeleteAcls do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0),
+  def request_schema(0),
     do: [
       filters:
         {{:array,
@@ -129,7 +129,7 @@ defmodule KlifeProtocol.Messages.DeleteAcls do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(1),
+  def request_schema(1),
     do: [
       filters:
         {{:array,
@@ -144,7 +144,7 @@ defmodule KlifeProtocol.Messages.DeleteAcls do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(2),
+  def request_schema(2),
     do: [
       filters:
         {{:compact_array,
@@ -161,7 +161,7 @@ defmodule KlifeProtocol.Messages.DeleteAcls do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(3),
+  def request_schema(3),
     do: [
       filters:
         {{:compact_array,
@@ -178,10 +178,10 @@ defmodule KlifeProtocol.Messages.DeleteAcls do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(unkown_version),
+  def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message DeleteAcls")
 
-  defp response_schema(0),
+  def response_schema(0),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       filter_results:
@@ -204,7 +204,7 @@ defmodule KlifeProtocol.Messages.DeleteAcls do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(1),
+  def response_schema(1),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       filter_results:
@@ -228,7 +228,7 @@ defmodule KlifeProtocol.Messages.DeleteAcls do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(2),
+  def response_schema(2),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       filter_results:
@@ -255,7 +255,7 @@ defmodule KlifeProtocol.Messages.DeleteAcls do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(3),
+  def response_schema(3),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       filter_results:
@@ -282,6 +282,6 @@ defmodule KlifeProtocol.Messages.DeleteAcls do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(unkown_version),
+  def response_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message DeleteAcls")
 end

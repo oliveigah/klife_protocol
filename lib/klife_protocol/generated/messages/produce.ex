@@ -137,7 +137,7 @@ defmodule KlifeProtocol.Messages.Produce do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0),
+  def request_schema(0),
     do: [
       acks: {:int16, %{is_nullable?: false}},
       timeout_ms: {:int32, %{is_nullable?: false}},
@@ -154,7 +154,7 @@ defmodule KlifeProtocol.Messages.Produce do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(1),
+  def request_schema(1),
     do: [
       acks: {:int16, %{is_nullable?: false}},
       timeout_ms: {:int32, %{is_nullable?: false}},
@@ -171,7 +171,7 @@ defmodule KlifeProtocol.Messages.Produce do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(2),
+  def request_schema(2),
     do: [
       acks: {:int16, %{is_nullable?: false}},
       timeout_ms: {:int32, %{is_nullable?: false}},
@@ -188,25 +188,7 @@ defmodule KlifeProtocol.Messages.Produce do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(3),
-    do: [
-      transactional_id: {:string, %{is_nullable?: true}},
-      acks: {:int16, %{is_nullable?: false}},
-      timeout_ms: {:int32, %{is_nullable?: false}},
-      topic_data:
-        {{:array,
-          [
-            name: {:string, %{is_nullable?: false}},
-            partition_data:
-              {{:array,
-                [
-                  index: {:int32, %{is_nullable?: false}},
-                  records: {:record_batch, %{is_nullable?: true}}
-                ]}, %{is_nullable?: false}}
-          ]}, %{is_nullable?: false}}
-    ]
-
-  defp request_schema(4),
+  def request_schema(3),
     do: [
       transactional_id: {:string, %{is_nullable?: true}},
       acks: {:int16, %{is_nullable?: false}},
@@ -224,7 +206,7 @@ defmodule KlifeProtocol.Messages.Produce do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(5),
+  def request_schema(4),
     do: [
       transactional_id: {:string, %{is_nullable?: true}},
       acks: {:int16, %{is_nullable?: false}},
@@ -242,7 +224,7 @@ defmodule KlifeProtocol.Messages.Produce do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(6),
+  def request_schema(5),
     do: [
       transactional_id: {:string, %{is_nullable?: true}},
       acks: {:int16, %{is_nullable?: false}},
@@ -260,7 +242,7 @@ defmodule KlifeProtocol.Messages.Produce do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(7),
+  def request_schema(6),
     do: [
       transactional_id: {:string, %{is_nullable?: true}},
       acks: {:int16, %{is_nullable?: false}},
@@ -278,7 +260,7 @@ defmodule KlifeProtocol.Messages.Produce do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(8),
+  def request_schema(7),
     do: [
       transactional_id: {:string, %{is_nullable?: true}},
       acks: {:int16, %{is_nullable?: false}},
@@ -296,7 +278,25 @@ defmodule KlifeProtocol.Messages.Produce do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(9),
+  def request_schema(8),
+    do: [
+      transactional_id: {:string, %{is_nullable?: true}},
+      acks: {:int16, %{is_nullable?: false}},
+      timeout_ms: {:int32, %{is_nullable?: false}},
+      topic_data:
+        {{:array,
+          [
+            name: {:string, %{is_nullable?: false}},
+            partition_data:
+              {{:array,
+                [
+                  index: {:int32, %{is_nullable?: false}},
+                  records: {:record_batch, %{is_nullable?: true}}
+                ]}, %{is_nullable?: false}}
+          ]}, %{is_nullable?: false}}
+    ]
+
+  def request_schema(9),
     do: [
       transactional_id: {:compact_string, %{is_nullable?: true}},
       acks: {:int16, %{is_nullable?: false}},
@@ -317,7 +317,7 @@ defmodule KlifeProtocol.Messages.Produce do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(10),
+  def request_schema(10),
     do: [
       transactional_id: {:compact_string, %{is_nullable?: true}},
       acks: {:int16, %{is_nullable?: false}},
@@ -338,7 +338,7 @@ defmodule KlifeProtocol.Messages.Produce do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(11),
+  def request_schema(11),
     do: [
       transactional_id: {:compact_string, %{is_nullable?: true}},
       acks: {:int16, %{is_nullable?: false}},
@@ -359,10 +359,10 @@ defmodule KlifeProtocol.Messages.Produce do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(unkown_version),
+  def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message Produce")
 
-  defp response_schema(0),
+  def response_schema(0),
     do: [
       responses:
         {{:array,
@@ -378,7 +378,7 @@ defmodule KlifeProtocol.Messages.Produce do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(1),
+  def response_schema(1),
     do: [
       responses:
         {{:array,
@@ -395,7 +395,7 @@ defmodule KlifeProtocol.Messages.Produce do
       throttle_time_ms: {:int32, %{is_nullable?: false}}
     ]
 
-  defp response_schema(2),
+  def response_schema(2),
     do: [
       responses:
         {{:array,
@@ -413,7 +413,7 @@ defmodule KlifeProtocol.Messages.Produce do
       throttle_time_ms: {:int32, %{is_nullable?: false}}
     ]
 
-  defp response_schema(3),
+  def response_schema(3),
     do: [
       responses:
         {{:array,
@@ -431,7 +431,7 @@ defmodule KlifeProtocol.Messages.Produce do
       throttle_time_ms: {:int32, %{is_nullable?: false}}
     ]
 
-  defp response_schema(4),
+  def response_schema(4),
     do: [
       responses:
         {{:array,
@@ -449,7 +449,7 @@ defmodule KlifeProtocol.Messages.Produce do
       throttle_time_ms: {:int32, %{is_nullable?: false}}
     ]
 
-  defp response_schema(5),
+  def response_schema(5),
     do: [
       responses:
         {{:array,
@@ -468,7 +468,7 @@ defmodule KlifeProtocol.Messages.Produce do
       throttle_time_ms: {:int32, %{is_nullable?: false}}
     ]
 
-  defp response_schema(6),
+  def response_schema(6),
     do: [
       responses:
         {{:array,
@@ -487,7 +487,7 @@ defmodule KlifeProtocol.Messages.Produce do
       throttle_time_ms: {:int32, %{is_nullable?: false}}
     ]
 
-  defp response_schema(7),
+  def response_schema(7),
     do: [
       responses:
         {{:array,
@@ -506,7 +506,7 @@ defmodule KlifeProtocol.Messages.Produce do
       throttle_time_ms: {:int32, %{is_nullable?: false}}
     ]
 
-  defp response_schema(8),
+  def response_schema(8),
     do: [
       responses:
         {{:array,
@@ -532,7 +532,7 @@ defmodule KlifeProtocol.Messages.Produce do
       throttle_time_ms: {:int32, %{is_nullable?: false}}
     ]
 
-  defp response_schema(9),
+  def response_schema(9),
     do: [
       responses:
         {{:compact_array,
@@ -562,7 +562,7 @@ defmodule KlifeProtocol.Messages.Produce do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(10),
+  def response_schema(10),
     do: [
       responses:
         {{:compact_array,
@@ -616,7 +616,7 @@ defmodule KlifeProtocol.Messages.Produce do
          }}
     ]
 
-  defp response_schema(11),
+  def response_schema(11),
     do: [
       responses:
         {{:compact_array,
@@ -670,6 +670,6 @@ defmodule KlifeProtocol.Messages.Produce do
          }}
     ]
 
-  defp response_schema(unkown_version),
+  def response_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message Produce")
 end

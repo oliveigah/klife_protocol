@@ -112,7 +112,7 @@ defmodule KlifeProtocol.Messages.DescribeAcls do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0),
+  def request_schema(0),
     do: [
       resource_type_filter: {:int8, %{is_nullable?: false}},
       resource_name_filter: {:string, %{is_nullable?: true}},
@@ -122,7 +122,7 @@ defmodule KlifeProtocol.Messages.DescribeAcls do
       permission_type: {:int8, %{is_nullable?: false}}
     ]
 
-  defp request_schema(1),
+  def request_schema(1),
     do: [
       resource_type_filter: {:int8, %{is_nullable?: false}},
       resource_name_filter: {:string, %{is_nullable?: true}},
@@ -133,7 +133,7 @@ defmodule KlifeProtocol.Messages.DescribeAcls do
       permission_type: {:int8, %{is_nullable?: false}}
     ]
 
-  defp request_schema(2),
+  def request_schema(2),
     do: [
       resource_type_filter: {:int8, %{is_nullable?: false}},
       resource_name_filter: {:compact_string, %{is_nullable?: true}},
@@ -145,7 +145,7 @@ defmodule KlifeProtocol.Messages.DescribeAcls do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(3),
+  def request_schema(3),
     do: [
       resource_type_filter: {:int8, %{is_nullable?: false}},
       resource_name_filter: {:compact_string, %{is_nullable?: true}},
@@ -157,10 +157,10 @@ defmodule KlifeProtocol.Messages.DescribeAcls do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(unkown_version),
+  def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message DescribeAcls")
 
-  defp response_schema(0),
+  def response_schema(0),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -181,7 +181,7 @@ defmodule KlifeProtocol.Messages.DescribeAcls do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(1),
+  def response_schema(1),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -203,7 +203,7 @@ defmodule KlifeProtocol.Messages.DescribeAcls do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(2),
+  def response_schema(2),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -228,7 +228,7 @@ defmodule KlifeProtocol.Messages.DescribeAcls do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(3),
+  def response_schema(3),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
@@ -253,6 +253,6 @@ defmodule KlifeProtocol.Messages.DescribeAcls do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(unkown_version),
+  def response_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message DescribeAcls")
 end

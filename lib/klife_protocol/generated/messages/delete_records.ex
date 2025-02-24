@@ -103,7 +103,7 @@ defmodule KlifeProtocol.Messages.DeleteRecords do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0),
+  def request_schema(0),
     do: [
       topics:
         {{:array,
@@ -119,7 +119,7 @@ defmodule KlifeProtocol.Messages.DeleteRecords do
       timeout_ms: {:int32, %{is_nullable?: false}}
     ]
 
-  defp request_schema(1),
+  def request_schema(1),
     do: [
       topics:
         {{:array,
@@ -135,7 +135,7 @@ defmodule KlifeProtocol.Messages.DeleteRecords do
       timeout_ms: {:int32, %{is_nullable?: false}}
     ]
 
-  defp request_schema(2),
+  def request_schema(2),
     do: [
       topics:
         {{:compact_array,
@@ -154,10 +154,10 @@ defmodule KlifeProtocol.Messages.DeleteRecords do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(unkown_version),
+  def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message DeleteRecords")
 
-  defp response_schema(0),
+  def response_schema(0),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       topics:
@@ -174,7 +174,7 @@ defmodule KlifeProtocol.Messages.DeleteRecords do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(1),
+  def response_schema(1),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       topics:
@@ -191,7 +191,7 @@ defmodule KlifeProtocol.Messages.DeleteRecords do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(2),
+  def response_schema(2),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       topics:
@@ -211,6 +211,6 @@ defmodule KlifeProtocol.Messages.DeleteRecords do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(unkown_version),
+  def response_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message DeleteRecords")
 end

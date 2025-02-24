@@ -130,43 +130,43 @@ defmodule KlifeProtocol.Messages.Metadata do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0),
+  def request_schema(0),
     do: [topics: {{:array, [name: {:string, %{is_nullable?: false}}]}, %{is_nullable?: false}}]
 
-  defp request_schema(1),
+  def request_schema(1),
     do: [topics: {{:array, [name: {:string, %{is_nullable?: false}}]}, %{is_nullable?: true}}]
 
-  defp request_schema(2),
+  def request_schema(2),
     do: [topics: {{:array, [name: {:string, %{is_nullable?: false}}]}, %{is_nullable?: true}}]
 
-  defp request_schema(3),
+  def request_schema(3),
     do: [topics: {{:array, [name: {:string, %{is_nullable?: false}}]}, %{is_nullable?: true}}]
 
-  defp request_schema(4),
+  def request_schema(4),
     do: [
       topics: {{:array, [name: {:string, %{is_nullable?: false}}]}, %{is_nullable?: true}},
       allow_auto_topic_creation: {:boolean, %{is_nullable?: false}}
     ]
 
-  defp request_schema(5),
+  def request_schema(5),
     do: [
       topics: {{:array, [name: {:string, %{is_nullable?: false}}]}, %{is_nullable?: true}},
       allow_auto_topic_creation: {:boolean, %{is_nullable?: false}}
     ]
 
-  defp request_schema(6),
+  def request_schema(6),
     do: [
       topics: {{:array, [name: {:string, %{is_nullable?: false}}]}, %{is_nullable?: true}},
       allow_auto_topic_creation: {:boolean, %{is_nullable?: false}}
     ]
 
-  defp request_schema(7),
+  def request_schema(7),
     do: [
       topics: {{:array, [name: {:string, %{is_nullable?: false}}]}, %{is_nullable?: true}},
       allow_auto_topic_creation: {:boolean, %{is_nullable?: false}}
     ]
 
-  defp request_schema(8),
+  def request_schema(8),
     do: [
       topics: {{:array, [name: {:string, %{is_nullable?: false}}]}, %{is_nullable?: true}},
       allow_auto_topic_creation: {:boolean, %{is_nullable?: false}},
@@ -174,7 +174,7 @@ defmodule KlifeProtocol.Messages.Metadata do
       include_topic_authorized_operations: {:boolean, %{is_nullable?: false}}
     ]
 
-  defp request_schema(9),
+  def request_schema(9),
     do: [
       topics:
         {{:compact_array,
@@ -186,7 +186,7 @@ defmodule KlifeProtocol.Messages.Metadata do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(10),
+  def request_schema(10),
     do: [
       topics:
         {{:compact_array,
@@ -201,7 +201,7 @@ defmodule KlifeProtocol.Messages.Metadata do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(11),
+  def request_schema(11),
     do: [
       topics:
         {{:compact_array,
@@ -215,7 +215,7 @@ defmodule KlifeProtocol.Messages.Metadata do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(12),
+  def request_schema(12),
     do: [
       topics:
         {{:compact_array,
@@ -229,10 +229,10 @@ defmodule KlifeProtocol.Messages.Metadata do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(unkown_version),
+  def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message Metadata")
 
-  defp response_schema(0),
+  def response_schema(0),
     do: [
       brokers:
         {{:array,
@@ -258,7 +258,7 @@ defmodule KlifeProtocol.Messages.Metadata do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(1),
+  def response_schema(1),
     do: [
       brokers:
         {{:array,
@@ -287,7 +287,7 @@ defmodule KlifeProtocol.Messages.Metadata do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(2),
+  def response_schema(2),
     do: [
       brokers:
         {{:array,
@@ -317,7 +317,7 @@ defmodule KlifeProtocol.Messages.Metadata do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(3),
+  def response_schema(3),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       brokers:
@@ -348,7 +348,7 @@ defmodule KlifeProtocol.Messages.Metadata do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(4),
+  def response_schema(4),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       brokers:
@@ -379,39 +379,7 @@ defmodule KlifeProtocol.Messages.Metadata do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(5),
-    do: [
-      throttle_time_ms: {:int32, %{is_nullable?: false}},
-      brokers:
-        {{:array,
-          [
-            node_id: {:int32, %{is_nullable?: false}},
-            host: {:string, %{is_nullable?: false}},
-            port: {:int32, %{is_nullable?: false}},
-            rack: {:string, %{is_nullable?: true}}
-          ]}, %{is_nullable?: false}},
-      cluster_id: {:string, %{is_nullable?: true}},
-      controller_id: {:int32, %{is_nullable?: false}},
-      topics:
-        {{:array,
-          [
-            error_code: {:int16, %{is_nullable?: false}},
-            name: {:string, %{is_nullable?: false}},
-            is_internal: {:boolean, %{is_nullable?: false}},
-            partitions:
-              {{:array,
-                [
-                  error_code: {:int16, %{is_nullable?: false}},
-                  partition_index: {:int32, %{is_nullable?: false}},
-                  leader_id: {:int32, %{is_nullable?: false}},
-                  replica_nodes: {{:array, :int32}, %{is_nullable?: false}},
-                  isr_nodes: {{:array, :int32}, %{is_nullable?: false}},
-                  offline_replicas: {{:array, :int32}, %{is_nullable?: false}}
-                ]}, %{is_nullable?: false}}
-          ]}, %{is_nullable?: false}}
-    ]
-
-  defp response_schema(6),
+  def response_schema(5),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       brokers:
@@ -443,7 +411,39 @@ defmodule KlifeProtocol.Messages.Metadata do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(7),
+  def response_schema(6),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      brokers:
+        {{:array,
+          [
+            node_id: {:int32, %{is_nullable?: false}},
+            host: {:string, %{is_nullable?: false}},
+            port: {:int32, %{is_nullable?: false}},
+            rack: {:string, %{is_nullable?: true}}
+          ]}, %{is_nullable?: false}},
+      cluster_id: {:string, %{is_nullable?: true}},
+      controller_id: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:array,
+          [
+            error_code: {:int16, %{is_nullable?: false}},
+            name: {:string, %{is_nullable?: false}},
+            is_internal: {:boolean, %{is_nullable?: false}},
+            partitions:
+              {{:array,
+                [
+                  error_code: {:int16, %{is_nullable?: false}},
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  leader_id: {:int32, %{is_nullable?: false}},
+                  replica_nodes: {{:array, :int32}, %{is_nullable?: false}},
+                  isr_nodes: {{:array, :int32}, %{is_nullable?: false}},
+                  offline_replicas: {{:array, :int32}, %{is_nullable?: false}}
+                ]}, %{is_nullable?: false}}
+          ]}, %{is_nullable?: false}}
+    ]
+
+  def response_schema(7),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       brokers:
@@ -476,7 +476,7 @@ defmodule KlifeProtocol.Messages.Metadata do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(8),
+  def response_schema(8),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       brokers:
@@ -511,7 +511,7 @@ defmodule KlifeProtocol.Messages.Metadata do
       cluster_authorized_operations: {:int32, %{is_nullable?: false}}
     ]
 
-  defp response_schema(9),
+  def response_schema(9),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       brokers:
@@ -550,7 +550,7 @@ defmodule KlifeProtocol.Messages.Metadata do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(10),
+  def response_schema(10),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       brokers:
@@ -590,7 +590,7 @@ defmodule KlifeProtocol.Messages.Metadata do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(11),
+  def response_schema(11),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       brokers:
@@ -629,7 +629,7 @@ defmodule KlifeProtocol.Messages.Metadata do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(12),
+  def response_schema(12),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       brokers:
@@ -668,6 +668,6 @@ defmodule KlifeProtocol.Messages.Metadata do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(unkown_version),
+  def response_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message Metadata")
 end

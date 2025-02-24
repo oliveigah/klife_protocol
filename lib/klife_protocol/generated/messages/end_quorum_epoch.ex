@@ -116,7 +116,7 @@ defmodule KlifeProtocol.Messages.EndQuorumEpoch do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0),
+  def request_schema(0),
     do: [
       cluster_id: {:string, %{is_nullable?: true}},
       topics:
@@ -134,7 +134,7 @@ defmodule KlifeProtocol.Messages.EndQuorumEpoch do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(1),
+  def request_schema(1),
     do: [
       cluster_id: {:compact_string, %{is_nullable?: true}},
       topics:
@@ -169,10 +169,10 @@ defmodule KlifeProtocol.Messages.EndQuorumEpoch do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(unkown_version),
+  def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message EndQuorumEpoch")
 
-  defp response_schema(0),
+  def response_schema(0),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       topics:
@@ -190,7 +190,7 @@ defmodule KlifeProtocol.Messages.EndQuorumEpoch do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(1),
+  def response_schema(1),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       topics:
@@ -223,6 +223,6 @@ defmodule KlifeProtocol.Messages.EndQuorumEpoch do
          }}
     ]
 
-  defp response_schema(unkown_version),
+  def response_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message EndQuorumEpoch")
 end

@@ -28,7 +28,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
       client_software_version: "0"
     }
 
-    {:ok, %{content: %{api_keys: api_keys}} = resp} =
+    {:ok, %{content: %{api_keys: api_keys}}} =
       %{headers: headers, content: content}
       |> Messages.ApiVersions.serialize_request(version)
       |> send_message_to_broker()

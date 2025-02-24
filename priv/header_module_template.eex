@@ -8,13 +8,13 @@ defmodule KlifeProtocol.Header do
 
     <%= Enum.map(request_schemas, fn {version, schema} ->
         """
-        defp request_schema(#{version}), do: #{inspect(schema)}
+        def request_schema(#{version}), do: #{inspect(schema)}
         """
     end) %>
 
     <%= Enum.map(response_schemas, fn {version, schema} ->
         """
-        defp response_schema(#{version}), do: #{inspect(schema)}
+        def response_schema(#{version}), do: #{inspect(schema)}
         """
     end) %>
 

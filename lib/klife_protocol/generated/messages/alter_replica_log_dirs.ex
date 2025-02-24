@@ -101,7 +101,7 @@ defmodule KlifeProtocol.Messages.AlterReplicaLogDirs do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0),
+  def request_schema(0),
     do: [
       dirs:
         {{:array,
@@ -116,7 +116,7 @@ defmodule KlifeProtocol.Messages.AlterReplicaLogDirs do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(1),
+  def request_schema(1),
     do: [
       dirs:
         {{:array,
@@ -131,7 +131,7 @@ defmodule KlifeProtocol.Messages.AlterReplicaLogDirs do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp request_schema(2),
+  def request_schema(2),
     do: [
       dirs:
         {{:compact_array,
@@ -149,10 +149,10 @@ defmodule KlifeProtocol.Messages.AlterReplicaLogDirs do
       tag_buffer: {:tag_buffer, []}
     ]
 
-  defp request_schema(unkown_version),
+  def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message AlterReplicaLogDirs")
 
-  defp response_schema(0),
+  def response_schema(0),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       results:
@@ -168,7 +168,7 @@ defmodule KlifeProtocol.Messages.AlterReplicaLogDirs do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(1),
+  def response_schema(1),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       results:
@@ -184,7 +184,7 @@ defmodule KlifeProtocol.Messages.AlterReplicaLogDirs do
           ]}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(2),
+  def response_schema(2),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       results:
@@ -203,6 +203,6 @@ defmodule KlifeProtocol.Messages.AlterReplicaLogDirs do
       tag_buffer: {:tag_buffer, %{}}
     ]
 
-  defp response_schema(unkown_version),
+  def response_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message AlterReplicaLogDirs")
 end

@@ -97,24 +97,24 @@ defmodule KlifeProtocol.Messages.SaslHandshake do
   defp res_header_version(msg_version),
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
-  defp request_schema(0), do: [mechanism: {:string, %{is_nullable?: false}}]
-  defp request_schema(1), do: [mechanism: {:string, %{is_nullable?: false}}]
+  def request_schema(0), do: [mechanism: {:string, %{is_nullable?: false}}]
+  def request_schema(1), do: [mechanism: {:string, %{is_nullable?: false}}]
 
-  defp request_schema(unkown_version),
+  def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message SaslHandshake")
 
-  defp response_schema(0),
+  def response_schema(0),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       mechanisms: {{:array, :string}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(1),
+  def response_schema(1),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       mechanisms: {{:array, :string}, %{is_nullable?: false}}
     ]
 
-  defp response_schema(unkown_version),
+  def response_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message SaslHandshake")
 end
