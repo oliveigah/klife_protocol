@@ -34,13 +34,34 @@ defmodule KlifeProtocol.TestSupport.Helpers do
       |> send_message_to_broker()
       |> Messages.ApiVersions.deserialize_response(version)
 
-    IO.inspect(resp, limit: :infinity)
-
-    Enum.flat_map(api_keys, fn %{api_key: key, min_version: min, max_version: max} ->
-      Enum.map(min..max, fn v ->
-        {:"#{key}", v}
+    result =
+      Enum.flat_map(api_keys, fn %{api_key: key, min_version: min, max_version: max} ->
+        Enum.map(min..max, fn v ->
+          {:"#{key}", v}
+        end)
       end)
-    end)
+
+    # Due to a bug on librdkafka, kafka 4.0 returns versions 0-2 for
+    # the produce message on api versions despite rejecting
+    # messages with these versions. So we need to manually
+    # filter it out here.
+    # See: https://issues.apache.org/jira/browse/KAFKA-18659
+
+    # Heuristic to find out if we are running the test against a kafka 4.0
+    # API key 26 version 5 was introduced on 4.0
+    is_kafka_4? = Enum.find(result, fn {k, v} -> {k, v} == {:"26", 5} end)
+
+    if is_kafka_4? do
+      Enum.reject(result, fn {k, v} ->
+        {k, v} in [
+          {:"0", 0},
+          {:"0", 1},
+          {:"0", 2}
+        ]
+      end)
+    else
+      result
+    end
   end
 
   def initialize_shared_storage() do
