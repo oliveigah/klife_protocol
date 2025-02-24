@@ -3,6 +3,7 @@ defmodule KlifeProtocol.CRC32cTest do
 
   alias KlifeProtocol.CRC32c
 
+  @tag core: true
   test "execute/1" do
     assert CRC32c.execute(<<>>) == 0
 

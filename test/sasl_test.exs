@@ -14,12 +14,13 @@ defmodule KlifeProtocol.SaslTest do
 
   defp get_produce_msg_binary() do
     topic_name = "test_topic_default"
-    version = 0
+    version = 9
     partition_index = 0
     ts = DateTime.to_unix(DateTime.utc_now())
 
     content = %{
-      acks: 1,
+      transactional_id: nil,
+      acks: -1,
       timeout_ms: 1000,
       topic_data: [
         %{
@@ -35,8 +36,8 @@ defmodule KlifeProtocol.SaslTest do
                 last_offset_delta: 0,
                 base_timestamp: ts,
                 max_timestamp: ts,
-                producer_id: 1,
-                producer_epoch: 1,
+                producer_id: -1,
+                producer_epoch: -1,
                 base_sequence: 1,
                 records: [
                   %{
@@ -63,6 +64,7 @@ defmodule KlifeProtocol.SaslTest do
     {resp, version}
   end
 
+  @tag core: true
   test "fail if do not pass sasl opts" do
     ssl_opts = [
       verify: :verify_peer,
@@ -86,6 +88,7 @@ defmodule KlifeProtocol.SaslTest do
     end)
   end
 
+  @tag core: true
   test "success with plain sasl opts" do
     ssl_opts = [
       verify: :verify_peer,
@@ -120,6 +123,7 @@ defmodule KlifeProtocol.SaslTest do
     end)
   end
 
+  @tag core: true
   test "success with plain sasl opts 2 step auth" do
     ssl_opts = [
       verify: :verify_peer,

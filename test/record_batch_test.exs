@@ -3,6 +3,7 @@ defmodule KlifeProtocol.RecordBatchTest do
 
   alias KlifeProtocol.RecordBatch
 
+  @tag core: true
   test "compression bits" do
     none = RecordBatch.encode_attributes(compression: :none)
     assert Bitwise.band(none, 7) == 0
@@ -31,6 +32,7 @@ defmodule KlifeProtocol.RecordBatchTest do
     assert %{compression: :zstd} = RecordBatch.decode_attributes(zstd)
   end
 
+  @tag core: true
   test "other bits" do
     opts = [
       compression: :gzip,

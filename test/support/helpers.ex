@@ -19,6 +19,30 @@ defmodule KlifeProtocol.TestSupport.Helpers do
     kafka3: "localhost:39093"
   ]
 
+  def get_versions_to_test() do
+    version = 3
+    headers = generate_headers()
+
+    content = %{
+      client_software_name: "klife",
+      client_software_version: "0"
+    }
+
+    {:ok, %{content: %{api_keys: api_keys}} = resp} =
+      %{headers: headers, content: content}
+      |> Messages.ApiVersions.serialize_request(version)
+      |> send_message_to_broker()
+      |> Messages.ApiVersions.deserialize_response(version)
+
+    IO.inspect(resp, limit: :infinity)
+
+    Enum.flat_map(api_keys, fn %{api_key: key, min_version: min, max_version: max} ->
+      Enum.map(min..max, fn v ->
+        {:"#{key}", v}
+      end)
+    end)
+  end
+
   def initialize_shared_storage() do
     :ets.new(:shared_storage, [:named_table, :set, :public])
     write_to_shared(:correlation_counter, :atomics.new(1, []))

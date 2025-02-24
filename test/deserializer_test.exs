@@ -5,6 +5,7 @@ defmodule KlifeProtocol.DeserializerTest do
 
   @default_metadata %{is_nullable?: false}
 
+  @tag core: true
   test "boolean" do
     input = <<1, 0, 1>>
 
@@ -18,6 +19,7 @@ defmodule KlifeProtocol.DeserializerTest do
     assert %{a: true, b: false, c: true} = response
   end
 
+  @tag core: true
   test "int8" do
     input = <<31, 123, 4>>
 
@@ -31,6 +33,7 @@ defmodule KlifeProtocol.DeserializerTest do
     assert %{a: 31, b: 123, c: 4} = response
   end
 
+  @tag core: true
   test "int16" do
     input = <<31::16-signed, 123::16-signed, 4::16-signed>>
 
@@ -44,6 +47,7 @@ defmodule KlifeProtocol.DeserializerTest do
     assert %{a: 31, b: 123, c: 4} = response
   end
 
+  @tag core: true
   test "int32" do
     input = <<31::32-signed, 123::32-signed, 4::32-signed>>
 
@@ -57,6 +61,7 @@ defmodule KlifeProtocol.DeserializerTest do
     assert %{a: 31, b: 123, c: 4} = response
   end
 
+  @tag core: true
   test "uint32" do
     input = <<0::32-signed, 2::8-signed, 4_223_817_021::32>>
 
@@ -70,6 +75,7 @@ defmodule KlifeProtocol.DeserializerTest do
     assert %{a: 0, b: 2, c: 4_223_817_021} = response
   end
 
+  @tag core: true
   test "int64" do
     input = <<31::64-signed, 123::64-signed, 4::64-signed>>
 
@@ -83,6 +89,7 @@ defmodule KlifeProtocol.DeserializerTest do
     assert %{a: 31, b: 123, c: 4} = response
   end
 
+  @tag core: true
   test "float64" do
     input = <<31.123::float, 123.0::float, 4::float>>
 
@@ -96,6 +103,7 @@ defmodule KlifeProtocol.DeserializerTest do
     assert %{a: 31.123, b: 123.0, c: 4.0} = response
   end
 
+  @tag core: true
   test "string" do
     input = <<
       byte_size("abc")::16-signed,
@@ -118,6 +126,7 @@ defmodule KlifeProtocol.DeserializerTest do
     assert %{a: "abc", b: "defgh", c: nil, d: "ij"} = response
   end
 
+  @tag core: true
   test "bytes" do
     input = <<3::32-signed, 1, 2, 3, -1::32-signed, 4::32-signed, 7, 8, 9, 10>>
 
@@ -131,6 +140,7 @@ defmodule KlifeProtocol.DeserializerTest do
     assert %{a: <<1, 2, 3>>, b: nil, c: <<7, 8, 9, 10>>} = response
   end
 
+  @tag core: true
   test "array - simple" do
     input = <<
       2::32-signed,
@@ -154,6 +164,7 @@ defmodule KlifeProtocol.DeserializerTest do
     assert %{a: [10, 20], b: ["a", "b", "c"]} = response
   end
 
+  @tag core: true
   test "array - nested" do
     input = <<
       2::32-signed,
@@ -212,6 +223,7 @@ defmodule KlifeProtocol.DeserializerTest do
            } = response
   end
 
+  @tag core: true
   test "compact_bytes" do
     input = <<4, 1, 2, 3, 0, 5, 7, 8, 9, 10>>
 
@@ -226,6 +238,7 @@ defmodule KlifeProtocol.DeserializerTest do
     assert %{a: <<1, 2, 3>>, b: nil, c: <<7, 8, 9, 10>>} = response
   end
 
+  @tag core: true
   test "compact_string" do
     input = <<4, "aaa", 0, 10, "abcabcabc">>
 
@@ -240,6 +253,7 @@ defmodule KlifeProtocol.DeserializerTest do
     assert %{a: "aaa", b: nil, c: "abcabcabc"} = response
   end
 
+  @tag core: true
   test "compact_array - simple" do
     input =
       <<3, 10::16-signed, 20::16-signed>> <>
@@ -257,6 +271,7 @@ defmodule KlifeProtocol.DeserializerTest do
     assert %{a: [10, 20], b: ["a", "b", "c"], c: nil} = response
   end
 
+  @tag core: true
   test "compact_array - nested" do
     input =
       <<3, 2, 10::16-signed, 3, 20::16-signed, 30::16-signed>> <>
@@ -283,6 +298,7 @@ defmodule KlifeProtocol.DeserializerTest do
            } = response
   end
 
+  @tag core: true
   test "unsigned_varint" do
     input = <<10, 120, 172, 2, 192, 132, 61>>
 
@@ -298,6 +314,7 @@ defmodule KlifeProtocol.DeserializerTest do
     assert %{a: 10, b: 120, c: 300, d: 1_000_000} = response
   end
 
+  @tag core: true
   test "varint" do
     input = <<19, 239, 1, 215, 4, 160, 156, 1>>
 
@@ -312,6 +329,7 @@ defmodule KlifeProtocol.DeserializerTest do
              Deserializer.execute(input, schema)
   end
 
+  @tag core: true
   test "tag_buffer" do
     input = <<3, 0, 5, 4, "aaa", 2, 3, 123::16-signed, 3, 12, 11, "unkown tag">>
 
@@ -330,6 +348,7 @@ defmodule KlifeProtocol.DeserializerTest do
     assert %{a: "aaa", c: 123} = response
   end
 
+  @tag core: true
   test "empty tag_buffer" do
     input = <<0>>
 

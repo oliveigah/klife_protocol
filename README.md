@@ -175,7 +175,7 @@ sasl_opts = [
 ]
 
 # On socket initialization
-{:ok, socket} = Socket.connect("localhost", 9092, [backend: :ssl, sasl_opts: sasl_opts])
+{:ok, socket} = Socket.connect("localhost", 19094, [backend: :ssl, sasl_opts: sasl_opts])
 
 # After socket initialization
 {:ok, socket} = Socket.connect("localhost", 9092, [backend: :ssl])

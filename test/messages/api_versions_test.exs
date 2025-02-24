@@ -4,6 +4,7 @@ defmodule Messages.ApiVersionsTest do
   alias KlifeProtocol.Messages.ApiVersions
   alias KlifeProtocol.TestSupport.Helpers
 
+  @tag "#{ApiVersions.api_key()}": 0
   test "request and response v0" do
     version = 0
     headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
@@ -33,6 +34,7 @@ defmodule Messages.ApiVersionsTest do
            end)
   end
 
+  @tag "#{ApiVersions.api_key()}": 1
   test "request and response v1" do
     version = 1
     headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
@@ -63,6 +65,7 @@ defmodule Messages.ApiVersionsTest do
            end)
   end
 
+  @tag "#{ApiVersions.api_key()}": 2
   test "request and response v2" do
     version = 2
     headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
@@ -93,6 +96,7 @@ defmodule Messages.ApiVersionsTest do
            end)
   end
 
+  @tag "#{ApiVersions.api_key()}": 3
   test "request and response v3" do
     version = 3
 
@@ -117,13 +121,10 @@ defmodule Messages.ApiVersionsTest do
     assert length(Map.keys(headers)) == 1
     assert %{correlation_id: ^correlation_id} = headers
 
-    assert length(Map.keys(content)) == 4
-
     assert %{
              error_code: 0,
              api_keys: api_keys,
-             throttle_time_ms: 0,
-             finalized_features_epoch: 0
+             throttle_time_ms: 0
            } = content
 
     assert is_list(api_keys) == true

@@ -5,6 +5,7 @@ defmodule Messages.FetchTest do
   alias KlifeProtocol.TestSupport.Helpers
   alias KlifeProtocol.RecordBatch
 
+  @tag "#{Fetch.api_key()}": 4
   test "request and response v4", _ctx do
     version = 4
     topic_name = "test_topic_default"
@@ -202,6 +203,7 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
+  @tag "#{Fetch.api_key()}": 5
   test "request and response v5", _ctx do
     version = 5
     topic_name = "test_topic_default"
@@ -400,6 +402,7 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
+  @tag "#{Fetch.api_key()}": 6
   test "request and response v6", _ctx do
     version = 6
     topic_name = "test_topic_default"
@@ -598,6 +601,7 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
+  @tag "#{Fetch.api_key()}": 7
   test "request and response v7", _ctx do
     version = 7
     topic_name = "test_topic_default"
@@ -800,6 +804,7 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
+  @tag "#{Fetch.api_key()}": 8
   test "request and response v8", _ctx do
     version = 8
     topic_name = "test_topic_default"
@@ -1002,6 +1007,7 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
+  @tag "#{Fetch.api_key()}": 9
   test "request and response v9", _ctx do
     version = 9
     topic_name = "test_topic_default"
@@ -1208,6 +1214,7 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
+  @tag "#{Fetch.api_key()}": 10
   test "request and response v10", _ctx do
     version = 10
     topic_name = "test_topic_default"
@@ -1414,6 +1421,7 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
+  @tag "#{Fetch.api_key()}": 11
   test "request and response v11", _ctx do
     version = 11
     topic_name = "test_topic_default"
@@ -1621,6 +1629,7 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
+  @tag "#{Fetch.api_key()}": 12
   test "request and response v12", _ctx do
     version = 12
     topic_name = "test_topic_default"
@@ -1829,6 +1838,7 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
+  @tag "#{Fetch.api_key()}": 13
   test "request and response v13", _ctx do
     version = 13
     topic_name = "test_topic_default"
@@ -2037,6 +2047,7 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
+  @tag "#{Fetch.api_key()}": 13
   test "Partial messages", _ctx do
     version = 13
     topic_name = "test_topic_default"
@@ -2203,6 +2214,7 @@ defmodule Messages.FetchTest do
            ] = records_2
   end
 
+  @tag "#{Fetch.api_key()}": 13
   test "Partial messages with compression", _ctx do
     version = 13
     topic_name = "test_topic_default"
@@ -2371,6 +2383,7 @@ defmodule Messages.FetchTest do
            ] = records_2
   end
 
+  @tag "#{Fetch.api_key()}": 13
   test "request and response v13 with gzip compression", _ctx do
     version = 13
     topic_name = "test_topic_default"
@@ -2580,6 +2593,7 @@ defmodule Messages.FetchTest do
            ] = records_3
   end
 
+  @tag "#{Fetch.api_key()}": 13
   test "request and response v13 with snappy compression", _ctx do
     version = 13
     topic_name = "test_topic_default"

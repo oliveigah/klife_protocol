@@ -15,4 +15,6 @@ Enum.map(test_topics, fn {topic_name, opts} ->
   {:ok, _} = Helpers.get_or_create_topic(topic_name, opts)
 end)
 
+ExUnit.configure(include: Helpers.get_versions_to_test() ++ [core: true], exclude: :test)
+
 ExUnit.start()
