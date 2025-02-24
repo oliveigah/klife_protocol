@@ -42,13 +42,13 @@ defmodule KlifeProtocol.Messages.AddPartitionsToTxn do
       - verify_only: Boolean to signify if we want to check if the partition is in the transaction rather than add it. (bool | versions 4+)
       - topics: The partitions to add to the transaction. ([]AddPartitionsToTxnTopic | versions 4+)
           - name: The name of the topic. (string | versions 0+)
-          - partitions: The partition indexes to add to the transaction ([]int32 | versions 0+)
+          - partitions: The partition indexes to add to the transaction. ([]int32 | versions 0+)
   - v3_and_below_transactional_id: The transactional id corresponding to the transaction. (string | versions 0-3)
   - v3_and_below_producer_id: Current producer id in use by the transactional id. (int64 | versions 0-3)
   - v3_and_below_producer_epoch: Current epoch associated with the producer id. (int16 | versions 0-3)
   - v3_and_below_topics: The partitions to add to the transaction. ([]AddPartitionsToTxnTopic | versions 0-3)
       - name: The name of the topic. (string | versions 0+)
-      - partitions: The partition indexes to add to the transaction ([]int32 | versions 0+)
+      - partitions: The partition indexes to add to the transaction. ([]int32 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -70,10 +70,10 @@ defmodule KlifeProtocol.Messages.AddPartitionsToTxn do
       - transactional_id: The transactional id corresponding to the transaction. (string | versions 4+)
       - topic_results: The results for each topic. ([]AddPartitionsToTxnTopicResult | versions 4+)
           - name: The topic name. (string | versions 0+)
-          - results_by_partition: The results for each partition ([]AddPartitionsToTxnPartitionResult | versions 0+)
+          - results_by_partition: The results for each partition. ([]AddPartitionsToTxnPartitionResult | versions 0+)
   - results_by_topic_v3_and_below: The results for each topic. ([]AddPartitionsToTxnTopicResult | versions 0-3)
       - name: The topic name. (string | versions 0+)
-      - results_by_partition: The results for each partition ([]AddPartitionsToTxnPartitionResult | versions 0+)
+      - results_by_partition: The results for each partition. ([]AddPartitionsToTxnPartitionResult | versions 0+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)

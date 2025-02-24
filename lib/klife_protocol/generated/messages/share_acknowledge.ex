@@ -59,7 +59,7 @@ defmodule KlifeProtocol.Messages.ShareAcknowledge do
           - partition_index: The partition index. (int32 | versions 0+)
           - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
           - error_message: The error message, or null if there was no error. (string | versions 0+)
-          - current_leader:  (LeaderIdAndEpoch | versions 0+)
+          - current_leader: The current leader of the partition. (LeaderIdAndEpoch | versions 0+)
               - leader_id: The ID of the current leader or -1 if the leader is unknown. (int32 | versions 0+)
               - leader_epoch: The latest known leader epoch. (int32 | versions 0+)
   - node_endpoints: Endpoints for all current leaders enumerated in PartitionData with error NOT_LEADER_OR_FOLLOWER. ([]NodeEndpoint | versions 0+)

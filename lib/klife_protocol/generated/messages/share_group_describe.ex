@@ -24,7 +24,7 @@ defmodule KlifeProtocol.Messages.ShareGroupDescribe do
   Receives a map and serialize it to kafka wire format of the given version.
 
   Input content fields:
-  - group_ids: The ids of the groups to describe ([]string | versions 0+)
+  - group_ids: The ids of the groups to describe. ([]string | versions 0+)
   - include_authorized_operations: Whether to include authorized operations. (bool | versions 0+)
 
   """

@@ -24,7 +24,7 @@ defmodule KlifeProtocol.Messages.DescribeProducers do
   Receives a map and serialize it to kafka wire format of the given version.
 
   Input content fields:
-  - topics:  ([]TopicRequest | versions 0+)
+  - topics: The topics to list producers for. ([]TopicRequest | versions 0+)
       - name: The topic name. (string | versions 0+)
       - partition_indexes: The indexes of the partitions to list producers for. ([]int32 | versions 0+)
 
@@ -44,18 +44,18 @@ defmodule KlifeProtocol.Messages.DescribeProducers do
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - topics: Each topic in the response. ([]TopicResponse | versions 0+)
-      - name: The topic name (string | versions 0+)
+      - name: The topic name. (string | versions 0+)
       - partitions: Each partition in the response. ([]PartitionResponse | versions 0+)
           - partition_index: The partition index. (int32 | versions 0+)
           - error_code: The partition error code, or 0 if there was no error. (int16 | versions 0+)
-          - error_message: The partition error message, which may be null if no additional details are available (string | versions 0+)
-          - active_producers:  ([]ProducerState | versions 0+)
-              - producer_id:  (int64 | versions 0+)
-              - producer_epoch:  (int32 | versions 0+)
-              - last_sequence:  (int32 | versions 0+)
-              - last_timestamp:  (int64 | versions 0+)
-              - coordinator_epoch:  (int32 | versions 0+)
-              - current_txn_start_offset:  (int64 | versions 0+)
+          - error_message: The partition error message, which may be null if no additional details are available. (string | versions 0+)
+          - active_producers: The active producers for the partition. ([]ProducerState | versions 0+)
+              - producer_id: The producer id. (int64 | versions 0+)
+              - producer_epoch: The producer epoch. (int32 | versions 0+)
+              - last_sequence: The last sequence number sent by the producer. (int32 | versions 0+)
+              - last_timestamp: The last timestamp sent by the producer. (int64 | versions 0+)
+              - coordinator_epoch: The current epoch of the producer group. (int32 | versions 0+)
+              - current_txn_start_offset: The current transaction start offset of the producer. (int64 | versions 0+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)

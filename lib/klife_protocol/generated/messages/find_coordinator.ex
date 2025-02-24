@@ -13,6 +13,7 @@ defmodule KlifeProtocol.Messages.FindCoordinator do
   - Version 4 adds support for batching via CoordinatorKeys (KIP-699)
   - Version 5 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
   - Version 6 adds support for share groups (KIP-932).
+  For key type SHARE (2), the coordinator key format is "groupId:topicId:partition".
 
   Response versions summary:
   - Version 1 adds throttle time and error messages.
@@ -37,7 +38,7 @@ defmodule KlifeProtocol.Messages.FindCoordinator do
 
   Input content fields:
   - key: The coordinator key. (string | versions 0-3)
-  - key_type: The coordinator key type. (Group, transaction, etc.) (int8 | versions 1+)
+  - key_type: The coordinator key type. (group, transaction, share). (int8 | versions 1+)
   - coordinator_keys: The coordinator keys. ([]string | versions 4+)
 
   """
@@ -60,7 +61,7 @@ defmodule KlifeProtocol.Messages.FindCoordinator do
   - node_id: The node id. (int32 | versions 0-3)
   - host: The host name. (string | versions 0-3)
   - port: The port. (int32 | versions 0-3)
-  - coordinators: Each coordinator result in the response ([]Coordinator | versions 4+)
+  - coordinators: Each coordinator result in the response. ([]Coordinator | versions 4+)
       - key: The coordinator key. (string | versions 4+)
       - node_id: The node id. (int32 | versions 4+)
       - host: The host name. (string | versions 4+)

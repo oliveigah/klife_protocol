@@ -11,12 +11,14 @@ defmodule KlifeProtocol.Messages.EndTxn do
   - Version 2 adds the support for new error code PRODUCER_FENCED.
   - Version 3 enables flexible versions.
   - Version 4 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
+  - Version 5 enables bumping epoch on every transaction (KIP-890 Part 2)
 
   Response versions summary:
   - Starting in version 1, on quota violation, brokers send out responses before throttling.
   - Version 2 adds the support for new error code PRODUCER_FENCED.
   - Version 3 enables flexible versions.
   - Version 4 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
+  - Version 5 enables bumping epoch on every transaction (KIP-890 Part 2), so producer ID and epoch are included in the response.
 
   """
 
@@ -53,6 +55,8 @@ defmodule KlifeProtocol.Messages.EndTxn do
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
+  - producer_id: The producer ID. (int64 | versions 5+)
+  - producer_epoch: The current epoch associated with the producer. (int16 | versions 5+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)
@@ -87,7 +91,7 @@ defmodule KlifeProtocol.Messages.EndTxn do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 4
+  def max_supported_version(), do: 5
 
   @doc """
   Returns the current min supported version of this message.
@@ -142,6 +146,15 @@ defmodule KlifeProtocol.Messages.EndTxn do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  def request_schema(5),
+    do: [
+      transactional_id: {:compact_string, %{is_nullable?: false}},
+      producer_id: {:int64, %{is_nullable?: false}},
+      producer_epoch: {:int16, %{is_nullable?: false}},
+      committed: {:boolean, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message EndTxn")
 
@@ -174,6 +187,15 @@ defmodule KlifeProtocol.Messages.EndTxn do
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(5),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      producer_id: {:int64, %{is_nullable?: false}},
+      producer_epoch: {:int16, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, %{}}
     ]
 

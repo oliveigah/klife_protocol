@@ -7,6 +7,7 @@ defmodule KlifeProtocol.Messages.OffsetForLeaderEpoch do
   Kafka protocol OffsetForLeaderEpoch message
 
   Request versions summary:
+  - Versions 0-1 were removed in Apache Kafka 4.0, Version 2 is the new baseline.
   - Version 1 is the same as version 0.
   - Version 2 adds the current leader epoch to support fencing.
   - Version 3 adds ReplicaId (the default is -2 which conventionally represents a
@@ -15,6 +16,7 @@ defmodule KlifeProtocol.Messages.OffsetForLeaderEpoch do
   - Version 4 enables flexible versions.
 
   Response versions summary:
+  - Versions 0-1 were removed in Apache Kafka 4.0, Version 2 is the new baseline.
   - Version 1 added the leader epoch to the response.
   - Version 2 added the throttle time.
   - Version 3 is the same as version 2.

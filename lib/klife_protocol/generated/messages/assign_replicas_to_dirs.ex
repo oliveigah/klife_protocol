@@ -24,14 +24,14 @@ defmodule KlifeProtocol.Messages.AssignReplicasToDirs do
   Receives a map and serialize it to kafka wire format of the given version.
 
   Input content fields:
-  - broker_id: The ID of the requesting broker (int32 | versions 0+)
-  - broker_epoch: The epoch of the requesting broker (int64 | versions 0+)
-  - directories:  ([]DirectoryData | versions 0+)
-      - id: The ID of the directory (uuid | versions 0+)
-      - topics:  ([]TopicData | versions 0+)
-          - topic_id: The ID of the assigned topic (uuid | versions 0+)
-          - partitions:  ([]PartitionData | versions 0+)
-              - partition_index: The partition index (int32 | versions 0+)
+  - broker_id: The ID of the requesting broker. (int32 | versions 0+)
+  - broker_epoch: The epoch of the requesting broker. (int64 | versions 0+)
+  - directories: The directories to which replicas should be assigned. ([]DirectoryData | versions 0+)
+      - id: The ID of the directory. (uuid | versions 0+)
+      - topics: The topics assigned to the directory. ([]TopicData | versions 0+)
+          - topic_id: The ID of the assigned topic. (uuid | versions 0+)
+          - partitions: The partitions assigned to the directory. ([]PartitionData | versions 0+)
+              - partition_index: The partition index. (int32 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -48,14 +48,14 @@ defmodule KlifeProtocol.Messages.AssignReplicasToDirs do
   Response content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
-  - error_code: The top level response error code (int16 | versions 0+)
-  - directories:  ([]DirectoryData | versions 0+)
-      - id: The ID of the directory (uuid | versions 0+)
-      - topics:  ([]TopicData | versions 0+)
-          - topic_id: The ID of the assigned topic (uuid | versions 0+)
-          - partitions:  ([]PartitionData | versions 0+)
-              - partition_index: The partition index (int32 | versions 0+)
-              - error_code: The partition level error code (int16 | versions 0+)
+  - error_code: The top level response error code. (int16 | versions 0+)
+  - directories: The list of directories and their assigned partitions. ([]DirectoryData | versions 0+)
+      - id: The ID of the directory. (uuid | versions 0+)
+      - topics: The list of topics and their assigned partitions. ([]TopicData | versions 0+)
+          - topic_id: The ID of the assigned topic. (uuid | versions 0+)
+          - partitions: The list of assigned partitions. ([]PartitionData | versions 0+)
+              - partition_index: The partition index. (int32 | versions 0+)
+              - error_code: The partition level error code. (int16 | versions 0+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)

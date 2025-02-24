@@ -7,10 +7,12 @@ defmodule KlifeProtocol.Messages.Vote do
   Kafka protocol Vote message
 
   Request versions summary:
-  - Version 1 adds voter key and candidate directory id (KIP-853)
+  - Version 1 adds voter key and directory id (KIP-853)
+  Version 2 adds PreVote field and renames candidate to replica
 
   Response versions summary:
   - Version 1 adds leader endpoint (KIP-853)
+  Version 2 handles PreVote requests
 
   """
 
@@ -26,18 +28,19 @@ defmodule KlifeProtocol.Messages.Vote do
   Receives a map and serialize it to kafka wire format of the given version.
 
   Input content fields:
-  - cluster_id:  (string | versions 0+)
-  - voter_id: The replica id of the voter receiving the request (int32 | versions 1+)
-  - topics:  ([]TopicData | versions 0+)
+  - cluster_id: The cluster id. (string | versions 0+)
+  - voter_id: The replica id of the voter receiving the request. (int32 | versions 1+)
+  - topics: The topic data. ([]TopicData | versions 0+)
       - topic_name: The topic name. (string | versions 0+)
-      - partitions:  ([]PartitionData | versions 0+)
+      - partitions: The partition data. ([]PartitionData | versions 0+)
           - partition_index: The partition index. (int32 | versions 0+)
-          - candidate_epoch: The bumped epoch of the candidate sending the request (int32 | versions 0+)
-          - candidate_id: The replica id of the voter sending the request (int32 | versions 0+)
-          - candidate_directory_id: The directory id of the voter sending the request (uuid | versions 1+)
-          - voter_directory_id: The ID of the voter sending the request (uuid | versions 1+)
-          - last_offset_epoch: The epoch of the last record written to the metadata log (int32 | versions 0+)
-          - last_offset: The offset of the last record written to the metadata log (int64 | versions 0+)
+          - replica_epoch: The epoch of the voter sending the request (int32 | versions 0+)
+          - replica_id: The replica id of the voter sending the request (int32 | versions 0+)
+          - replica_directory_id: The directory id of the voter sending the request (uuid | versions 1+)
+          - voter_directory_id: The directory id of the voter receiving the request (uuid | versions 1+)
+          - last_offset_epoch: The epoch of the last record written to the metadata log. (int32 | versions 0+)
+          - last_offset: The log end offset of the metadata log of the voter sending the request. (int64 | versions 0+)
+          - pre_vote: Whether the request is a PreVote request (not persisted) or not. (bool | versions 2+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -54,18 +57,18 @@ defmodule KlifeProtocol.Messages.Vote do
   Response content fields:
 
   - error_code: The top level error code. (int16 | versions 0+)
-  - topics:  ([]TopicData | versions 0+)
+  - topics: The results for each topic. ([]TopicData | versions 0+)
       - topic_name: The topic name. (string | versions 0+)
-      - partitions:  ([]PartitionData | versions 0+)
+      - partitions: The results for each partition. ([]PartitionData | versions 0+)
           - partition_index: The partition index. (int32 | versions 0+)
-          - error_code:  (int16 | versions 0+)
+          - error_code: The partition level error code. (int16 | versions 0+)
           - leader_id: The ID of the current leader or -1 if the leader is unknown. (int32 | versions 0+)
-          - leader_epoch: The latest known leader epoch (int32 | versions 0+)
-          - vote_granted: True if the vote was granted and false otherwise (bool | versions 0+)
-  - node_endpoints: Endpoints for all current-leaders enumerated in PartitionData ([]NodeEndpoint | versions 1+)
-      - node_id: The ID of the associated node (int32 | versions 1+)
-      - host: The node's hostname (string | versions 1+)
-      - port: The node's port (uint16 | versions 1+)
+          - leader_epoch: The latest known leader epoch. (int32 | versions 0+)
+          - vote_granted: True if the vote was granted and false otherwise. (bool | versions 0+)
+  - node_endpoints: Endpoints for all current-leaders enumerated in PartitionData. ([]NodeEndpoint | versions 1+)
+      - node_id: The ID of the associated node. (int32 | versions 1+)
+      - host: The node's hostname. (string | versions 1+)
+      - port: The node's port. (uint16 | versions 1+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)
@@ -100,7 +103,7 @@ defmodule KlifeProtocol.Messages.Vote do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 1
+  def max_supported_version(), do: 2
 
   @doc """
   Returns the current min supported version of this message.
@@ -124,8 +127,8 @@ defmodule KlifeProtocol.Messages.Vote do
               {{:compact_array,
                 [
                   partition_index: {:int32, %{is_nullable?: false}},
-                  candidate_epoch: {:int32, %{is_nullable?: false}},
-                  candidate_id: {:int32, %{is_nullable?: false}},
+                  replica_epoch: {:int32, %{is_nullable?: false}},
+                  replica_id: {:int32, %{is_nullable?: false}},
                   last_offset_epoch: {:int32, %{is_nullable?: false}},
                   last_offset: {:int64, %{is_nullable?: false}},
                   tag_buffer: {:tag_buffer, []}
@@ -147,12 +150,38 @@ defmodule KlifeProtocol.Messages.Vote do
               {{:compact_array,
                 [
                   partition_index: {:int32, %{is_nullable?: false}},
-                  candidate_epoch: {:int32, %{is_nullable?: false}},
-                  candidate_id: {:int32, %{is_nullable?: false}},
-                  candidate_directory_id: {:uuid, %{is_nullable?: false}},
+                  replica_epoch: {:int32, %{is_nullable?: false}},
+                  replica_id: {:int32, %{is_nullable?: false}},
+                  replica_directory_id: {:uuid, %{is_nullable?: false}},
                   voter_directory_id: {:uuid, %{is_nullable?: false}},
                   last_offset_epoch: {:int32, %{is_nullable?: false}},
                   last_offset: {:int64, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  def request_schema(2),
+    do: [
+      cluster_id: {:compact_string, %{is_nullable?: true}},
+      voter_id: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            topic_name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  replica_epoch: {:int32, %{is_nullable?: false}},
+                  replica_id: {:int32, %{is_nullable?: false}},
+                  replica_directory_id: {:uuid, %{is_nullable?: false}},
+                  voter_directory_id: {:uuid, %{is_nullable?: false}},
+                  last_offset_epoch: {:int32, %{is_nullable?: false}},
+                  last_offset: {:int64, %{is_nullable?: false}},
+                  pre_vote: {:boolean, %{is_nullable?: false}},
                   tag_buffer: {:tag_buffer, []}
                 ]}, %{is_nullable?: false}},
             tag_buffer: {:tag_buffer, []}
@@ -186,6 +215,40 @@ defmodule KlifeProtocol.Messages.Vote do
     ]
 
   def response_schema(1),
+    do: [
+      error_code: {:int16, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            topic_name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  leader_id: {:int32, %{is_nullable?: false}},
+                  leader_epoch: {:int32, %{is_nullable?: false}},
+                  vote_granted: {:boolean, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer:
+        {:tag_buffer,
+         %{
+           0 =>
+             {{:node_endpoints,
+               {:compact_array,
+                [
+                  node_id: {:int32, %{is_nullable?: false}},
+                  host: {:compact_string, %{is_nullable?: false}},
+                  port: {:uint16, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}}, %{is_nullable?: false}}
+         }}
+    ]
+
+  def response_schema(2),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       topics:

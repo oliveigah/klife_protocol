@@ -7,6 +7,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
   Kafka protocol ListOffsets message
 
   Request versions summary:
+  - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
   - Version 1 removes MaxNumOffsets.  From this version forward, only a single
   offset can be returned.
   - Version 2 adds the isolation level, which is used for transactional reads.
@@ -17,8 +18,10 @@ defmodule KlifeProtocol.Messages.ListOffsets do
   - Version 7 enables listing offsets by max timestamp (KIP-734).
   - Version 8 enables listing offsets by local log start offset (KIP-405).
   - Version 9 enables listing offsets by last tiered offset (KIP-1005).
+  - Version 10 enables async remote list offsets support (KIP-1075)
 
   Response versions summary:
+  - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
   - Version 1 removes the offsets array in favor of returning a single offset.
   Version 1 also adds the timestamp associated with the returned offset.
   - Version 2 adds the throttle time.
@@ -30,6 +33,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
   - Version 8 enables listing offsets by local log start offset.
   This is the earliest log start offset in the local log. (KIP-405).
   - Version 9 enables listing offsets by last tiered offset (KIP-1005).
+  - Version 10 enables async remote list offsets support (KIP-1075)
 
   """
 
@@ -46,14 +50,14 @@ defmodule KlifeProtocol.Messages.ListOffsets do
 
   Input content fields:
   - replica_id: The broker ID of the requester, or -1 if this request is being made by a normal consumer. (int32 | versions 0+)
-  - isolation_level: This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records (int8 | versions 2+)
+  - isolation_level: This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records. (int8 | versions 2+)
   - topics: Each topic in the request. ([]ListOffsetsTopic | versions 0+)
       - name: The topic name. (string | versions 0+)
       - partitions: Each partition in the request. ([]ListOffsetsPartition | versions 0+)
           - partition_index: The partition index. (int32 | versions 0+)
           - current_leader_epoch: The current leader epoch. (int32 | versions 4+)
           - timestamp: The current timestamp. (int64 | versions 0+)
-          - max_num_offsets: The maximum number of offsets to report. (int32 | versions 0)
+  - timeout_ms: The timeout to await a response in milliseconds for requests that require reading from remote storage for topics enabled with tiered storage. (int32 | versions 10+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -71,14 +75,13 @@ defmodule KlifeProtocol.Messages.ListOffsets do
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 2+)
   - topics: Each topic in the response. ([]ListOffsetsTopicResponse | versions 0+)
-      - name: The topic name (string | versions 0+)
+      - name: The topic name. (string | versions 0+)
       - partitions: Each partition in the response. ([]ListOffsetsPartitionResponse | versions 0+)
           - partition_index: The partition index. (int32 | versions 0+)
           - error_code: The partition error code, or 0 if there was no error. (int16 | versions 0+)
-          - old_style_offsets: The result offsets. ([]int64 | versions 0)
           - timestamp: The timestamp associated with the returned offset. (int64 | versions 1+)
           - offset: The returned offset. (int64 | versions 1+)
-          - leader_epoch:  (int32 | versions 4+)
+          - leader_epoch: The leader epoch associated with the returned offset. (int32 | versions 4+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)
@@ -113,7 +116,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 9
+  def max_supported_version(), do: 10
 
   @doc """
   Returns the current min supported version of this message.
@@ -313,6 +316,28 @@ defmodule KlifeProtocol.Messages.ListOffsets do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  def request_schema(10),
+    do: [
+      replica_id: {:int32, %{is_nullable?: false}},
+      isolation_level: {:int8, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  current_leader_epoch: {:int32, %{is_nullable?: false}},
+                  timestamp: {:int64, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      timeout_ms: {:int32, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message ListOffsets")
 
@@ -490,6 +515,28 @@ defmodule KlifeProtocol.Messages.ListOffsets do
     ]
 
   def response_schema(9),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  timestamp: {:int64, %{is_nullable?: false}},
+                  offset: {:int64, %{is_nullable?: false}},
+                  leader_epoch: {:int32, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(10),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       topics:

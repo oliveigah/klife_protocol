@@ -25,11 +25,11 @@ defmodule KlifeProtocol.Messages.DescribeTopicPartitions do
 
   Input content fields:
   - topics: The topics to fetch details for. ([]TopicRequest | versions 0+)
-      - name: The topic name (string | versions 0+)
+      - name: The topic name. (string | versions 0+)
   - response_partition_limit: The maximum number of partitions included in the response. (int32 | versions 0+)
   - cursor: The first topic and partition index to fetch details for. (Cursor | versions 0+)
-      - topic_name: The name for the first topic to process (string | versions 0+)
-      - partition_index: The partition index to start with (int32 | versions 0+)
+      - topic_name: The name for the first topic to process. (string | versions 0+)
+      - partition_index: The partition index to start with. (int32 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -63,8 +63,8 @@ defmodule KlifeProtocol.Messages.DescribeTopicPartitions do
           - offline_replicas: The set of offline replicas of this partition. ([]int32 | versions 0+)
       - topic_authorized_operations: 32-bit bitfield to represent authorized operations for this topic. (int32 | versions 0+)
   - next_cursor: The next topic and partition index to fetch details for. (Cursor | versions 0+)
-      - topic_name: The name for the first topic to process (string | versions 0+)
-      - partition_index: The partition index to start with (int32 | versions 0+)
+      - topic_name: The name for the first topic to process. (string | versions 0+)
+      - partition_index: The partition index to start with. (int32 | versions 0+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)

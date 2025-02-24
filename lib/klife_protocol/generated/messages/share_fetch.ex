@@ -68,7 +68,7 @@ defmodule KlifeProtocol.Messages.ShareFetch do
           - error_message: The fetch error message, or null if there was no fetch error. (string | versions 0+)
           - acknowledge_error_code: The acknowledge error code, or 0 if there was no acknowledge error. (int16 | versions 0+)
           - acknowledge_error_message: The acknowledge error message, or null if there was no acknowledge error. (string | versions 0+)
-          - current_leader:  (LeaderIdAndEpoch | versions 0+)
+          - current_leader: The current leader of the partition. (LeaderIdAndEpoch | versions 0+)
               - leader_id: The ID of the current leader or -1 if the leader is unknown. (int32 | versions 0+)
               - leader_epoch: The latest known leader epoch. (int32 | versions 0+)
           - records: The record data. (records | versions 0+)

@@ -9,8 +9,7 @@ defmodule KlifeProtocol.Messages.Metadata do
   Request versions summary:
 
   Response versions summary:
-  - Version 1 adds fields for the rack of each broker, the controller id, and
-  whether or not the topic is internal.
+  - Version 1 adds fields for the rack of each broker, the controller id, and whether or not the topic is internal.
   - Version 2 adds the cluster ID field.
   - Version 3 adds the throttle time.
   - Version 4 is the same as version 3.
@@ -24,6 +23,7 @@ defmodule KlifeProtocol.Messages.Metadata do
   - Version 11 deprecates ClusterAuthorizedOperations. This is now exposed
   by the DescribeCluster API (KIP-700).
   Version 12 supports topicId.
+  Version 13 supports top-level error code in the response.
 
   """
 
@@ -83,6 +83,7 @@ defmodule KlifeProtocol.Messages.Metadata do
           - offline_replicas: The set of offline replicas of this partition. ([]int32 | versions 5+)
       - topic_authorized_operations: 32-bit bitfield to represent authorized operations for this topic. (int32 | versions 8+)
   - cluster_authorized_operations: 32-bit bitfield to represent authorized operations for this cluster. (int32 | versions 8-10)
+  - error_code: The top-level error code, or 0 if there was no error. (int16 | versions 13+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)
@@ -117,7 +118,7 @@ defmodule KlifeProtocol.Messages.Metadata do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 12
+  def max_supported_version(), do: 13
 
   @doc """
   Returns the current min supported version of this message.
@@ -216,6 +217,20 @@ defmodule KlifeProtocol.Messages.Metadata do
     ]
 
   def request_schema(12),
+    do: [
+      topics:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            name: {:compact_string, %{is_nullable?: true}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: true}},
+      allow_auto_topic_creation: {:boolean, %{is_nullable?: false}},
+      include_topic_authorized_operations: {:boolean, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  def request_schema(13),
     do: [
       topics:
         {{:compact_array,
@@ -665,6 +680,46 @@ defmodule KlifeProtocol.Messages.Metadata do
             topic_authorized_operations: {:int32, %{is_nullable?: false}},
             tag_buffer: {:tag_buffer, %{}}
           ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(13),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      brokers:
+        {{:compact_array,
+          [
+            node_id: {:int32, %{is_nullable?: false}},
+            host: {:compact_string, %{is_nullable?: false}},
+            port: {:int32, %{is_nullable?: false}},
+            rack: {:compact_string, %{is_nullable?: true}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      cluster_id: {:compact_string, %{is_nullable?: true}},
+      controller_id: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            error_code: {:int16, %{is_nullable?: false}},
+            name: {:compact_string, %{is_nullable?: true}},
+            topic_id: {:uuid, %{is_nullable?: false}},
+            is_internal: {:boolean, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  error_code: {:int16, %{is_nullable?: false}},
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  leader_id: {:int32, %{is_nullable?: false}},
+                  leader_epoch: {:int32, %{is_nullable?: false}},
+                  replica_nodes: {{:compact_array, :int32}, %{is_nullable?: false}},
+                  isr_nodes: {{:compact_array, :int32}, %{is_nullable?: false}},
+                  offline_replicas: {{:compact_array, :int32}, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            topic_authorized_operations: {:int32, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, %{}}
     ]
 

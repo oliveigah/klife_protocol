@@ -24,8 +24,8 @@ defmodule KlifeProtocol.Messages.AllocateProducerIds do
   Receives a map and serialize it to kafka wire format of the given version.
 
   Input content fields:
-  - broker_id: The ID of the requesting broker (int32 | versions 0+)
-  - broker_epoch: The epoch of the requesting broker (int64 | versions 0+)
+  - broker_id: The ID of the requesting broker. (int32 | versions 0+)
+  - broker_epoch: The epoch of the requesting broker. (int64 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -42,9 +42,9 @@ defmodule KlifeProtocol.Messages.AllocateProducerIds do
   Response content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
-  - error_code: The top level response error code (int16 | versions 0+)
-  - producer_id_start: The first producer ID in this range, inclusive (int64 | versions 0+)
-  - producer_id_len: The number of producer IDs in this range (int32 | versions 0+)
+  - error_code: The top level response error code. (int16 | versions 0+)
+  - producer_id_start: The first producer ID in this range, inclusive. (int64 | versions 0+)
+  - producer_id_len: The number of producer IDs in this range. (int32 | versions 0+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)

@@ -24,14 +24,14 @@ defmodule KlifeProtocol.Messages.AddRaftVoter do
   Receives a map and serialize it to kafka wire format of the given version.
 
   Input content fields:
-  - cluster_id:  (string | versions 0+)
-  - timeout_ms:  (int32 | versions 0+)
-  - voter_id: The replica id of the voter getting added to the topic partition (int32 | versions 0+)
-  - voter_directory_id: The directory id of the voter getting added to the topic partition (uuid | versions 0+)
-  - listeners: The endpoints that can be used to communicate with the voter ([]Listener | versions 0+)
-      - name: The name of the endpoint (string | versions 0+)
-      - host: The hostname (string | versions 0+)
-      - port: The port (uint16 | versions 0+)
+  - cluster_id: The cluster id. (string | versions 0+)
+  - timeout_ms: The maximum time to wait for the request to complete before returning. (int32 | versions 0+)
+  - voter_id: The replica id of the voter getting added to the topic partition. (int32 | versions 0+)
+  - voter_directory_id: The directory id of the voter getting added to the topic partition. (uuid | versions 0+)
+  - listeners: The endpoints that can be used to communicate with the voter. ([]Listener | versions 0+)
+      - name: The name of the endpoint. (string | versions 0+)
+      - host: The hostname. (string | versions 0+)
+      - port: The port. (uint16 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -48,7 +48,7 @@ defmodule KlifeProtocol.Messages.AddRaftVoter do
   Response content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
-  - error_code: The error code, or 0 if there was no error (int16 | versions 0+)
+  - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
   - error_message: The error message, or null if there was no error. (string | versions 0+)
 
   """

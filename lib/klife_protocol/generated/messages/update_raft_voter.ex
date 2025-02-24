@@ -24,17 +24,17 @@ defmodule KlifeProtocol.Messages.UpdateRaftVoter do
   Receives a map and serialize it to kafka wire format of the given version.
 
   Input content fields:
-  - cluster_id:  (string | versions 0+)
-  - current_leader_epoch: The current leader epoch of the partition, -1 for unknown leader epoch (int32 | versions 0+)
-  - voter_id: The replica id of the voter getting updated in the topic partition (int32 | versions 0+)
-  - voter_directory_id: The directory id of the voter getting updated in the topic partition (uuid | versions 0+)
-  - listeners: The endpoint that can be used to communicate with the leader ([]Listener | versions 0+)
-      - name: The name of the endpoint (string | versions 0+)
-      - host: The hostname (string | versions 0+)
-      - port: The port (uint16 | versions 0+)
-  - k_raft_version_feature: The range of versions of the protocol that the replica supports (KRaftVersionFeature | versions 0+)
-      - min_supported_version: The minimum supported KRaft protocol version (int16 | versions 0+)
-      - max_supported_version: The maximum supported KRaft protocol version (int16 | versions 0+)
+  - cluster_id: The cluster id. (string | versions 0+)
+  - current_leader_epoch: The current leader epoch of the partition, -1 for unknown leader epoch. (int32 | versions 0+)
+  - voter_id: The replica id of the voter getting updated in the topic partition. (int32 | versions 0+)
+  - voter_directory_id: The directory id of the voter getting updated in the topic partition. (uuid | versions 0+)
+  - listeners: The endpoint that can be used to communicate with the leader. ([]Listener | versions 0+)
+      - name: The name of the endpoint. (string | versions 0+)
+      - host: The hostname. (string | versions 0+)
+      - port: The port. (uint16 | versions 0+)
+  - k_raft_version_feature: The range of versions of the protocol that the replica supports. (KRaftVersionFeature | versions 0+)
+      - min_supported_version: The minimum supported KRaft protocol version. (int16 | versions 0+)
+      - max_supported_version: The maximum supported KRaft protocol version. (int16 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -51,12 +51,12 @@ defmodule KlifeProtocol.Messages.UpdateRaftVoter do
   Response content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
-  - error_code: The error code, or 0 if there was no error (int16 | versions 0+)
-  - current_leader:  (CurrentLeader | versions 0+)
-      - leader_id: The replica id of the current leader or -1 if the leader is unknown (int32 | versions 0+)
-      - leader_epoch: The latest known leader epoch (int32 | versions 0+)
-      - host: The node's hostname (string | versions 0+)
-      - port: The node's port (int32 | versions 0+)
+  - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
+  - current_leader: Details of the current Raft cluster leader. (CurrentLeader | versions 0+)
+      - leader_id: The replica id of the current leader or -1 if the leader is unknown. (int32 | versions 0+)
+      - leader_epoch: The latest known leader epoch. (int32 | versions 0+)
+      - host: The node's hostname. (string | versions 0+)
+      - port: The node's port. (int32 | versions 0+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)

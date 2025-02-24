@@ -11,12 +11,17 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
   - Version 2 adds the committed leader epoch.
   - Version 3 adds the member.id, group.instance.id and generation.id.
   - Version 4 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
+  - Version 5 is the same as version 4 (KIP-890). Note when TxnOffsetCommit requests are used in transaction, if
+  transaction V2 (KIP_890 part 2) is enabled, the TxnOffsetCommit request will also include the function for a
+  AddOffsetsToTxn call. If V2 is disabled, the client can't use TxnOffsetCommit request version higher than 4 within
+  a transaction.
 
   Response versions summary:
   - Starting in version 1, on quota violation, brokers send out responses before throttling.
   - Version 2 is the same as version 1.
   - Version 3 adds illegal generation, fenced instance id, and unknown member id errors.
   - Version 4 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
+  - Version 5 is the same with version 3 (KIP-890).
 
   """
 
@@ -101,7 +106,7 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 4
+  def max_supported_version(), do: 5
 
   @doc """
   Returns the current min supported version of this message.
@@ -229,6 +234,33 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  def request_schema(5),
+    do: [
+      transactional_id: {:compact_string, %{is_nullable?: false}},
+      group_id: {:compact_string, %{is_nullable?: false}},
+      producer_id: {:int64, %{is_nullable?: false}},
+      producer_epoch: {:int16, %{is_nullable?: false}},
+      generation_id: {:int32, %{is_nullable?: false}},
+      member_id: {:compact_string, %{is_nullable?: false}},
+      group_instance_id: {:compact_string, %{is_nullable?: true}},
+      topics:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  committed_offset: {:int64, %{is_nullable?: false}},
+                  committed_leader_epoch: {:int32, %{is_nullable?: false}},
+                  committed_metadata: {:compact_string, %{is_nullable?: true}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message TxnOffsetCommit")
 
@@ -300,6 +332,25 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
     ]
 
   def response_schema(4),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(5),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       topics:

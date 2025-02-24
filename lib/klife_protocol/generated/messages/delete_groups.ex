@@ -45,8 +45,8 @@ defmodule KlifeProtocol.Messages.DeleteGroups do
   Response content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
-  - results: The deletion results ([]DeletableGroupResult | versions 0+)
-      - group_id: The group id (string | versions 0+)
+  - results: The deletion results. ([]DeletableGroupResult | versions 0+)
+      - group_id: The group id. (string | versions 0+)
       - error_code: The deletion error, or 0 if the deletion succeeded. (int16 | versions 0+)
 
   """

@@ -47,7 +47,7 @@ defmodule KlifeProtocol.Messages.GetTelemetrySubscriptions do
   - accepted_compression_types: Compression types that broker accepts for the PushTelemetryRequest. ([]int8 | versions 0+)
   - push_interval_ms: Configured push interval, which is the lowest configured interval in the current subscription set. (int32 | versions 0+)
   - telemetry_max_bytes: The maximum bytes of binary data the broker accepts in PushTelemetryRequest. (int32 | versions 0+)
-  - delta_temporality: Flag to indicate monotonic/counter metrics are to be emitted as deltas or cumulative values (bool | versions 0+)
+  - delta_temporality: Flag to indicate monotonic/counter metrics are to be emitted as deltas or cumulative values. (bool | versions 0+)
   - requested_metrics: Requested metrics prefix string match. Empty array: No metrics subscribed, Array[0] empty string: All metrics subscribed. ([]string | versions 0+)
 
   """

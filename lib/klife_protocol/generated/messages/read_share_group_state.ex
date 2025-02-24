@@ -45,15 +45,15 @@ defmodule KlifeProtocol.Messages.ReadShareGroupState do
 
   Response content fields:
 
-  - results: The read results ([]ReadStateResult | versions 0+)
-      - topic_id: The topic identifier (uuid | versions 0+)
+  - results: The read results. ([]ReadStateResult | versions 0+)
+      - topic_id: The topic identifier. (uuid | versions 0+)
       - partitions: The results for the partitions. ([]PartitionResult | versions 0+)
           - partition: The partition index. (int32 | versions 0+)
           - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
           - error_message: The error message, or null if there was no error. (string | versions 0+)
           - state_epoch: The state epoch for this share-partition. (int32 | versions 0+)
           - start_offset: The share-partition start offset, which can be -1 if it is not yet initialized. (int64 | versions 0+)
-          - state_batches:  ([]StateBatch | versions 0+)
+          - state_batches: The state batches for this share-partition. ([]StateBatch | versions 0+)
               - first_offset: The base offset of this state batch. (int64 | versions 0+)
               - last_offset: The last offset of this state batch. (int64 | versions 0+)
               - delivery_state: The state - 0:Available,2:Acked,4:Archived. (int8 | versions 0+)

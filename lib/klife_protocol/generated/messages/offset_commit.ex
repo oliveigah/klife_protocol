@@ -7,6 +7,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   Kafka protocol OffsetCommit message
 
   Request versions summary:
+  - Versions 0-1 were removed in Apache Kafka 4.0, Version 2 is the new baseline.
   - Version 1 adds timestamp and group membership information, as well as the commit timestamp.
   - Version 2 adds retention time.  It removes the commit timestamp added in version 1.
   - Version 3 and 4 are the same as version 2.
@@ -18,6 +19,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   request is the same as version 8.
 
   Response versions summary:
+  - Versions 0-1 were removed in Apache Kafka 4.0, Version 2 is the new baseline.
   - Versions 1 and 2 are the same as version 0.
   - Version 3 adds the throttle time to the response.
   - Starting in version 4, on quota violation, brokers send out responses before throttling.
@@ -53,7 +55,6 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
           - partition_index: The partition index. (int32 | versions 0+)
           - committed_offset: The message offset to be committed. (int64 | versions 0+)
           - committed_leader_epoch: The leader epoch of this partition. (int32 | versions 6+)
-          - commit_timestamp: The timestamp of the commit. (int64 | versions 1)
           - committed_metadata: Any associated metadata the client wants to keep. (string | versions 0+)
 
   """

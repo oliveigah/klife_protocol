@@ -27,7 +27,7 @@ defmodule KlifeProtocol.Messages.BrokerRegistration do
   - broker_id: The broker ID. (int32 | versions 0+)
   - cluster_id: The cluster id of the broker process. (string | versions 0+)
   - incarnation_id: The incarnation id of the broker process. (uuid | versions 0+)
-  - listeners: The listeners of this broker ([]Listener | versions 0+)
+  - listeners: The listeners of this broker. ([]Listener | versions 0+)
       - name: The name of the endpoint. (string | versions 0+)
       - host: The hostname. (string | versions 0+)
       - port: The port. (uint16 | versions 0+)
@@ -37,7 +37,7 @@ defmodule KlifeProtocol.Messages.BrokerRegistration do
       - min_supported_version: The minimum supported feature level. (int16 | versions 0+)
       - max_supported_version: The maximum supported feature level. (int16 | versions 0+)
   - rack: The rack which this broker is in. (string | versions 0+)
-  - is_migrating_zk_broker: If the required configurations for ZK migration are present, this value is set to true (bool | versions 1+)
+  - is_migrating_zk_broker: If the required configurations for ZK migration are present, this value is set to true. (bool | versions 1+)
   - log_dirs: Log directories configured in this broker which are available. ([]uuid | versions 2+)
   - previous_broker_epoch: The epoch before a clean shutdown. (int64 | versions 3+)
 

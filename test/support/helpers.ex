@@ -196,7 +196,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
     headers = generate_headers()
     default_id = "00000000-0000-0000-0000-000000000000"
 
-    version = Messages.Metadata.max_supported_version()
+    version = 12
 
     content = %{
       topics: [

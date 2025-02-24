@@ -51,9 +51,9 @@ defmodule KlifeProtocol.Messages.ElectLeaders do
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code: The top level response error code. (int16 | versions 1+)
   - replica_election_results: The election results, or an empty array if the requester did not have permission and the request asks for all partitions. ([]ReplicaElectionResult | versions 0+)
-      - topic: The topic name (string | versions 0+)
-      - partition_result: The results for each partition ([]PartitionResult | versions 0+)
-          - partition_id: The partition id (int32 | versions 0+)
+      - topic: The topic name. (string | versions 0+)
+      - partition_result: The results for each partition. ([]PartitionResult | versions 0+)
+          - partition_id: The partition id. (int32 | versions 0+)
           - error_code: The result error, or zero if there was no error. (int16 | versions 0+)
           - error_message: The result message, or null if there was no error. (string | versions 0+)
 

@@ -7,6 +7,7 @@ defmodule KlifeProtocol.Messages.CreateTopics do
   Kafka protocol CreateTopics message
 
   Request versions summary:
+  - Versions 0-1 were removed in Apache Kafka 4.0, Version 2 is the new baseline.
   - Version 1 adds validateOnly.
   - Version 4 makes partitions/replicationFactor optional even when assignments are not present (KIP-464)
   - Version 5 is the first flexible version.
@@ -16,6 +17,7 @@ defmodule KlifeProtocol.Messages.CreateTopics do
   - Version 7 is the same as version 6.
 
   Response versions summary:
+  - Versions 0-1 were removed in Apache Kafka 4.0, Version 2 is the new baseline.
   - Version 1 adds a per-topic error message string.
   - Version 2 adds the throttle time.
   - Starting in version 3, on quota violation, brokers send out responses before throttling.
@@ -70,7 +72,7 @@ defmodule KlifeProtocol.Messages.CreateTopics do
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 2+)
   - topics: Results for each topic we tried to create. ([]CreatableTopicResult | versions 0+)
       - name: The topic name. (string | versions 0+)
-      - topic_id: The unique topic ID (uuid | versions 7+)
+      - topic_id: The unique topic ID. (uuid | versions 7+)
       - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
       - error_message: The error message, or null if there was no error. (string | versions 1+)
       - topic_config_error_code: Optional topic config error returned if configs are not returned in the response. (int16 | versions 5+)

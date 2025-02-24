@@ -7,6 +7,8 @@ defmodule KlifeProtocol.Messages.UpdateFeatures do
   Kafka protocol UpdateFeatures message
 
   Request versions summary:
+  - Version 1 adds validate only field.
+  - Version 2 changes the response to not return feature level results.
 
   Response versions summary:
 
@@ -49,7 +51,7 @@ defmodule KlifeProtocol.Messages.UpdateFeatures do
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code: The top-level error code, or `0` if there was no top-level error. (int16 | versions 0+)
   - error_message: The top-level error message, or `null` if there was no top-level error. (string | versions 0+)
-  - results: Results for each feature update. ([]UpdatableFeatureResult | versions 0+)
+  - results: Results for each feature update. ([]UpdatableFeatureResult | versions 0-1)
       - feature: The name of the finalized feature. (string | versions 0+)
       - error_code: The feature update error code or `0` if the feature update succeeded. (int16 | versions 0+)
       - error_message: The feature update error, or `null` if the feature update succeeded. (string | versions 0+)
@@ -87,7 +89,7 @@ defmodule KlifeProtocol.Messages.UpdateFeatures do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 1
+  def max_supported_version(), do: 2
 
   @doc """
   Returns the current min supported version of this message.
@@ -115,6 +117,21 @@ defmodule KlifeProtocol.Messages.UpdateFeatures do
     ]
 
   def request_schema(1),
+    do: [
+      timeout_ms: {:int32, %{is_nullable?: false}},
+      feature_updates:
+        {{:compact_array,
+          [
+            feature: {:compact_string, %{is_nullable?: false}},
+            max_version_level: {:int16, %{is_nullable?: false}},
+            upgrade_type: {:int8, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      validate_only: {:boolean, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  def request_schema(2),
     do: [
       timeout_ms: {:int32, %{is_nullable?: false}},
       feature_updates:
@@ -161,6 +178,14 @@ defmodule KlifeProtocol.Messages.UpdateFeatures do
             error_message: {:compact_string, %{is_nullable?: true}},
             tag_buffer: {:tag_buffer, %{}}
           ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(2),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      error_message: {:compact_string, %{is_nullable?: true}},
       tag_buffer: {:tag_buffer, %{}}
     ]
 

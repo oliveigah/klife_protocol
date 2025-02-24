@@ -32,10 +32,10 @@ defmodule KlifeProtocol.Messages.WriteShareGroupState do
           - state_epoch: The state epoch for this share-partition. (int32 | versions 0+)
           - leader_epoch: The leader epoch of the share-partition. (int32 | versions 0+)
           - start_offset: The share-partition start offset, or -1 if the start offset is not being written. (int64 | versions 0+)
-          - state_batches:  ([]StateBatch | versions 0+)
+          - state_batches: The state batches for the share-partition. ([]StateBatch | versions 0+)
               - first_offset: The base offset of this state batch. (int64 | versions 0+)
               - last_offset: The last offset of this state batch. (int64 | versions 0+)
-              - delivery_state: The state - 0:Available,2:Acked,4:Archived (int8 | versions 0+)
+              - delivery_state: The state - 0:Available,2:Acked,4:Archived. (int8 | versions 0+)
               - delivery_count: The delivery count. (int16 | versions 0+)
 
   """
@@ -52,8 +52,8 @@ defmodule KlifeProtocol.Messages.WriteShareGroupState do
 
   Response content fields:
 
-  - results: The write results ([]WriteStateResult | versions 0+)
-      - topic_id: The topic identifier (uuid | versions 0+)
+  - results: The write results. ([]WriteStateResult | versions 0+)
+      - topic_id: The topic identifier. (uuid | versions 0+)
       - partitions: The results for the partitions. ([]PartitionResult | versions 0+)
           - partition: The partition index. (int32 | versions 0+)
           - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)

@@ -7,10 +7,11 @@ defmodule KlifeProtocol.Messages.Fetch do
   Kafka protocol Fetch message
 
   Request versions summary:
+  - Versions 0-3 were removed in Apache Kafka 4.0, Version 4 is the new baseline.
   - Version 1 is the same as version 0.
-  - Starting in Version 2, the requester must be able to handle Kafka Log
+  Starting in Version 2, the requester must be able to handle Kafka Log
   Message format version 1.
-  - Version 3 adds MaxBytes.  Starting in version 3, the partition ordering in
+  Version 3 adds MaxBytes.  Starting in version 3, the partition ordering in
   the request is now relevant.  Partitions will be processed in the order
   they appear in the request.
   - Version 4 adds IsolationLevel.  Starting in version 4, the reqestor must be
@@ -33,8 +34,8 @@ defmodule KlifeProtocol.Messages.Fetch do
   - Version 17 adds directory id support from KIP-853
 
   Response versions summary:
-  - Version 1 adds throttle time.
-  - Version 2 and 3 are the same as version 1.
+  - Versions 0-3 were removed in Apache Kafka 4.0, Version 4 is the new baseline.
+  - Version 1 adds throttle time. Version 2 and 3 are the same as version 1.
   - Version 4 adds features for transactional consumption.
   - Version 5 adds LogStartOffset to indicate the earliest available offset of
   partition data that can be consumed.
@@ -68,31 +69,31 @@ defmodule KlifeProtocol.Messages.Fetch do
   Input content fields:
   - cluster_id: The clusterId if known. This is used to validate metadata fetches prior to broker registration. (string | versions 12+)
   - replica_id: The broker ID of the follower, of -1 if this request is from a consumer. (int32 | versions 0-14)
-  - replica_state:  (ReplicaState | versions 15+)
+  - replica_state: The state of the replica in the follower. (ReplicaState | versions 15+)
       - replica_id: The replica ID of the follower, or -1 if this request is from a consumer. (int32 | versions 15+)
       - replica_epoch: The epoch of this follower, or -1 if not available. (int64 | versions 15+)
   - max_wait_ms: The maximum time in milliseconds to wait for the response. (int32 | versions 0+)
   - min_bytes: The minimum bytes to accumulate in the response. (int32 | versions 0+)
   - max_bytes: The maximum bytes to fetch.  See KIP-74 for cases where this limit may not be honored. (int32 | versions 3+)
-  - isolation_level: This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records (int8 | versions 4+)
+  - isolation_level: This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records. (int8 | versions 4+)
   - session_id: The fetch session ID. (int32 | versions 7+)
   - session_epoch: The fetch session epoch, which is used for ordering requests in a session. (int32 | versions 7+)
   - topics: The topics to fetch. ([]FetchTopic | versions 0+)
       - topic: The name of the topic to fetch. (string | versions 0-12)
-      - topic_id: The unique topic ID (uuid | versions 13+)
+      - topic_id: The unique topic ID. (uuid | versions 13+)
       - partitions: The partitions to fetch. ([]FetchPartition | versions 0+)
           - partition: The partition index. (int32 | versions 0+)
           - current_leader_epoch: The current leader epoch of the partition. (int32 | versions 9+)
           - fetch_offset: The message offset. (int64 | versions 0+)
-          - last_fetched_epoch: The epoch of the last fetched record or -1 if there is none (int32 | versions 12+)
+          - last_fetched_epoch: The epoch of the last fetched record or -1 if there is none. (int32 | versions 12+)
           - log_start_offset: The earliest available offset of the follower replica.  The field is only used when the request is sent by the follower. (int64 | versions 5+)
           - partition_max_bytes: The maximum bytes to fetch from this partition.  See KIP-74 for cases where this limit may not be honored. (int32 | versions 0+)
-          - replica_directory_id: The directory id of the follower fetching (uuid | versions 17+)
+          - replica_directory_id: The directory id of the follower fetching. (uuid | versions 17+)
   - forgotten_topics_data: In an incremental fetch request, the partitions to remove. ([]ForgottenTopic | versions 7+)
       - topic: The topic name. (string | versions 7-12)
-      - topic_id: The unique topic ID (uuid | versions 13+)
+      - topic_id: The unique topic ID. (uuid | versions 13+)
       - partitions: The partitions indexes to forget. ([]int32 | versions 7+)
-  - rack_id: Rack ID of the consumer making this request (string | versions 11+)
+  - rack_id: Rack ID of the consumer making this request. (string | versions 11+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -113,26 +114,26 @@ defmodule KlifeProtocol.Messages.Fetch do
   - session_id: The fetch session ID, or 0 if this is not part of a fetch session. (int32 | versions 7+)
   - responses: The response topics. ([]FetchableTopicResponse | versions 0+)
       - topic: The topic name. (string | versions 0-12)
-      - topic_id: The unique topic ID (uuid | versions 13+)
+      - topic_id: The unique topic ID. (uuid | versions 13+)
       - partitions: The topic partitions. ([]PartitionData | versions 0+)
           - partition_index: The partition index. (int32 | versions 0+)
           - error_code: The error code, or 0 if there was no fetch error. (int16 | versions 0+)
           - high_watermark: The current high water mark. (int64 | versions 0+)
-          - last_stable_offset: The last stable offset (or LSO) of the partition. This is the last offset such that the state of all transactional records prior to this offset have been decided (ABORTED or COMMITTED) (int64 | versions 4+)
+          - last_stable_offset: The last stable offset (or LSO) of the partition. This is the last offset such that the state of all transactional records prior to this offset have been decided (ABORTED or COMMITTED). (int64 | versions 4+)
           - log_start_offset: The current log start offset. (int64 | versions 5+)
-          - diverging_epoch: In case divergence is detected based on the `LastFetchedEpoch` and `FetchOffset` in the request, this field indicates the largest epoch and its end offset such that subsequent records are known to diverge (EpochEndOffset | versions 12+)
-              - epoch:  (int32 | versions 12+)
-              - end_offset:  (int64 | versions 12+)
-          - current_leader:  (LeaderIdAndEpoch | versions 12+)
+          - diverging_epoch: In case divergence is detected based on the `LastFetchedEpoch` and `FetchOffset` in the request, this field indicates the largest epoch and its end offset such that subsequent records are known to diverge. (EpochEndOffset | versions 12+)
+              - epoch: The largest epoch. (int32 | versions 12+)
+              - end_offset: The end offset of the epoch. (int64 | versions 12+)
+          - current_leader: The current leader of the partition. (LeaderIdAndEpoch | versions 12+)
               - leader_id: The ID of the current leader or -1 if the leader is unknown. (int32 | versions 12+)
-              - leader_epoch: The latest known leader epoch (int32 | versions 12+)
+              - leader_epoch: The latest known leader epoch. (int32 | versions 12+)
           - snapshot_id: In the case of fetching an offset less than the LogStartOffset, this is the end offset and epoch that should be used in the FetchSnapshot request. (SnapshotId | versions 12+)
-              - end_offset:  (int64 | versions 0+)
-              - epoch:  (int32 | versions 0+)
+              - end_offset: The end offset of the epoch. (int64 | versions 0+)
+              - epoch: The largest epoch. (int32 | versions 0+)
           - aborted_transactions: The aborted transactions. ([]AbortedTransaction | versions 4+)
               - producer_id: The producer id associated with the aborted transaction. (int64 | versions 4+)
               - first_offset: The first offset in the aborted transaction. (int64 | versions 4+)
-          - preferred_read_replica: The preferred read replica for the consumer to use on its next fetch request (int32 | versions 11+)
+          - preferred_read_replica: The preferred read replica for the consumer to use on its next fetch request. (int32 | versions 11+)
           - records: The record data. (records | versions 0+)
   - node_endpoints: Endpoints for all current-leaders enumerated in PartitionData, with errors NOT_LEADER_OR_FOLLOWER & FENCED_LEADER_EPOCH. ([]NodeEndpoint | versions 16+)
       - node_id: The ID of the associated node. (int32 | versions 16+)
@@ -684,7 +685,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         producer_id: {:int64, %{is_nullable?: false}},
                         first_offset: {:int64, %{is_nullable?: false}}
                       ]}, %{is_nullable?: true}},
-                  records: {:record_batch, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: false}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -710,7 +711,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         producer_id: {:int64, %{is_nullable?: false}},
                         first_offset: {:int64, %{is_nullable?: false}}
                       ]}, %{is_nullable?: true}},
-                  records: {:record_batch, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: false}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -736,7 +737,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         producer_id: {:int64, %{is_nullable?: false}},
                         first_offset: {:int64, %{is_nullable?: false}}
                       ]}, %{is_nullable?: true}},
-                  records: {:record_batch, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: false}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -764,7 +765,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         producer_id: {:int64, %{is_nullable?: false}},
                         first_offset: {:int64, %{is_nullable?: false}}
                       ]}, %{is_nullable?: true}},
-                  records: {:record_batch, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: false}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -792,7 +793,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         producer_id: {:int64, %{is_nullable?: false}},
                         first_offset: {:int64, %{is_nullable?: false}}
                       ]}, %{is_nullable?: true}},
-                  records: {:record_batch, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: false}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -820,7 +821,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         producer_id: {:int64, %{is_nullable?: false}},
                         first_offset: {:int64, %{is_nullable?: false}}
                       ]}, %{is_nullable?: true}},
-                  records: {:record_batch, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: false}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -848,7 +849,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         producer_id: {:int64, %{is_nullable?: false}},
                         first_offset: {:int64, %{is_nullable?: false}}
                       ]}, %{is_nullable?: true}},
-                  records: {:record_batch, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: false}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -877,7 +878,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         first_offset: {:int64, %{is_nullable?: false}}
                       ]}, %{is_nullable?: true}},
                   preferred_read_replica: {:int32, %{is_nullable?: false}},
-                  records: {:record_batch, %{is_nullable?: true}}
+                  records: {:record_batch, %{is_nullable?: false}}
                 ]}, %{is_nullable?: false}}
           ]}, %{is_nullable?: false}}
     ]
@@ -907,7 +908,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         tag_buffer: {:tag_buffer, %{}}
                       ]}, %{is_nullable?: true}},
                   preferred_read_replica: {:int32, %{is_nullable?: false}},
-                  records: {:compact_record_batch, %{is_nullable?: true}},
+                  records: {:compact_record_batch, %{is_nullable?: false}},
                   tag_buffer:
                     {:tag_buffer,
                      %{
@@ -967,7 +968,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         tag_buffer: {:tag_buffer, %{}}
                       ]}, %{is_nullable?: true}},
                   preferred_read_replica: {:int32, %{is_nullable?: false}},
-                  records: {:compact_record_batch, %{is_nullable?: true}},
+                  records: {:compact_record_batch, %{is_nullable?: false}},
                   tag_buffer:
                     {:tag_buffer,
                      %{
@@ -1027,7 +1028,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         tag_buffer: {:tag_buffer, %{}}
                       ]}, %{is_nullable?: true}},
                   preferred_read_replica: {:int32, %{is_nullable?: false}},
-                  records: {:compact_record_batch, %{is_nullable?: true}},
+                  records: {:compact_record_batch, %{is_nullable?: false}},
                   tag_buffer:
                     {:tag_buffer,
                      %{
@@ -1087,7 +1088,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         tag_buffer: {:tag_buffer, %{}}
                       ]}, %{is_nullable?: true}},
                   preferred_read_replica: {:int32, %{is_nullable?: false}},
-                  records: {:compact_record_batch, %{is_nullable?: true}},
+                  records: {:compact_record_batch, %{is_nullable?: false}},
                   tag_buffer:
                     {:tag_buffer,
                      %{
@@ -1147,7 +1148,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         tag_buffer: {:tag_buffer, %{}}
                       ]}, %{is_nullable?: true}},
                   preferred_read_replica: {:int32, %{is_nullable?: false}},
-                  records: {:compact_record_batch, %{is_nullable?: true}},
+                  records: {:compact_record_batch, %{is_nullable?: false}},
                   tag_buffer:
                     {:tag_buffer,
                      %{
@@ -1220,7 +1221,7 @@ defmodule KlifeProtocol.Messages.Fetch do
                         tag_buffer: {:tag_buffer, %{}}
                       ]}, %{is_nullable?: true}},
                   preferred_read_replica: {:int32, %{is_nullable?: false}},
-                  records: {:compact_record_batch, %{is_nullable?: true}},
+                  records: {:compact_record_batch, %{is_nullable?: false}},
                   tag_buffer:
                     {:tag_buffer,
                      %{

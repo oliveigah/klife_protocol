@@ -7,8 +7,11 @@ defmodule KlifeProtocol.Messages.ConsumerGroupDescribe do
   Kafka protocol ConsumerGroupDescribe message
 
   Request versions summary:
+  - Version 1 adds MemberType field to ConsumerGroupDescribeResponse (KIP-1099).
+  For ConsumerGroupDescribeRequest, version 1 is same as version 0.
 
   Response versions summary:
+  - Version 1 adds MemberType field (KIP-1099).
 
   """
 
@@ -24,7 +27,7 @@ defmodule KlifeProtocol.Messages.ConsumerGroupDescribe do
   Receives a map and serialize it to kafka wire format of the given version.
 
   Input content fields:
-  - group_ids: The ids of the groups to describe ([]string | versions 0+)
+  - group_ids: The ids of the groups to describe. ([]string | versions 0+)
   - include_authorized_operations: Whether to include authorized operations. (bool | versions 0+)
 
   """
@@ -61,6 +64,7 @@ defmodule KlifeProtocol.Messages.ConsumerGroupDescribe do
           - subscribed_topic_regex: the subscribed topic regex otherwise or null of not provided. (string | versions 0+)
           - assignment: The current assignment. (Assignment | versions 0+)
           - target_assignment: The target assignment. (Assignment | versions 0+)
+          - member_type: -1 for unknown. 0 for classic member. +1 for consumer member. (int8 | versions 1+)
       - authorized_operations: 32-bit bitfield to represent authorized operations for this group. (int32 | versions 0+)
 
   """
@@ -96,7 +100,7 @@ defmodule KlifeProtocol.Messages.ConsumerGroupDescribe do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 0
+  def max_supported_version(), do: 1
 
   @doc """
   Returns the current min supported version of this message.
@@ -110,6 +114,13 @@ defmodule KlifeProtocol.Messages.ConsumerGroupDescribe do
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
   def request_schema(0),
+    do: [
+      group_ids: {{:compact_array, :compact_string}, %{is_nullable?: false}},
+      include_authorized_operations: {:boolean, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  def request_schema(1),
     do: [
       group_ids: {{:compact_array, :compact_string}, %{is_nullable?: false}},
       include_authorized_operations: {:boolean, %{is_nullable?: false}},
@@ -170,6 +181,66 @@ defmodule KlifeProtocol.Messages.ConsumerGroupDescribe do
                             ]}, %{is_nullable?: false}},
                         tag_buffer: {:tag_buffer, %{}}
                       ]}, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            authorized_operations: {:int32, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(1),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      groups:
+        {{:compact_array,
+          [
+            error_code: {:int16, %{is_nullable?: false}},
+            error_message: {:compact_string, %{is_nullable?: true}},
+            group_id: {:compact_string, %{is_nullable?: false}},
+            group_state: {:compact_string, %{is_nullable?: false}},
+            group_epoch: {:int32, %{is_nullable?: false}},
+            assignment_epoch: {:int32, %{is_nullable?: false}},
+            assignor_name: {:compact_string, %{is_nullable?: false}},
+            members:
+              {{:compact_array,
+                [
+                  member_id: {:compact_string, %{is_nullable?: false}},
+                  instance_id: {:compact_string, %{is_nullable?: true}},
+                  rack_id: {:compact_string, %{is_nullable?: true}},
+                  member_epoch: {:int32, %{is_nullable?: false}},
+                  client_id: {:compact_string, %{is_nullable?: false}},
+                  client_host: {:compact_string, %{is_nullable?: false}},
+                  subscribed_topic_names:
+                    {{:compact_array, :compact_string}, %{is_nullable?: false}},
+                  subscribed_topic_regex: {:compact_string, %{is_nullable?: true}},
+                  assignment:
+                    {{:object,
+                      [
+                        topic_partitions:
+                          {{:compact_array,
+                            [
+                              topic_id: {:uuid, %{is_nullable?: false}},
+                              topic_name: {:compact_string, %{is_nullable?: false}},
+                              partitions: {{:compact_array, :int32}, %{is_nullable?: false}},
+                              tag_buffer: {:tag_buffer, %{}}
+                            ]}, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, %{}}
+                      ]}, %{is_nullable?: false}},
+                  target_assignment:
+                    {{:object,
+                      [
+                        topic_partitions:
+                          {{:compact_array,
+                            [
+                              topic_id: {:uuid, %{is_nullable?: false}},
+                              topic_name: {:compact_string, %{is_nullable?: false}},
+                              partitions: {{:compact_array, :int32}, %{is_nullable?: false}},
+                              tag_buffer: {:tag_buffer, %{}}
+                            ]}, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, %{}}
+                      ]}, %{is_nullable?: false}},
+                  member_type: {:int8, %{is_nullable?: false}},
                   tag_buffer: {:tag_buffer, %{}}
                 ]}, %{is_nullable?: false}},
             authorized_operations: {:int32, %{is_nullable?: false}},

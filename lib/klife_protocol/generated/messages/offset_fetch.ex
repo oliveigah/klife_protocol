@@ -7,6 +7,7 @@ defmodule KlifeProtocol.Messages.OffsetFetch do
   Kafka protocol OffsetFetch message
 
   Request versions summary:
+  - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
   - In version 0, the request read offsets from ZK.
   - Starting in version 1, the broker supports fetching offsets from the internal __consumer_offsets topic.
   - Starting in version 2, the request can contain a null topics array to indicate that offsets
@@ -20,6 +21,7 @@ defmodule KlifeProtocol.Messages.OffsetFetch do
   the MemberId and MemberEpoch fields. Those are filled in and validated when the new consumer protocol is used.
 
   Response versions summary:
+  - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
   - Version 1 is the same as version 0.
   - Version 2 adds a top-level error code.
   - Version 3 adds the throttle time.
@@ -50,9 +52,9 @@ defmodule KlifeProtocol.Messages.OffsetFetch do
   - topics: Each topic we would like to fetch offsets for, or null to fetch offsets for all topics. ([]OffsetFetchRequestTopic | versions 0-7)
       - name: The topic name. (string | versions 0-7)
       - partition_indexes: The partition indexes we would like to fetch offsets for. ([]int32 | versions 0-7)
-  - groups: Each group we would like to fetch offsets for ([]OffsetFetchRequestGroup | versions 8+)
+  - groups: Each group we would like to fetch offsets for. ([]OffsetFetchRequestGroup | versions 8+)
       - group_id: The group ID. (string | versions 8+)
-      - member_id: The member ID assigned by the group coordinator if using the new consumer protocol (KIP-848). (string | versions 9+)
+      - member_id: The member id. (string | versions 9+)
       - member_epoch: The member epoch if using the new consumer protocol (KIP-848). (int32 | versions 9+)
       - topics: Each topic we would like to fetch offsets for, or null to fetch offsets for all topics. ([]OffsetFetchRequestTopics | versions 8+)
           - name: The topic name. (string | versions 8+)
@@ -76,7 +78,7 @@ defmodule KlifeProtocol.Messages.OffsetFetch do
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 3+)
   - topics: The responses per topic. ([]OffsetFetchResponseTopic | versions 0-7)
       - name: The topic name. (string | versions 0-7)
-      - partitions: The responses per partition ([]OffsetFetchResponsePartition | versions 0-7)
+      - partitions: The responses per partition. ([]OffsetFetchResponsePartition | versions 0-7)
           - partition_index: The partition index. (int32 | versions 0-7)
           - committed_offset: The committed message offset. (int64 | versions 0-7)
           - committed_leader_epoch: The leader epoch. (int32 | versions 5-7)
@@ -87,7 +89,7 @@ defmodule KlifeProtocol.Messages.OffsetFetch do
       - group_id: The group ID. (string | versions 8+)
       - topics: The responses per topic. ([]OffsetFetchResponseTopics | versions 8+)
           - name: The topic name. (string | versions 8+)
-          - partitions: The responses per partition ([]OffsetFetchResponsePartitions | versions 8+)
+          - partitions: The responses per partition. ([]OffsetFetchResponsePartitions | versions 8+)
               - partition_index: The partition index. (int32 | versions 8+)
               - committed_offset: The committed message offset. (int64 | versions 8+)
               - committed_leader_epoch: The leader epoch. (int32 | versions 8+)

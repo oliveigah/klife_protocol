@@ -41,17 +41,17 @@ defmodule KlifeProtocol.Messages.DescribeTransactions do
   Response content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
-  - transaction_states:  ([]TransactionState | versions 0+)
-      - error_code:  (int16 | versions 0+)
-      - transactional_id:  (string | versions 0+)
-      - transaction_state:  (string | versions 0+)
-      - transaction_timeout_ms:  (int32 | versions 0+)
-      - transaction_start_time_ms:  (int64 | versions 0+)
-      - producer_id:  (int64 | versions 0+)
-      - producer_epoch:  (int16 | versions 0+)
+  - transaction_states: The current state of the transaction. ([]TransactionState | versions 0+)
+      - error_code: The error code. (int16 | versions 0+)
+      - transactional_id: The transactional id. (string | versions 0+)
+      - transaction_state: The current transaction state of the producer. (string | versions 0+)
+      - transaction_timeout_ms: The timeout in milliseconds for the transaction. (int32 | versions 0+)
+      - transaction_start_time_ms: The start time of the transaction in milliseconds. (int64 | versions 0+)
+      - producer_id: The current producer id associated with the transaction. (int64 | versions 0+)
+      - producer_epoch: The current epoch associated with the producer id. (int16 | versions 0+)
       - topics: The set of partitions included in the current transaction (if active). When a transaction is preparing to commit or abort, this will include only partitions which do not have markers. ([]TopicData | versions 0+)
-          - topic:  (string | versions 0+)
-          - partitions:  ([]int32 | versions 0+)
+          - topic: The topic name. (string | versions 0+)
+          - partitions: The partition ids included in the current transaction. ([]int32 | versions 0+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)

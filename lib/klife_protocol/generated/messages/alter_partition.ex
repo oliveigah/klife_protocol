@@ -7,13 +7,15 @@ defmodule KlifeProtocol.Messages.AlterPartition do
   Kafka protocol AlterPartition message
 
   Request versions summary:
-  - Version 1 adds LeaderRecoveryState field (KIP-704).
-  - Version 2 adds TopicId field to replace TopicName field (KIP-841).
+  - Versions 0-1 were removed in Apache Kafka 4.0, version 2 is the new baseline.
+  Version 1 adds LeaderRecoveryState field (KIP-704).
+  Version 2 adds TopicId field to replace TopicName field (KIP-841).
   - Version 3 adds the NewIsrEpochs field and deprecates the NewIsr field (KIP-903).
 
   Response versions summary:
-  - Version 1 adds LeaderRecoveryState field (KIP-704).
-  - Version 2 adds TopicId field to replace TopicName field, can return the following new errors:
+  - Versions 0-1 were removed in Apache Kafka 4.0, version 2 is the new baseline.
+  Version 1 adds LeaderRecoveryState field (KIP-704).
+  Version 2 adds TopicId field to replace TopicName field, can return the following new errors:
   INELIGIBLE_REPLICA, NEW_LEADER_ELECTED and UNKNOWN_TOPIC_ID (KIP-841).
   - Version 3 is the same as version 2 (KIP-903).
 
@@ -31,20 +33,19 @@ defmodule KlifeProtocol.Messages.AlterPartition do
   Receives a map and serialize it to kafka wire format of the given version.
 
   Input content fields:
-  - broker_id: The ID of the requesting broker (int32 | versions 0+)
-  - broker_epoch: The epoch of the requesting broker (int64 | versions 0+)
-  - topics:  ([]TopicData | versions 0+)
-      - topic_name: The name of the topic to alter ISRs for (string | versions 0-1)
-      - topic_id: The ID of the topic to alter ISRs for (uuid | versions 2+)
-      - partitions:  ([]PartitionData | versions 0+)
-          - partition_index: The partition index (int32 | versions 0+)
-          - leader_epoch: The leader epoch of this partition (int32 | versions 0+)
+  - broker_id: The ID of the requesting broker. (int32 | versions 0+)
+  - broker_epoch: The epoch of the requesting broker. (int64 | versions 0+)
+  - topics: The topics to alter ISRs for. ([]TopicData | versions 0+)
+      - topic_id: The ID of the topic to alter ISRs for. (uuid | versions 2+)
+      - partitions: The partitions to alter ISRs for. ([]PartitionData | versions 0+)
+          - partition_index: The partition index. (int32 | versions 0+)
+          - leader_epoch: The leader epoch of this partition. (int32 | versions 0+)
           - new_isr: The ISR for this partition. Deprecated since version 3. ([]int32 | versions 0-2)
-          - new_isr_with_epochs:  ([]BrokerState | versions 3+)
+          - new_isr_with_epochs: The ISR for this partition. ([]BrokerState | versions 3+)
               - broker_id: The ID of the broker. (int32 | versions 3+)
               - broker_epoch: The epoch of the broker. It will be -1 if the epoch check is not supported. (int64 | versions 3+)
           - leader_recovery_state: 1 if the partition is recovering from an unclean leader election; 0 otherwise. (int8 | versions 1+)
-          - partition_epoch: The expected epoch of the partition which is being updated. For legacy cluster this is the ZkVersion in the LeaderAndIsr request. (int32 | versions 0+)
+          - partition_epoch: The expected epoch of the partition which is being updated. (int32 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -61,18 +62,17 @@ defmodule KlifeProtocol.Messages.AlterPartition do
   Response content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
-  - error_code: The top level response error code (int16 | versions 0+)
-  - topics:  ([]TopicData | versions 0+)
-      - topic_name: The name of the topic (string | versions 0-1)
-      - topic_id: The ID of the topic (uuid | versions 2+)
-      - partitions:  ([]PartitionData | versions 0+)
-          - partition_index: The partition index (int32 | versions 0+)
-          - error_code: The partition level error code (int16 | versions 0+)
+  - error_code: The top level response error code. (int16 | versions 0+)
+  - topics: The responses for each topic. ([]TopicData | versions 0+)
+      - topic_id: The ID of the topic. (uuid | versions 2+)
+      - partitions: The responses for each partition. ([]PartitionData | versions 0+)
+          - partition_index: The partition index. (int32 | versions 0+)
+          - error_code: The partition level error code. (int16 | versions 0+)
           - leader_id: The broker ID of the leader. (int32 | versions 0+)
           - leader_epoch: The leader epoch. (int32 | versions 0+)
           - isr: The in-sync replica IDs. ([]int32 | versions 0+)
           - leader_recovery_state: 1 if the partition is recovering from an unclean leader election; 0 otherwise. (int8 | versions 1+)
-          - partition_epoch: The current epoch for the partition for KRaft controllers. The current ZK version for the legacy controllers. (int32 | versions 0+)
+          - partition_epoch: The current epoch for the partition for KRaft controllers. (int32 | versions 0+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)

@@ -7,6 +7,9 @@ defmodule KlifeProtocol.Messages.Produce do
   Kafka protocol Produce message
 
   Request versions summary:
+  - Versions 0-2 were removed in Apache Kafka 4.0, version 3 is the new baseline. Due to a bug in librdkafka,
+  these versions have to be included in the api versions response (see KAFKA-18659), but are rejected otherwise.
+  See `ApiKeys.PRODUCE_API_VERSIONS_RESPONSE_MIN_VERSION` for more details.
   - Version 1 and 2 are the same as version 0.
   - Version 3 adds the transactional ID, which is used for authorization when attempting to write
   transactional data.  Version 3 also adds support for Kafka Message Format v2.
@@ -18,19 +21,26 @@ defmodule KlifeProtocol.Messages.Produce do
   - Version 9 enables flexible versions.
   - Version 10 is the same as version 9 (KIP-951).
   - Version 11 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
+  - Version 12 is the same as version 11 (KIP-890). Note when produce requests are used in transaction, if
+  transaction V2 (KIP_890 part 2) is enabled, the produce request will also include the function for a
+  AddPartitionsToTxn call. If V2 is disabled, the client can't use produce request version higher than 11 within
+  a transaction.
 
   Response versions summary:
+  - Versions 0-2 were removed in Apache Kafka 4.0, version 3 is the new baseline. Due to a bug in librdkafka,
+  these versions have to be included in the api versions response (see KAFKA-18659), but are rejected otherwise.
+  See `ApiKeys.PRODUCE_API_VERSIONS_RESPONSE_MIN_VERSION` for more details.
   - Version 1 added the throttle time.
-  - Version 2 added the log append time.
+  Version 2 added the log append time.
   - Version 3 is the same as version 2.
   - Version 4 added KAFKA_STORAGE_ERROR as a possible error code.
-  - Version 5 added LogStartOffset to filter out spurious
-  OutOfOrderSequenceExceptions on the client.
+  - Version 5 added LogStartOffset to filter out spurious OutOfOrderSequenceExceptions on the client.
   - Version 8 added RecordErrors and ErrorMessage to include information about
   records that cause the whole batch to be dropped.  See KIP-467 for details.
   - Version 9 enables flexible versions.
   - Version 10 adds 'CurrentLeader' and 'NodeEndpoints' as tagged fields (KIP-951)
   - Version 11 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
+  - Version 12 is the same as version 10 (KIP-890).
 
   """
 
@@ -69,21 +79,21 @@ defmodule KlifeProtocol.Messages.Produce do
 
   Response content fields:
 
-  - responses: Each produce response ([]TopicProduceResponse | versions 0+)
-      - name: The topic name (string | versions 0+)
+  - responses: Each produce response. ([]TopicProduceResponse | versions 0+)
+      - name: The topic name. (string | versions 0+)
       - partition_responses: Each partition that we produced to within the topic. ([]PartitionProduceResponse | versions 0+)
           - index: The partition index. (int32 | versions 0+)
           - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
           - base_offset: The base offset. (int64 | versions 0+)
           - log_append_time_ms: The timestamp returned by broker after appending the messages. If CreateTime is used for the topic, the timestamp will be -1.  If LogAppendTime is used for the topic, the timestamp will be the broker local time when the messages are appended. (int64 | versions 2+)
           - log_start_offset: The log start offset. (int64 | versions 5+)
-          - record_errors: The batch indices of records that caused the batch to be dropped ([]BatchIndexAndErrorMessage | versions 8+)
-              - batch_index: The batch index of the record that cause the batch to be dropped (int32 | versions 8+)
-              - batch_index_error_message: The error message of the record that caused the batch to be dropped (string | versions 8+)
-          - error_message: The global error message summarizing the common root cause of the records that caused the batch to be dropped (string | versions 8+)
-          - current_leader:  (LeaderIdAndEpoch | versions 10+)
+          - record_errors: The batch indices of records that caused the batch to be dropped. ([]BatchIndexAndErrorMessage | versions 8+)
+              - batch_index: The batch index of the record that caused the batch to be dropped. (int32 | versions 8+)
+              - batch_index_error_message: The error message of the record that caused the batch to be dropped. (string | versions 8+)
+          - error_message: The global error message summarizing the common root cause of the records that caused the batch to be dropped. (string | versions 8+)
+          - current_leader: The leader broker that the producer should use for future requests. (LeaderIdAndEpoch | versions 10+)
               - leader_id: The ID of the current leader or -1 if the leader is unknown. (int32 | versions 10+)
-              - leader_epoch: The latest known leader epoch (int32 | versions 10+)
+              - leader_epoch: The latest known leader epoch. (int32 | versions 10+)
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 1+)
   - node_endpoints: Endpoints for all current-leaders enumerated in PartitionProduceResponses, with errors NOT_LEADER_OR_FOLLOWER. ([]NodeEndpoint | versions 10+)
       - node_id: The ID of the associated node. (int32 | versions 10+)
@@ -124,7 +134,7 @@ defmodule KlifeProtocol.Messages.Produce do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 11
+  def max_supported_version(), do: 12
 
   @doc """
   Returns the current min supported version of this message.
@@ -339,6 +349,27 @@ defmodule KlifeProtocol.Messages.Produce do
     ]
 
   def request_schema(11),
+    do: [
+      transactional_id: {:compact_string, %{is_nullable?: true}},
+      acks: {:int16, %{is_nullable?: false}},
+      timeout_ms: {:int32, %{is_nullable?: false}},
+      topic_data:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            partition_data:
+              {{:compact_array,
+                [
+                  index: {:int32, %{is_nullable?: false}},
+                  records: {:compact_record_batch, %{is_nullable?: true}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  def request_schema(12),
     do: [
       transactional_id: {:compact_string, %{is_nullable?: true}},
       acks: {:int16, %{is_nullable?: false}},
@@ -617,6 +648,60 @@ defmodule KlifeProtocol.Messages.Produce do
     ]
 
   def response_schema(11),
+    do: [
+      responses:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            partition_responses:
+              {{:compact_array,
+                [
+                  index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  base_offset: {:int64, %{is_nullable?: false}},
+                  log_append_time_ms: {:int64, %{is_nullable?: false}},
+                  log_start_offset: {:int64, %{is_nullable?: false}},
+                  record_errors:
+                    {{:compact_array,
+                      [
+                        batch_index: {:int32, %{is_nullable?: false}},
+                        batch_index_error_message: {:compact_string, %{is_nullable?: true}},
+                        tag_buffer: {:tag_buffer, %{}}
+                      ]}, %{is_nullable?: false}},
+                  error_message: {:compact_string, %{is_nullable?: true}},
+                  tag_buffer:
+                    {:tag_buffer,
+                     %{
+                       0 =>
+                         {{:current_leader,
+                           {:object,
+                            [
+                              leader_id: {:int32, %{is_nullable?: false}},
+                              leader_epoch: {:int32, %{is_nullable?: false}},
+                              tag_buffer: {:tag_buffer, %{}}
+                            ]}}, %{is_nullable?: false}}
+                     }}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      tag_buffer:
+        {:tag_buffer,
+         %{
+           0 =>
+             {{:node_endpoints,
+               {:compact_array,
+                [
+                  node_id: {:int32, %{is_nullable?: false}},
+                  host: {:compact_string, %{is_nullable?: false}},
+                  port: {:int32, %{is_nullable?: false}},
+                  rack: {:compact_string, %{is_nullable?: true}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}}, %{is_nullable?: false}}
+         }}
+    ]
+
+  def response_schema(12),
     do: [
       responses:
         {{:compact_array,

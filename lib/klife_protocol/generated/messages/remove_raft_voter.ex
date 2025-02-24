@@ -24,9 +24,9 @@ defmodule KlifeProtocol.Messages.RemoveRaftVoter do
   Receives a map and serialize it to kafka wire format of the given version.
 
   Input content fields:
-  - cluster_id:  (string | versions 0+)
-  - voter_id: The replica id of the voter getting removed from the topic partition (int32 | versions 0+)
-  - voter_directory_id: The directory id of the voter getting removed from the topic partition (uuid | versions 0+)
+  - cluster_id: The cluster id of the request. (string | versions 0+)
+  - voter_id: The replica id of the voter getting removed from the topic partition. (int32 | versions 0+)
+  - voter_directory_id: The directory id of the voter getting removed from the topic partition. (uuid | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -43,7 +43,7 @@ defmodule KlifeProtocol.Messages.RemoveRaftVoter do
   Response content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
-  - error_code: The error code, or 0 if there was no error (int16 | versions 0+)
+  - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
   - error_message: The error message, or null if there was no error. (string | versions 0+)
 
   """

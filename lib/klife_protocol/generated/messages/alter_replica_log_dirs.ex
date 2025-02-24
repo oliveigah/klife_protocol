@@ -7,11 +7,13 @@ defmodule KlifeProtocol.Messages.AlterReplicaLogDirs do
   Kafka protocol AlterReplicaLogDirs message
 
   Request versions summary:
+  - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
   - Version 1 is the same as version 0.
   Version 2 enables flexible versions.
 
   Response versions summary:
-  - Starting in version 1, on quota violation brokers send out responses before throttling.
+  - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
+  Starting in version 1, on quota violation brokers send out responses before throttling.
   Version 2 enables flexible versions.
 
   """

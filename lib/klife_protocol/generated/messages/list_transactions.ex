@@ -26,9 +26,9 @@ defmodule KlifeProtocol.Messages.ListTransactions do
   Receives a map and serialize it to kafka wire format of the given version.
 
   Input content fields:
-  - state_filters: The transaction states to filter by: if empty, all transactions are returned; if non-empty, then only transactions matching one of the filtered states will be returned ([]string | versions 0+)
-  - producer_id_filters: The producerIds to filter by: if empty, all transactions will be returned; if non-empty, only transactions which match one of the filtered producerIds will be returned ([]int64 | versions 0+)
-  - duration_filter: Duration (in millis) to filter by: if < 0, all transactions will be returned; otherwise, only transactions running longer than this duration will be returned (int64 | versions 1+)
+  - state_filters: The transaction states to filter by: if empty, all transactions are returned; if non-empty, then only transactions matching one of the filtered states will be returned. ([]string | versions 0+)
+  - producer_id_filters: The producerIds to filter by: if empty, all transactions will be returned; if non-empty, only transactions which match one of the filtered producerIds will be returned. ([]int64 | versions 0+)
+  - duration_filter: Duration (in millis) to filter by: if < 0, all transactions will be returned; otherwise, only transactions running longer than this duration will be returned. (int64 | versions 1+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -45,12 +45,12 @@ defmodule KlifeProtocol.Messages.ListTransactions do
   Response content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
-  - error_code:  (int16 | versions 0+)
-  - unknown_state_filters: Set of state filters provided in the request which were unknown to the transaction coordinator ([]string | versions 0+)
-  - transaction_states:  ([]TransactionState | versions 0+)
-      - transactional_id:  (string | versions 0+)
-      - producer_id:  (int64 | versions 0+)
-      - transaction_state: The current transaction state of the producer (string | versions 0+)
+  - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
+  - unknown_state_filters: Set of state filters provided in the request which were unknown to the transaction coordinator. ([]string | versions 0+)
+  - transaction_states: The current state of the transaction for the transactional id. ([]TransactionState | versions 0+)
+      - transactional_id: The transactional id. (string | versions 0+)
+      - producer_id: The producer id. (int64 | versions 0+)
+      - transaction_state: The current transaction state of the producer. (string | versions 0+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)

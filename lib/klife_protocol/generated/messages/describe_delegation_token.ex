@@ -7,12 +7,14 @@ defmodule KlifeProtocol.Messages.DescribeDelegationToken do
   Kafka protocol DescribeDelegationToken message
 
   Request versions summary:
-  - Version 1 is the same as version 0.
+  - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
+  Version 1 is the same as version 0.
   Version 2 adds flexible version support
   Version 3 adds token requester into the response
 
   Response versions summary:
-  - Starting in version 1, on quota violation, brokers send out responses before throttling.
+  - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
+  Starting in version 1, on quota violation, brokers send out responses before throttling.
   Version 2 adds flexible version support
   Version 3 adds token requester details
 
@@ -60,8 +62,8 @@ defmodule KlifeProtocol.Messages.DescribeDelegationToken do
       - token_id: The token ID. (string | versions 0+)
       - hmac: The token HMAC. (bytes | versions 0+)
       - renewers: Those who are able to renew this token before it expires. ([]DescribedDelegationTokenRenewer | versions 0+)
-          - principal_type: The renewer principal type (string | versions 0+)
-          - principal_name: The renewer principal name (string | versions 0+)
+          - principal_type: The renewer principal type. (string | versions 0+)
+          - principal_name: The renewer principal name. (string | versions 0+)
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
 
   """

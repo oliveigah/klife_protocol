@@ -27,21 +27,21 @@ defmodule KlifeProtocol.Messages.EndQuorumEpoch do
   Receives a map and serialize it to kafka wire format of the given version.
 
   Input content fields:
-  - cluster_id:  (string | versions 0+)
-  - topics:  ([]TopicData | versions 0+)
+  - cluster_id: The cluster id. (string | versions 0+)
+  - topics: The topics. ([]TopicData | versions 0+)
       - topic_name: The topic name. (string | versions 0+)
-      - partitions:  ([]PartitionData | versions 0+)
+      - partitions: The partitions. ([]PartitionData | versions 0+)
           - partition_index: The partition index. (int32 | versions 0+)
-          - leader_id: The current leader ID that is resigning (int32 | versions 0+)
-          - leader_epoch: The current epoch (int32 | versions 0+)
-          - preferred_successors: A sorted list of preferred successors to start the election ([]int32 | versions 0)
-          - preferred_candidates: A sorted list of preferred candidates to start the election ([]ReplicaInfo | versions 1+)
-              - candidate_id:  (int32 | versions 1+)
-              - candidate_directory_id:  (uuid | versions 1+)
-  - leader_endpoints: Endpoints for the leader ([]LeaderEndpoint | versions 1+)
-      - name: The name of the endpoint (string | versions 1+)
-      - host: The node's hostname (string | versions 1+)
-      - port: The node's port (uint16 | versions 1+)
+          - leader_id: The current leader ID that is resigning. (int32 | versions 0+)
+          - leader_epoch: The current epoch. (int32 | versions 0+)
+          - preferred_successors: A sorted list of preferred successors to start the election. ([]int32 | versions 0)
+          - preferred_candidates: A sorted list of preferred candidates to start the election. ([]ReplicaInfo | versions 1+)
+              - candidate_id: The ID of the candidate replica. (int32 | versions 1+)
+              - candidate_directory_id: The directory ID of the candidate replica. (uuid | versions 1+)
+  - leader_endpoints: Endpoints for the leader. ([]LeaderEndpoint | versions 1+)
+      - name: The name of the endpoint. (string | versions 1+)
+      - host: The node's hostname. (string | versions 1+)
+      - port: The node's port. (uint16 | versions 1+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -58,17 +58,17 @@ defmodule KlifeProtocol.Messages.EndQuorumEpoch do
   Response content fields:
 
   - error_code: The top level error code. (int16 | versions 0+)
-  - topics:  ([]TopicData | versions 0+)
+  - topics: The topic data. ([]TopicData | versions 0+)
       - topic_name: The topic name. (string | versions 0+)
-      - partitions:  ([]PartitionData | versions 0+)
+      - partitions: The partition data. ([]PartitionData | versions 0+)
           - partition_index: The partition index. (int32 | versions 0+)
-          - error_code:  (int16 | versions 0+)
+          - error_code: The partition level error code. (int16 | versions 0+)
           - leader_id: The ID of the current leader or -1 if the leader is unknown. (int32 | versions 0+)
-          - leader_epoch: The latest known leader epoch (int32 | versions 0+)
-  - node_endpoints: Endpoints for all leaders enumerated in PartitionData ([]NodeEndpoint | versions 1+)
-      - node_id: The ID of the associated node (int32 | versions 1+)
-      - host: The node's hostname (string | versions 1+)
-      - port: The node's port (uint16 | versions 1+)
+          - leader_epoch: The latest known leader epoch. (int32 | versions 0+)
+  - node_endpoints: Endpoints for all leaders enumerated in PartitionData. ([]NodeEndpoint | versions 1+)
+      - node_id: The ID of the associated node. (int32 | versions 1+)
+      - host: The node's hostname. (string | versions 1+)
+      - port: The node's port. (uint16 | versions 1+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)

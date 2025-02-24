@@ -7,12 +7,14 @@ defmodule KlifeProtocol.Messages.DescribeConfigs do
   Kafka protocol DescribeConfigs message
 
   Request versions summary:
-  - Version 1 adds IncludeSynonyms.
+  - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
+  Version 1 adds IncludeSynonyms and removes IsDefault.
   Version 2 is the same as version 1.
   Version 4 enables flexible versions.
 
   Response versions summary:
-  - Version 1 adds ConfigSource and the synonyms.
+  - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
+  Version 1 adds ConfigSource and the synonyms.
   Starting in version 2, on quota violation, brokers send out responses before throttling.
   Version 4 enables flexible versions.
 
@@ -61,14 +63,13 @@ defmodule KlifeProtocol.Messages.DescribeConfigs do
           - name: The configuration name. (string | versions 0+)
           - value: The configuration value. (string | versions 0+)
           - read_only: True if the configuration is read-only. (bool | versions 0+)
-          - is_default: True if the configuration is not set. (bool | versions 0)
           - config_source: The configuration source. (int8 | versions 1+)
           - is_sensitive: True if this configuration is sensitive. (bool | versions 0+)
           - synonyms: The synonyms for this configuration key. ([]DescribeConfigsSynonym | versions 1+)
               - name: The synonym name. (string | versions 1+)
               - value: The synonym value. (string | versions 1+)
               - source: The synonym source. (int8 | versions 1+)
-          - config_type: The configuration data type. Type can be one of the following values - BOOLEAN, STRING, INT, SHORT, LONG, DOUBLE, LIST, CLASS, PASSWORD (int8 | versions 3+)
+          - config_type: The configuration data type. Type can be one of the following values - BOOLEAN, STRING, INT, SHORT, LONG, DOUBLE, LIST, CLASS, PASSWORD. (int8 | versions 3+)
           - documentation: The configuration documentation. (string | versions 3+)
 
   """

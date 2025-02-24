@@ -25,7 +25,7 @@ defmodule KlifeProtocol.Messages.OffsetDelete do
 
   Input content fields:
   - group_id: The unique group identifier. (string | versions 0+)
-  - topics: The topics to delete offsets for ([]OffsetDeleteRequestTopic | versions 0+)
+  - topics: The topics to delete offsets for. ([]OffsetDeleteRequestTopic | versions 0+)
       - name: The topic name. (string | versions 0+)
       - partitions: Each partition to delete offsets for. ([]OffsetDeleteRequestPartition | versions 0+)
           - partition_index: The partition index. (int32 | versions 0+)

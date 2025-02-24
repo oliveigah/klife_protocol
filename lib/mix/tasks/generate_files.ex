@@ -110,44 +110,71 @@ if Mix.env() == :dev do
             if module_name == "Header" do
               mod = String.to_atom("Elixir.KlifeProtocol.#{module_name}")
 
-              {mod, 0, 2}
+              case Code.ensure_compiled(mod) do
+                {:module, mod} ->
+                  {mod, 0, 2}
+
+                _ ->
+                  # 100_000 in order to guarantee that
+                  # the current version will never be used
+                  {mod, 100_000, 100_000}
+              end
             else
               mod = String.to_atom("Elixir.KlifeProtocol.Messages.#{module_name}")
-              curr_min_v = apply(mod, :min_supported_version, [])
-              curr_max_v = apply(mod, :max_supported_version, [])
 
-              {mod, curr_min_v, curr_max_v}
+              case Code.ensure_compiled(mod) do
+                {:module, mod} ->
+                  curr_min_v = apply(mod, :min_supported_version, [])
+                  curr_max_v = apply(mod, :max_supported_version, [])
+
+                  {mod, curr_min_v, curr_max_v}
+
+                _ ->
+                  # 100_000 in order to guarantee that
+                  # the current version will never be used
+                  {mod, 100_000, 100_000}
+              end
             end
 
           {max_request_version, _schema} = List.last(request_schemas)
+          {min_request_version, _schema} = List.first(request_schemas)
+          first_req_vsn = min(min_request_version, curr_min_v)
 
           compatible_request_schemas =
-            Enum.map(0..max_request_version, fn v ->
-              new_val = Enum.find(request_schemas, fn {k, _v} -> k == v end)
+            Enum.map(first_req_vsn..max_request_version, fn vsn ->
+              new_val = Enum.find(request_schemas, fn {k, _v} -> k == vsn end)
               already_on_schema? = new_val != nil
-              current_exists? = v >= curr_min_v and v <= curr_max_v
+              current_exists? = vsn >= curr_min_v and vsn <= curr_max_v
+              skipped? = vsn in (@version_exceptions[module_name] || [])
 
               cond do
                 already_on_schema? -> new_val
-                current_exists? -> {v, apply(mod, :request_schema, [v])}
+                current_exists? -> {vsn, apply(mod, :request_schema, [vsn])}
+                skipped? -> nil
                 true -> raise "Unexpected gap for file #{req_file_path}"
               end
             end)
+            |> Enum.reject(fn e -> e == nil end)
 
           {max_response_version, _schema} = List.last(response_schemas)
+          {min_response_version, _schema} = List.first(response_schemas)
+          first_min_vsn = min(min_response_version, curr_min_v)
 
           compatible_response_schemas =
-            Enum.map(0..max_response_version, fn v ->
-              new_val = Enum.find(response_schemas, fn {k, _v} -> k == v end)
+            Enum.map(first_min_vsn..max_response_version, fn vsn ->
+              new_val = Enum.find(response_schemas, fn {k, _v} -> k == vsn end)
               already_on_schema? = new_val != nil
-              current_exists? = v >= curr_min_v and v <= curr_max_v
+              current_exists? = vsn >= curr_min_v and vsn <= curr_max_v
+              skipped? = vsn in (@version_exceptions[module_name] || [])
 
               cond do
                 already_on_schema? -> new_val
-                current_exists? -> {v, apply(mod, :response_schema, [v])}
+                current_exists? -> {vsn, apply(mod, :response_schema, [vsn])}
+                skipped? -> nil
                 true -> raise "Unexpected gap for file #{req_file_path}"
               end
             end)
+            |> Enum.reject(fn e -> e == nil end)
 
           template_path = @template_by_module[module_name] || @template_by_module["default"]
           write_base_path = @write_path_by_module[module_name] || @write_path_by_module["default"]
@@ -185,8 +212,8 @@ if Mix.env() == :dev do
 
               "priv/header_module_template.eex" ->
                 [
-                  request_schemas: request_schemas,
-                  response_schemas: response_schemas,
+                  request_schemas: compatible_request_schemas,
+                  response_schemas: compatible_response_schemas,
                   req_field_comments: get_fields_comments(req_map),
                   res_field_comments: get_fields_comments(res_map)
                 ]

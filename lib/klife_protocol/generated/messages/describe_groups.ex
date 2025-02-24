@@ -11,6 +11,7 @@ defmodule KlifeProtocol.Messages.DescribeGroups do
   - Starting in version 3, authorized operations can be requested.
   - Starting in version 4, the response will include group.instance.id info for members.
   - Version 5 is the first flexible version.
+  - Version 6 returns error code GROUP_ID_NOT_FOUND if the group ID is not found (KIP-1043).
 
   Response versions summary:
   - Version 1 added throttle time.
@@ -18,6 +19,7 @@ defmodule KlifeProtocol.Messages.DescribeGroups do
   - Starting in version 3, brokers can send authorized operations.
   - Starting in version 4, the response will optionally include group.instance.id info for members.
   - Version 5 is the first flexible version.
+  - Version 6 returns error code GROUP_ID_NOT_FOUND if the group ID is not found (KIP-1043).
 
   """
 
@@ -33,7 +35,7 @@ defmodule KlifeProtocol.Messages.DescribeGroups do
   Receives a map and serialize it to kafka wire format of the given version.
 
   Input content fields:
-  - groups: The names of the groups to describe ([]string | versions 0+)
+  - groups: The names of the groups to describe. ([]string | versions 0+)
   - include_authorized_operations: Whether to include authorized operations. (bool | versions 3+)
 
   """
@@ -53,12 +55,13 @@ defmodule KlifeProtocol.Messages.DescribeGroups do
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 1+)
   - groups: Each described group. ([]DescribedGroup | versions 0+)
       - error_code: The describe error, or 0 if there was no error. (int16 | versions 0+)
+      - error_message: The describe error message, or null if there was no error. (string | versions 6+)
       - group_id: The group ID string. (string | versions 0+)
       - group_state: The group state string, or the empty string. (string | versions 0+)
       - protocol_type: The group protocol type, or the empty string. (string | versions 0+)
       - protocol_data: The group protocol data, or the empty string. (string | versions 0+)
       - members: The group members. ([]DescribedGroupMember | versions 0+)
-          - member_id: The member ID assigned by the group coordinator. (string | versions 0+)
+          - member_id: The member id. (string | versions 0+)
           - group_instance_id: The unique identifier of the consumer instance provided by end user. (string | versions 4+)
           - client_id: The client ID used in the member's latest join group request. (string | versions 0+)
           - client_host: The client host. (string | versions 0+)
@@ -99,7 +102,7 @@ defmodule KlifeProtocol.Messages.DescribeGroups do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 5
+  def max_supported_version(), do: 6
 
   @doc """
   Returns the current min supported version of this message.
@@ -129,6 +132,13 @@ defmodule KlifeProtocol.Messages.DescribeGroups do
     ]
 
   def request_schema(5),
+    do: [
+      groups: {{:compact_array, :compact_string}, %{is_nullable?: false}},
+      include_authorized_operations: {:boolean, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  def request_schema(6),
     do: [
       groups: {{:compact_array, :compact_string}, %{is_nullable?: false}},
       include_authorized_operations: {:boolean, %{is_nullable?: false}},
@@ -262,6 +272,35 @@ defmodule KlifeProtocol.Messages.DescribeGroups do
         {{:compact_array,
           [
             error_code: {:int16, %{is_nullable?: false}},
+            group_id: {:compact_string, %{is_nullable?: false}},
+            group_state: {:compact_string, %{is_nullable?: false}},
+            protocol_type: {:compact_string, %{is_nullable?: false}},
+            protocol_data: {:compact_string, %{is_nullable?: false}},
+            members:
+              {{:compact_array,
+                [
+                  member_id: {:compact_string, %{is_nullable?: false}},
+                  group_instance_id: {:compact_string, %{is_nullable?: true}},
+                  client_id: {:compact_string, %{is_nullable?: false}},
+                  client_host: {:compact_string, %{is_nullable?: false}},
+                  member_metadata: {:compact_bytes, %{is_nullable?: false}},
+                  member_assignment: {:compact_bytes, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            authorized_operations: {:int32, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(6),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      groups:
+        {{:compact_array,
+          [
+            error_code: {:int16, %{is_nullable?: false}},
+            error_message: {:compact_string, %{is_nullable?: true}},
             group_id: {:compact_string, %{is_nullable?: false}},
             group_state: {:compact_string, %{is_nullable?: false}},
             protocol_type: {:compact_string, %{is_nullable?: false}},

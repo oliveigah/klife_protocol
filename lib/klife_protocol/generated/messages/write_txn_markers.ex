@@ -7,6 +7,7 @@ defmodule KlifeProtocol.Messages.WriteTxnMarkers do
   Kafka protocol WriteTxnMarkers message
 
   Request versions summary:
+  - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
   - Version 1 enables flexible versions.
 
   Response versions summary:
@@ -32,7 +33,7 @@ defmodule KlifeProtocol.Messages.WriteTxnMarkers do
       - topics: Each topic that we want to write transaction marker(s) for. ([]WritableTxnMarkerTopic | versions 0+)
           - name: The topic name. (string | versions 0+)
           - partition_indexes: The indexes of the partitions to write transaction markers for. ([]int32 | versions 0+)
-      - coordinator_epoch: Epoch associated with the transaction state partition hosted by this transaction coordinator (int32 | versions 0+)
+      - coordinator_epoch: Epoch associated with the transaction state partition hosted by this transaction coordinator. (int32 | versions 0+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do

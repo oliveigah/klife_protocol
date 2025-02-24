@@ -46,8 +46,8 @@ defmodule KlifeProtocol.Messages.InitializeShareGroupState do
 
   Response content fields:
 
-  - results: The initialization results ([]InitializeStateResult | versions 0+)
-      - topic_id: The topic identifier (uuid | versions 0+)
+  - results: The initialization results. ([]InitializeStateResult | versions 0+)
+      - topic_id: The topic identifier. (uuid | versions 0+)
       - partitions: The results for the partitions. ([]PartitionResult | versions 0+)
           - partition: The partition index. (int32 | versions 0+)
           - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)

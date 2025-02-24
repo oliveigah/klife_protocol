@@ -7,12 +7,14 @@ defmodule KlifeProtocol.Messages.CreateAcls do
   Kafka protocol CreateAcls message
 
   Request versions summary:
-  - Version 1 adds resource pattern type.
+  - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
+  Version 1 adds resource pattern type.
   Version 2 enables flexible versions.
   Version 3 adds user resource type.
 
   Response versions summary:
-  - Starting in version 1, on quota violation, brokers send out responses before throttling.
+  - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
+  Starting in version 1, on quota violation, brokers send out responses before throttling.
   Version 2 enables flexible versions.
   Version 3 adds user resource type.
 

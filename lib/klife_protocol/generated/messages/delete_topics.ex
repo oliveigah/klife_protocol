@@ -7,13 +7,15 @@ defmodule KlifeProtocol.Messages.DeleteTopics do
   Kafka protocol DeleteTopics message
 
   Request versions summary:
-  - Versions 0, 1, 2, and 3 are the same.
+  - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
+  Versions 0, 1, 2, and 3 are the same.
   - Version 4 is the first flexible version.
   - Version 5 adds ErrorMessage in the response and may return a THROTTLING_QUOTA_EXCEEDED error
   in the response if the topics deletion is throttled (KIP-599).
   - Version 6 reorganizes topics, adds topic IDs and allows topic names to be null.
 
   Response versions summary:
+  - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
   - Version 1 adds the throttle time.
   - Starting in version 2, on quota violation, brokers send out responses before throttling.
   - Starting in version 3, a TOPIC_DELETION_DISABLED error code may be returned.
@@ -38,10 +40,10 @@ defmodule KlifeProtocol.Messages.DeleteTopics do
   Receives a map and serialize it to kafka wire format of the given version.
 
   Input content fields:
-  - topics: The name or topic ID of the topic ([]DeleteTopicState | versions 6+)
-      - name: The topic name (string | versions 6+)
-      - topic_id: The unique topic ID (uuid | versions 6+)
-  - topic_names: The names of the topics to delete ([]string | versions 0-5)
+  - topics: The name or topic ID of the topic. ([]DeleteTopicState | versions 6+)
+      - name: The topic name. (string | versions 6+)
+      - topic_id: The unique topic ID. (uuid | versions 6+)
+  - topic_names: The names of the topics to delete. ([]string | versions 0-5)
   - timeout_ms: The length of time in milliseconds to wait for the deletions to complete. (int32 | versions 0+)
 
   """
@@ -60,8 +62,8 @@ defmodule KlifeProtocol.Messages.DeleteTopics do
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 1+)
   - responses: The results for each topic we tried to delete. ([]DeletableTopicResult | versions 0+)
-      - name: The topic name (string | versions 0+)
-      - topic_id: the unique topic ID (uuid | versions 6+)
+      - name: The topic name. (string | versions 0+)
+      - topic_id: The unique topic ID. (uuid | versions 6+)
       - error_code: The deletion error, or 0 if the deletion succeeded. (int16 | versions 0+)
       - error_message: The error message, or null if there was no error. (string | versions 5+)
 
