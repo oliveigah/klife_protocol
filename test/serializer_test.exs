@@ -360,4 +360,39 @@ defmodule KlifeProtocol.SerializerTest do
                  """,
                  fn -> Serializer.execute(input, schema) end
   end
+
+  @tag core: true
+  test "object" do
+    input = %{a: %{a: "aaa", b: 321, c: 123}}
+
+    schema = [
+      a:
+        {{:object,
+          [
+            a: {:compact_string, @default_metadata},
+            b: {:int16, @default_metadata},
+            c: {:int16, @default_metadata}
+          ]}, @default_metadata}
+    ]
+
+    assert <<1, 4, "aaa", 321::16-signed, 123::16-signed>> =
+             Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
+  end
+
+  test "null object" do
+    input = %{a: nil}
+
+    schema = [
+      a:
+        {{:object,
+          [
+            a: {:compact_string, @default_metadata},
+            b: {:int16, @default_metadata},
+            c: {:int16, @default_metadata}
+          ]}, %{is_nullable?: true}}
+    ]
+
+    assert <<255>> =
+             Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
+  end
 end

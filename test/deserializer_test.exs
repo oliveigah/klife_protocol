@@ -358,4 +358,41 @@ defmodule KlifeProtocol.DeserializerTest do
 
     assert %{} = response
   end
+
+  @tag core: true
+  test "object" do
+    input = <<1, 4, "aaa", 321::16-signed, 123::16-signed>>
+
+    schema = [
+      a:
+        {{:object,
+          [
+            a: {:compact_string, @default_metadata},
+            b: {:int16, @default_metadata},
+            c: {:int16, @default_metadata}
+          ]}, @default_metadata}
+    ]
+
+    assert {:ok, {result, <<>>}} = Deserializer.execute(input, schema)
+
+    assert %{a: %{a: "aaa", b: 321, c: 123}} == result
+  end
+
+  test "null object" do
+    input = <<255>>
+
+    schema = [
+      a:
+        {{:object,
+          [
+            a: {:compact_string, @default_metadata},
+            b: {:int16, @default_metadata},
+            c: {:int16, @default_metadata}
+          ]}, @default_metadata}
+    ]
+
+    assert {:ok, {result, <<>>}} = Deserializer.execute(input, schema)
+
+    assert %{a: nil} == result
+  end
 end

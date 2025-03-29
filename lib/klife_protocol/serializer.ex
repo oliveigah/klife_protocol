@@ -75,6 +75,14 @@ defmodule KlifeProtocol.Serializer do
     |> Base.decode16!(case: :lower)
   end
 
+  defp do_serialize_value(nil, {:object, _schema}) do
+    do_serialize_value(-1, :unsigned_varint)
+  end
+
+  defp do_serialize_value(val, {:object, schema}) do
+    do_serialize(schema, val, [do_serialize_value(1, :unsigned_varint)])
+  end
+
   defp do_serialize_value(nil, :bytes), do: <<-1::32-signed>>
 
   defp do_serialize_value(val, :bytes), do: [<<byte_size(val)::32-signed>>, val]

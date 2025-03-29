@@ -43,6 +43,15 @@ defmodule KlifeProtocol.Deserializer do
 
   defp do_deserialize_value(<<-1::16-signed, rest_data::binary>>, :string), do: {nil, rest_data}
 
+  # 255 is -1 encoded as unsigned_varint
+  defp do_deserialize_value(<<255, rest_data::binary>>, {:object, _schema}) do
+    {nil, rest_data}
+  end
+
+  defp do_deserialize_value(<<1, rest_data::binary>>, {:object, schema}) do
+    do_deserialize(schema, rest_data, %{})
+  end
+
   defp do_deserialize_value(<<len::16-signed, val::size(len)-binary, rest::binary>>, :string),
     do: {val, rest}
 
