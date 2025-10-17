@@ -221,12 +221,16 @@ defmodule KlifeProtocol.RecordBatch do
     raise "unsupported compression #{decode_compression(unkown)}"
   end
 
+  # Optimized with pattern matching on compression bits
   defp maybe_decompress(serialized_records, attributes) when is_integer(attributes) do
-    case Bitwise.band(attributes, 7) do
-      0 ->
+    import Bitwise
+    compression = attributes &&& 0x07
+
+    cond do
+      compression == 0 ->
         {:ok, serialized_records}
 
-      1 ->
+      compression == 1 ->
         <<records_length::32-signed, records_values::binary>> = serialized_records
         z = :zlib.open()
         # :zlib.gzip/1 implementation always use 31 window bits
@@ -236,13 +240,13 @@ defmodule KlifeProtocol.RecordBatch do
         :zlib.close(z)
         {:ok, <<records_length::32-signed, decompressed_records::binary>>}
 
-      2 ->
+      compression == 2 ->
         <<records_length::32-signed, records_values::binary>> = serialized_records
         {:ok, decompressed_records} = :snappyer.decompress(records_values)
         {:ok, <<records_length::32-signed, decompressed_records::binary>>}
 
-      unkown ->
-        raise "unsupported decompression #{decode_compression(unkown)}"
+      true ->
+        raise "unsupported decompression #{decode_compression(compression)}"
     end
   end
 
