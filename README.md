@@ -288,3 +288,9 @@ bash run-kafka.sh ${KAFKA_VERSION}
 CONN_MODE=SSL mix test
 bash stop-kafka.sh ${KAFKA_VERSION}
 ```
+
+## Generating messages for a new kafka version
+
+1 - get the message folder on the kafka repository, usually on `clients/src/main/resources/common/message`
+2 - execute `mix generate_files PATH_TO_MESSAGE_FOLDER`
+3 - verify all the changed files

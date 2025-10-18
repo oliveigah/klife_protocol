@@ -232,7 +232,8 @@ if Mix.env() == :dev do
 
           (write_base_path <> "#{file_name}.ex")
           |> Path.relative()
-          |> File.write!(module_content)
+          # prevent unecessary empty line changes on EOF
+          |> File.write!([module_content | "\n"])
 
           write_base_path <> "#{file_name}.ex"
       end

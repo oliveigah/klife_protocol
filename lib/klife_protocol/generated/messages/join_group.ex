@@ -7,7 +7,6 @@ defmodule KlifeProtocol.Messages.JoinGroup do
   Kafka protocol JoinGroup message
 
   Request versions summary:
-  - Versions 0-1 were removed in Apache Kafka 4.0, Version 2 is the new baseline.
   - Version 1 adds RebalanceTimeoutMs. Version 2 and 3 are the same as version 1.
   - Starting from version 4, the client needs to issue a second request to join group
   - Starting from version 5, we add a new field called groupInstanceId to indicate member identity across restarts.
@@ -18,7 +17,6 @@ defmodule KlifeProtocol.Messages.JoinGroup do
   - Version 9 is the same as version 8.
 
   Response versions summary:
-  - Versions 0-1 were removed in Apache Kafka 4.0, Version 2 is the new baseline.
   - Version 1 is the same as version 0.
   - Version 2 adds throttle time.
   - Starting in version 3, on quota violation, brokers send out responses before throttling.

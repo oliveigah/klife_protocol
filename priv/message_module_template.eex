@@ -168,7 +168,7 @@ defmodule KlifeProtocol.Messages.<%= module_name %> do
     <%= Enum.map(request_schemas, fn {version, schema} ->
         if version not in version_exceptions do
         """
-        def request_schema(#{version}), do: #{inspect(schema)}
+        def request_schema(#{version}), do: #{inspect(schema, limit: :infinity)}
         """
         else
         ""
@@ -181,7 +181,7 @@ defmodule KlifeProtocol.Messages.<%= module_name %> do
     <%= Enum.map(response_schemas, fn {version, schema} ->
         if version not in version_exceptions do
         """
-        def response_schema(#{version}), do: #{inspect(schema)}
+        def response_schema(#{version}), do: #{inspect(schema, limit: :infinity)}
         """
         else
         ""
