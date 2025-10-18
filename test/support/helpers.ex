@@ -7,17 +7,17 @@ defmodule KlifeProtocol.TestSupport.Helpers do
   alias KlifeProtocol.Messages
 
   # defined by the docker compose file
-  @default_brokers [
-    kafka1: "localhost:19092",
-    kafka2: "localhost:29092",
-    kafka3: "localhost:39092"
-  ]
+  @default_brokers %{
+    2 => "localhost:19092",
+    3 => "localhost:29092",
+    4 => "localhost:39092"
+  }
 
-  @default_brokers_ssl [
-    kafka1: "localhost:19093",
-    kafka2: "localhost:29093",
-    kafka3: "localhost:39093"
-  ]
+  @default_brokers_ssl %{
+    2 => "localhost:19093",
+    3 => "localhost:29093",
+    4 => "localhost:39093"
+  }
 
   def get_versions_to_test() do
     version = 3
@@ -80,10 +80,10 @@ defmodule KlifeProtocol.TestSupport.Helpers do
     socket_backend = :ssl
     opts = [backend: socket_backend, active: false] ++ ssl_opts
 
-    Enum.each(@default_brokers_ssl, fn {broker, hostname} ->
+    Enum.each(@default_brokers_ssl, fn {broker_id, hostname} ->
       [host, port] = String.split(hostname, ":")
       result = Socket.connect(host, String.to_integer(port), opts)
-      write_to_shared(broker, {socket_backend, result})
+      write_to_shared(broker_id, {socket_backend, result})
     end)
   end
 
@@ -91,10 +91,10 @@ defmodule KlifeProtocol.TestSupport.Helpers do
     socket_backend = :gen_tcp
     opts = [backend: socket_backend, active: false]
 
-    Enum.each(@default_brokers, fn {broker, hostname} ->
+    Enum.each(@default_brokers, fn {broker_id, hostname} ->
       [host, port] = String.split(hostname, ":")
       result = Socket.connect(host, String.to_integer(port), opts)
-      write_to_shared(broker, {socket_backend, result})
+      write_to_shared(broker_id, {socket_backend, result})
     end)
   end
 
@@ -233,8 +233,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
     resp_content
     |> Map.get(:brokers)
     |> Enum.find(fn e -> e.broker_id == resp_content.controller_id end)
-    |> Map.get(:host)
-    |> String.to_atom()
+    |> Map.get(:broker_id)
   end
 
   def get_broker_for_topic_partition(topic, partition_index) do
@@ -244,9 +243,7 @@ defmodule KlifeProtocol.TestSupport.Helpers do
     %{leader_id: leader_id} =
       Enum.find(topic_data.partitions, &(&1.partition_index == partition_index))
 
-    %{host: host} = Enum.find(content.brokers, &(&1.node_id == leader_id))
-
-    String.to_existing_atom(host)
+    leader_id
   end
 
   def get_or_create_topic(topic_name, opts \\ []) do
