@@ -221,11 +221,11 @@ This section provides performance benchmarks for the main use cases of produce s
 The benchmarks were conducted on a personal computer with the following specifications, using only a single core. The operations were performed on messages containing a single record batch with 1, 10, 50 and 100 records to/from a single partition without compression.
 
 ```
-CPU: AMD Ryzen 7 5700U
-Elixir: 1.15.7-OTP-26
-Erlang: 26.1
-OS : Debian 12
-Kernel: 6.1.0-13-amd64 (64-bit)
+CPU: AMD Ryzen AI 9 HX 370
+Elixir: 1.19.0-OTP-28
+Erlang: 28.1
+OS : Kubuntu 25.04
+Kernel: 6.14.0-33-generic (64-bit)
 ```
 
 All benchmarks can be executed by running the benchmark mix task from the project's base folder:
@@ -241,19 +241,19 @@ bash stop-kafka.sh
 
 | REC QTY | REC SIZE | REC/S   | IPS    | AVG    | P50    | P99    | SD    | Mem. Usg |
 | ------- | -------- | ------- | ------ | ------ | ------ | ------ | ----- | -------- |
-| 1       | 500 kb   | 3.92 k  | 3.92 K | 254 μs | 252 μs | 300 μs | ±4.8% | 3 kb     |
-| 10      | 50 kb    | 37.6 k  | 3.76 K | 265 μs | 263 μs | 316 μs | ±4.4% | 12 kb    |
-| 50      | 10 kb    | 146.6 k | 2.93 K | 341 μs | 340 μs | 393 μs | ±4.6% | 52 kb    |
-| 100     | 5 kb     | 246.0 k | 2.46 K | 406 μs | 399 μs | 520 μs | ±7.5% | 94 kb    |
+| 1       | 500 kb   | 5.08 K  | 5.08 K | 197 μs | 194 μs | 224 μs | ±6.6% | 3 kb     |
+| 10      | 50 kb    | 48.9 k  | 4.89 K | 204 μs | 202 μs | 245 μs | ±6.5% | 12 kb    |
+| 50      | 10 kb    | 213.0 k | 4.26 K | 234 μs | 232 μs | 276 μs | ±6.6% | 52 kb    |
+| 100     | 5 kb     | 363.0 k | 3.63 K | 275 μs | 273 μs | 310 μs | ±9.2% | 94 kb    |
 
 ### Fetch Deserialization
 
 | REC QTY | REC SIZE | REC/S  | IPS    | AVG    | P50    | P99    | SD   | Mem. Usg |
 | ------- | -------- | ------ | ------ | ------ | ------ | ------ | ---- | -------- |
-| 1       | 500 kb   | 4.23 k | 4.23 k | 236 μs | 224 μs | 400 μs | ±14% | 22 kb    |
-| 10      | 50 kb    | 36.2 k | 3.62 k | 276 μs | 257 μs | 421 μs | ±17% | 69 kb    |
-| 50      | 10 kb    | 116 k  | 2.32 k | 430 μs | 419 μs | 558 μs | ±13% | 281 kb   |
-| 100     | 5 kb     | 170 k  | 1.70 k | 587 μs | 580 μs | 772 μs | ±13% | 545 kb   |
+| 1       | 500 kb   | 5.29 k | 5.29 k | 188 μs | 187 μs | 226 μs | ±3%  | 10 kb    |
+| 10      | 50 kb    | 51.8 k | 5.18 k | 193 μs | 192 μs | 207 μs | ±2%  | 26 kb    |
+| 50      | 10 kb    | 231 k  | 4.62 k | 216 μs | 208 μs | 325 μs | ±11% | 98 kb    |
+| 100     | 5 kb     | 387 k  | 3.87 k | 258 μs | 233 μs | 431 μs | ±18% | 188 kb   |
 
 ## Project Overview
 
