@@ -222,10 +222,10 @@ The benchmarks were conducted on a personal computer with the following specific
 
 ```
 CPU: AMD Ryzen AI 9 HX 370
-Elixir: 1.19.0-OTP-28
-Erlang: 28.1
-OS : Kubuntu 25.04
-Kernel: 6.14.0-33-generic (64-bit)
+Elixir: 1.19.4-OTP-28
+Erlang: 28.3
+OS : Fedora 44
+Kernel: 7.0.12 (64-bit)
 ```
 
 All benchmarks can be executed by running the benchmark mix task from the project's base folder:
@@ -239,21 +239,21 @@ bash stop-kafka.sh
 
 ### Produce Serialization
 
-| REC QTY | REC SIZE | REC/S   | IPS    | AVG    | P50    | P99    | SD    | Mem. Usg |
-| ------- | -------- | ------- | ------ | ------ | ------ | ------ | ----- | -------- |
-| 1       | 500 kb   | 5.08 K  | 5.08 K | 197 μs | 194 μs | 224 μs | ±6.6% | 3 kb     |
-| 10      | 50 kb    | 48.9 k  | 4.89 K | 204 μs | 202 μs | 245 μs | ±6.5% | 12 kb    |
-| 50      | 10 kb    | 213.0 k | 4.26 K | 234 μs | 232 μs | 276 μs | ±6.6% | 52 kb    |
-| 100     | 5 kb     | 363.0 k | 3.63 K | 275 μs | 273 μs | 310 μs | ±9.2% | 94 kb    |
+| REC QTY | REC SIZE | REC/S   | IPS     | AVG   | P50   | P99    | SD     | Mem. Usg |
+| ------- | -------- | ------- | ------- | ----- | ----- | ------ | ------ | -------- |
+| 1       | 500 kb   | 44.8 k  | 44.87 K | 22 μs | 22 μs | 28 μs  | ±49.9% | 3 kb     |
+| 10      | 50 kb    | 390.0 k | 39.00 K | 26 μs | 25 μs | 31 μs  | ±36.7% | 10 kb    |
+| 50      | 10 kb    | 1.24 m  | 24.96 K | 40 μs | 39 μs | 49 μs  | ±13.1% | 42 kb    |
+| 100     | 5 kb     | 1.57 m  | 15.70 K | 64 μs | 59 μs | 170 μs | ±33.8% | 83 kb    |
 
 ### Fetch Deserialization
 
-| REC QTY | REC SIZE | REC/S  | IPS    | AVG    | P50    | P99    | SD   | Mem. Usg |
-| ------- | -------- | ------ | ------ | ------ | ------ | ------ | ---- | -------- |
-| 1       | 500 kb   | 5.29 k | 5.29 k | 188 μs | 187 μs | 226 μs | ±3%  | 10 kb    |
-| 10      | 50 kb    | 51.8 k | 5.18 k | 193 μs | 192 μs | 207 μs | ±2%  | 26 kb    |
-| 50      | 10 kb    | 231 k  | 4.62 k | 216 μs | 208 μs | 325 μs | ±11% | 98 kb    |
-| 100     | 5 kb     | 387 k  | 3.87 k | 258 μs | 233 μs | 431 μs | ±18% | 188 kb   |
+| REC QTY | REC SIZE | REC/S   | IPS     | AVG   | P50   | P99    | SD      | Mem. Usg |
+| ------- | -------- | ------- | ------- | ----- | ----- | ------ | ------- | -------- |
+| 1       | 500 kb   | 47.1 k  | 47.19 k | 21 μs | 15 μs | 52 μs  | ±390.3% | 8 kb     |
+| 10      | 50 kb    | 395.3 k | 39.53 k | 25 μs | 25 μs | 31 μs  | ±44.4%  | 22 kb    |
+| 50      | 10 kb    | 1.36 m  | 27.38 k | 37 μs | 35 μs | 76 μs  | ±36.9%  | 80 kb    |
+| 100     | 5 kb     | 1.71 m  | 17.11 k | 58 μs | 48 μs | 236 μs | ±112.4% | 154 kb   |
 
 ## Project Overview
 
@@ -288,6 +288,10 @@ bash run-kafka.sh ${KAFKA_VERSION}
 CONN_MODE=SSL mix test
 bash stop-kafka.sh ${KAFKA_VERSION}
 ```
+
+## Requirements
+
+The CRC32c required by the record batch format is computed with the [crc32cer](https://github.com/kafka4beam/crc32cer) NIF, which uses hardware accelerated CRC instructions (SSE 4.2 / ARMv8 CRC) when available. Note that building `crc32cer >= 1.1` requires `cmake` and a C++ toolchain to be available on the machine compiling the dependency.
 
 ## Generating messages for a new kafka version
 

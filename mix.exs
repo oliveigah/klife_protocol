@@ -53,7 +53,7 @@ defmodule KlifeProtocol.MixProject do
   defp deps do
     [
       # CRC
-      {:crc32cer, "~> 0.1.11"},
+      {:crc32cer, "~> 1.1"},
       # Compression
       {:snappyer, "~> 1.2.10"},
       # Code generation

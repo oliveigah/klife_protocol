@@ -74,21 +74,18 @@ defmodule KlifeProtocol.RecordBatch do
   @for_crc_serialization_no_compression_schema @records_metadata_schema ++ @records_schema
 
   def serialize(input) do
+    # The serializer only reads the fields present on the schema, so the input
+    # map can be used directly without building intermediate maps.
+    #
+    # The crc region is flattened into a single binary before the crc call
+    # because the nif flattens iolists internally anyway, this way the copy
+    # happens only once and the resulting binary is reused on the output.
     for_crc_serialized =
       case Bitwise.band(input.attributes, 7) do
         0 ->
-          for_crc_input = %{
-            attributes: input.attributes,
-            last_offset_delta: input.last_offset_delta,
-            base_timestamp: input.base_timestamp,
-            max_timestamp: input.max_timestamp,
-            producer_id: input.producer_id,
-            producer_epoch: input.producer_epoch,
-            base_sequence: input.base_sequence,
-            records: input.records
-          }
-
-          Serializer.execute(for_crc_input, @for_crc_serialization_no_compression_schema)
+          input
+          |> Serializer.execute(@for_crc_serialization_no_compression_schema)
+          |> :erlang.iolist_to_binary()
 
         other ->
           serialized_records =
@@ -96,20 +93,10 @@ defmodule KlifeProtocol.RecordBatch do
             |> Serializer.execute(@records_schema)
             |> compress(other)
 
-          records_metadata_input = %{
-            attributes: input.attributes,
-            last_offset_delta: input.last_offset_delta,
-            base_timestamp: input.base_timestamp,
-            max_timestamp: input.max_timestamp,
-            producer_id: input.producer_id,
-            producer_epoch: input.producer_epoch,
-            base_sequence: input.base_sequence
-          }
-
           serialized_records_metadata =
-            Serializer.execute(records_metadata_input, @records_metadata_schema)
+            Serializer.execute(input, @records_metadata_schema)
 
-          [serialized_records_metadata, serialized_records]
+          :erlang.iolist_to_binary([serialized_records_metadata, serialized_records])
       end
 
     crc = :crc32cer.nif(for_crc_serialized)
@@ -122,8 +109,7 @@ defmodule KlifeProtocol.RecordBatch do
 
     serialized_rest = Serializer.execute(rest_input, @rest_schema)
 
-    for_length_serialized = [serialized_rest, for_crc_serialized]
-    batch_length = :erlang.iolist_size(for_length_serialized)
+    batch_length = :erlang.iolist_size(serialized_rest) + byte_size(for_crc_serialized)
 
     base_input = %{
       base_offset: input.base_offset,
@@ -132,7 +118,7 @@ defmodule KlifeProtocol.RecordBatch do
 
     serialized_base = Serializer.execute(base_input, @base_batch_schema)
 
-    [serialized_base, for_length_serialized]
+    [serialized_base, serialized_rest, for_crc_serialized]
   end
 
   def deserialize(<<input::binary>>) do
