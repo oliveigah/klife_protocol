@@ -328,7 +328,30 @@ defmodule KlifeProtocol.SerializerTest do
          ]}
     ]
 
-    assert <<2, 0, 5, 4, "aaa", 2, 3, 123::16-signed>> =
+    assert <<2, 0, 4, 4, "aaa", 2, 2, 123::16-signed>> =
+             Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
+  end
+
+  @tag core: true
+  test "tag_buffer - tagged struct field has no presence byte" do
+    input = %{current_leader: %{leader_id: 4, leader_epoch: 10}}
+
+    schema = [
+      tag_buffer:
+        {:tag_buffer,
+         [
+           current_leader:
+             {{1,
+               {:object,
+                [
+                  leader_id: {:int32, @default_metadata},
+                  leader_epoch: {:int32, @default_metadata},
+                  tag_buffer: {:tag_buffer, []}
+                ]}}, @default_metadata}
+         ]}
+    ]
+
+    assert <<1, 1, 9, 4::32-signed, 10::32-signed, 0>> =
              Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end
 

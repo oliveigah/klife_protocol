@@ -2802,4 +2802,31 @@ defmodule Messages.FetchTest do
              }
            ] = records_3
   end
+
+  @tag core: true
+  test "deserialize response v17 - NOT_LEADER error with KIP-951 tagged fields" do
+    # Captured from a real Kafka 4.1.1 broker by fetching a partition from a
+    # broker that is not a replica of it. The partition carries the
+    # current_leader tagged field and the response carries node_endpoints.
+    raw =
+      Base.decode64!(
+        "AAAASwAAAAAAAAAVu/qYAmaO56FIm0sSv5XdaNgwLqICAAAABgAG////////////////////////////////AP////8BAQEJAAAABAAAAAoAAAEAFQIAAAAECmxvY2FsaG9zdAAAmLYAAA=="
+      )
+
+    assert {:ok, %{headers: headers, content: content}} = Fetch.deserialize_response(raw, 17)
+
+    assert %{correlation_id: 75} = headers
+
+    assert [
+             %{
+               topic_id: "668ee7a1-489b-4b12-bf95-dd68d8302ea2",
+               partitions: [partition_resp]
+             }
+           ] = content.responses
+
+    assert partition_resp.error_code == 6
+    assert partition_resp.current_leader == %{leader_id: 4, leader_epoch: 10}
+
+    assert [%{node_id: 4, host: "localhost", port: 39094, rack: nil}] = content.node_endpoints
+  end
 end

@@ -223,15 +223,26 @@ defmodule KlifeProtocol.Deserializer do
   defp deserialize_tag_buffer(rest_data, 0, _tagged_fields, result),
     do: {result, rest_data}
 
+  # Tagged fields are encoded as (tag, size, payload) where size is the exact
+  # byte size of the payload, so unknown tags are skipped by dropping size
+  # bytes (KIP-482). Tagged structs are encoded as their raw fields, without
+  # the presence byte used by nullable struct fields elsewhere, since the tag
+  # itself already conveys presence.
   defp deserialize_tag_buffer(data, len, tagged_fields, result) do
     {field_tag, rest_binary} = deserialize_unsigned_varint(data)
     {field_len, rest_binary} = deserialize_unsigned_varint(rest_binary)
-    field_len = field_len - 1
 
     case Map.get(tagged_fields, field_tag) do
       nil ->
         <<_::field_len*8, rest_binary::binary>> = rest_binary
         deserialize_tag_buffer(rest_binary, len - 1, tagged_fields, result)
+
+      {{field_name, {:object, schema}}, %{is_nullable?: false}} ->
+        {field_value, rest_binary} = do_deserialize(schema, rest_binary, [])
+
+        deserialize_tag_buffer(rest_binary, len - 1, tagged_fields, [
+          {field_name, field_value} | result
+        ])
 
       {{field_name, field_schema}, _} ->
         {field_value, rest_binary} = do_deserialize_value(field_schema, rest_binary)

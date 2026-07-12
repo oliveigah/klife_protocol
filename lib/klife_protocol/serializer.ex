@@ -189,6 +189,8 @@ defmodule KlifeProtocol.Serializer do
 
   defp serialize_tag_buffer([], _input_map, acc_data), do: acc_data
 
+  # Tagged fields are encoded as (tag, size, payload) where size is the exact
+  # byte size of the payload (KIP-482).
   defp serialize_tag_buffer(
          [{key, {{tag, type}, metadata}} | rest_schema],
          %{} = input_map,
@@ -196,14 +198,24 @@ defmodule KlifeProtocol.Serializer do
        ) do
     raw_value = Map.fetch!(input_map, key)
 
-    value = serialize_value(raw_value, key, {type, metadata})
-    size = do_serialize_value(:erlang.iolist_size(value) + 1, :unsigned_varint)
+    value = serialize_tagged_value(raw_value, key, {type, metadata})
+    size = do_serialize_value(:erlang.iolist_size(value), :unsigned_varint)
     tag = do_serialize_value(tag, :unsigned_varint)
 
     final_val = [tag, size, value]
 
     serialize_tag_buffer(rest_schema, input_map, [acc_data, final_val])
   end
+
+  # Tagged structs are encoded as their raw fields, without the presence byte
+  # used by nullable struct fields elsewhere, since the tag itself already
+  # conveys presence.
+  defp serialize_tagged_value(val, _key, {{:object, schema}, %{is_nullable?: false}})
+       when val != nil,
+       do: do_serialize(schema, val, [])
+
+  defp serialize_tagged_value(val, key, {type, metadata}),
+    do: serialize_value(val, key, {type, metadata})
 
   defp serialize_records(_schema, [], acc_data), do: acc_data
 

@@ -331,7 +331,7 @@ defmodule KlifeProtocol.DeserializerTest do
 
   @tag core: true
   test "tag_buffer" do
-    input = <<3, 0, 5, 4, "aaa", 2, 3, 123::16-signed, 3, 12, 11, "unkown tag">>
+    input = <<3, 0, 4, 4, "aaa", 2, 2, 123::16-signed, 3, 11, 11, "unkown tag">>
 
     schema = [
       tag_buffer:
@@ -346,6 +346,45 @@ defmodule KlifeProtocol.DeserializerTest do
     assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
 
     assert %{a: "aaa", c: 123} = response
+  end
+
+  @tag core: true
+  test "tag_buffer - skips unknown tagged field before a known one" do
+    # tag 5 is not declared on the schema and must be skipped by its
+    # exact size (KIP-482), realigning the parser for the known tag 1
+    input = <<2, 5, 3, "xyz", 1, 2, 123::16-signed>>
+
+    schema = [
+      tag_buffer: {:tag_buffer, %{1 => {{:b, :int16}, @default_metadata}}}
+    ]
+
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
+
+    assert %{b: 123} == response
+  end
+
+  @tag core: true
+  test "tag_buffer - tagged struct field has no presence byte" do
+    input = <<1, 1, 9, 4::32-signed, 10::32-signed, 0>>
+
+    schema = [
+      tag_buffer:
+        {:tag_buffer,
+         %{
+           1 =>
+             {{:current_leader,
+               {:object,
+                [
+                  leader_id: {:int32, @default_metadata},
+                  leader_epoch: {:int32, @default_metadata},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}}, @default_metadata}
+         }}
+    ]
+
+    assert {:ok, {response, <<>>}} = Deserializer.execute(input, schema)
+
+    assert %{current_leader: %{leader_id: 4, leader_epoch: 10}} == response
   end
 
   @tag core: true
