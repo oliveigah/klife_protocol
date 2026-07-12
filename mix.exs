@@ -4,7 +4,7 @@ defmodule KlifeProtocol.MixProject do
   def project do
     [
       app: :klife_protocol,
-      version: "1.0.0",
+      version: "1.0.1",
       elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
