@@ -17,6 +17,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   - Version 8 is the first flexible version.
   - Version 9 is the first version that can be used with the new consumer group protocol (KIP-848). The
   request is the same as version 8.
+  - Version 10 adds support for topic ids and removes support for topic names (KIP-848).
 
   Response versions summary:
   - Versions 0-1 were removed in Apache Kafka 4.0, Version 2 is the new baseline.
@@ -29,6 +30,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   - Version 9 is the first version that can be used with the new consumer group protocol (KIP-848). The response is
   the same as version 8 but can return STALE_MEMBER_EPOCH when the new consumer group protocol is used and
   GROUP_ID_NOT_FOUND when the group does not exist for both protocols.
+  - Version 10 adds support for topic ids and removes support for topic names (KIP-848).
 
   """
 
@@ -50,7 +52,8 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   - group_instance_id: The unique identifier of the consumer instance provided by end user. (string | versions 7+)
   - retention_time_ms: The time period in ms to retain the offset. (int64 | versions 2-4)
   - topics: The topics to commit offsets for. ([]OffsetCommitRequestTopic | versions 0+)
-      - name: The topic name. (string | versions 0+)
+      - name: The topic name. (string | versions 0-9)
+      - topic_id: The topic ID. (uuid | versions 10+)
       - partitions: Each partition to commit offsets for. ([]OffsetCommitRequestPartition | versions 0+)
           - partition_index: The partition index. (int32 | versions 0+)
           - committed_offset: The message offset to be committed. (int64 | versions 0+)
@@ -73,7 +76,8 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 3+)
   - topics: The responses for each topic. ([]OffsetCommitResponseTopic | versions 0+)
-      - name: The topic name. (string | versions 0+)
+      - name: The topic name. (string | versions 0-9)
+      - topic_id: The topic ID. (uuid | versions 10+)
       - partitions: The responses for each partition in the topic. ([]OffsetCommitResponsePartition | versions 0+)
           - partition_index: The partition index. (int32 | versions 0+)
           - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
@@ -111,7 +115,7 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 9
+  def max_supported_version(), do: 10
 
   @doc """
   Returns the current min supported version of this message.
@@ -329,6 +333,30 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  def request_schema(10),
+    do: [
+      group_id: {:compact_string, %{is_nullable?: false}},
+      generation_id_or_member_epoch: {:int32, %{is_nullable?: false}},
+      member_id: {:compact_string, %{is_nullable?: false}},
+      group_instance_id: {:compact_string, %{is_nullable?: true}},
+      topics:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  committed_offset: {:int64, %{is_nullable?: false}},
+                  committed_leader_epoch: {:int32, %{is_nullable?: false}},
+                  committed_metadata: {:compact_string, %{is_nullable?: true}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message OffsetCommit")
 
@@ -483,6 +511,25 @@ defmodule KlifeProtocol.Messages.OffsetCommit do
         {{:compact_array,
           [
             name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(10),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
             partitions:
               {{:compact_array,
                 [

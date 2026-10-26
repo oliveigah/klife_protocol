@@ -19,6 +19,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
   - Version 8 enables listing offsets by local log start offset (KIP-405).
   - Version 9 enables listing offsets by last tiered offset (KIP-1005).
   - Version 10 enables async remote list offsets support (KIP-1075)
+  - Version 11 enables listing offsets by earliest pending upload offset (KIP-1023)
 
   Response versions summary:
   - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
@@ -34,6 +35,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
   This is the earliest log start offset in the local log. (KIP-405).
   - Version 9 enables listing offsets by last tiered offset (KIP-1005).
   - Version 10 enables async remote list offsets support (KIP-1075)
+  - Version 11 enables listing offsets by earliest pending upload offset (KIP-1023)
 
   """
 
@@ -116,7 +118,7 @@ defmodule KlifeProtocol.Messages.ListOffsets do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 10
+  def max_supported_version(), do: 11
 
   @doc """
   Returns the current min supported version of this message.
@@ -338,6 +340,28 @@ defmodule KlifeProtocol.Messages.ListOffsets do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  def request_schema(11),
+    do: [
+      replica_id: {:int32, %{is_nullable?: false}},
+      isolation_level: {:int8, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  current_leader_epoch: {:int32, %{is_nullable?: false}},
+                  timestamp: {:int64, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      timeout_ms: {:int32, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message ListOffsets")
 
@@ -537,6 +561,28 @@ defmodule KlifeProtocol.Messages.ListOffsets do
     ]
 
   def response_schema(10),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  timestamp: {:int64, %{is_nullable?: false}},
+                  offset: {:int64, %{is_nullable?: false}},
+                  leader_epoch: {:int32, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(11),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       topics:

@@ -64,8 +64,8 @@ defmodule KlifeProtocol.Messages.DescribeLogDirs do
               - partition_size: The size of the log segments in this partition in bytes. (int64 | versions 0+)
               - offset_lag: The lag of the log's LEO w.r.t. partition's HW (if it is the current log for the partition) or current replica's LEO (if it is the future log for the partition). (int64 | versions 0+)
               - is_future_key: True if this log is created by AlterReplicaLogDirsRequest and will replace the current log of the replica in the future. (bool | versions 0+)
-      - total_bytes: The total size in bytes of the volume the log directory is in. (int64 | versions 4+)
-      - usable_bytes: The usable size in bytes of the volume the log directory is in. (int64 | versions 4+)
+      - total_bytes: The total size in bytes of the volume the log directory is in. This value does not include the size of data stored in remote storage. (int64 | versions 4+)
+      - usable_bytes: The usable size in bytes of the volume the log directory is in. This value does not include the size of data stored in remote storage. (int64 | versions 4+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)

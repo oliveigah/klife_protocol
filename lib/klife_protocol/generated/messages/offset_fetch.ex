@@ -19,6 +19,7 @@ defmodule KlifeProtocol.Messages.OffsetFetch do
   - Version 8 is adding support for fetching offsets for multiple groups at a time.
   - Version 9 is the first version that can be used with the new consumer group protocol (KIP-848). It adds
   the MemberId and MemberEpoch fields. Those are filled in and validated when the new consumer protocol is used.
+  - Version 10 adds support for topic ids and removes support for topic names (KIP-848).
 
   Response versions summary:
   - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
@@ -33,6 +34,7 @@ defmodule KlifeProtocol.Messages.OffsetFetch do
   - Version 9 is the first version that can be used with the new consumer group protocol (KIP-848). The response is
   the same as version 8 but can return STALE_MEMBER_EPOCH and UNKNOWN_MEMBER_ID errors when the new consumer group
   protocol is used.
+  - Version 10 adds support for topic ids and removes support for topic names (KIP-848).
 
   """
 
@@ -57,7 +59,8 @@ defmodule KlifeProtocol.Messages.OffsetFetch do
       - member_id: The member id. (string | versions 9+)
       - member_epoch: The member epoch if using the new consumer protocol (KIP-848). (int32 | versions 9+)
       - topics: Each topic we would like to fetch offsets for, or null to fetch offsets for all topics. ([]OffsetFetchRequestTopics | versions 8+)
-          - name: The topic name. (string | versions 8+)
+          - name: The topic name. (string | versions 8-9)
+          - topic_id: The topic ID. (uuid | versions 10+)
           - partition_indexes: The partition indexes we would like to fetch offsets for. ([]int32 | versions 8+)
   - require_stable: Whether broker should hold on returning unstable offsets but set a retriable error code for the partitions. (bool | versions 7+)
 
@@ -88,7 +91,8 @@ defmodule KlifeProtocol.Messages.OffsetFetch do
   - groups: The responses per group id. ([]OffsetFetchResponseGroup | versions 8+)
       - group_id: The group ID. (string | versions 8+)
       - topics: The responses per topic. ([]OffsetFetchResponseTopics | versions 8+)
-          - name: The topic name. (string | versions 8+)
+          - name: The topic name. (string | versions 8-9)
+          - topic_id: The topic ID. (uuid | versions 10+)
           - partitions: The responses per partition. ([]OffsetFetchResponsePartitions | versions 8+)
               - partition_index: The partition index. (int32 | versions 8+)
               - committed_offset: The committed message offset. (int64 | versions 8+)
@@ -130,7 +134,7 @@ defmodule KlifeProtocol.Messages.OffsetFetch do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 9
+  def max_supported_version(), do: 10
 
   @doc """
   Returns the current min supported version of this message.
@@ -267,6 +271,27 @@ defmodule KlifeProtocol.Messages.OffsetFetch do
               {{:compact_array,
                 [
                   name: {:compact_string, %{is_nullable?: false}},
+                  partition_indexes: {{:compact_array, :int32}, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: true}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      require_stable: {:boolean, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  def request_schema(10),
+    do: [
+      groups:
+        {{:compact_array,
+          [
+            group_id: {:compact_string, %{is_nullable?: false}},
+            member_id: {:compact_string, %{is_nullable?: true}},
+            member_epoch: {:int32, %{is_nullable?: false}},
+            topics:
+              {{:compact_array,
+                [
+                  topic_id: {:uuid, %{is_nullable?: false}},
                   partition_indexes: {{:compact_array, :int32}, %{is_nullable?: false}},
                   tag_buffer: {:tag_buffer, []}
                 ]}, %{is_nullable?: true}},
@@ -475,6 +500,35 @@ defmodule KlifeProtocol.Messages.OffsetFetch do
               {{:compact_array,
                 [
                   name: {:compact_string, %{is_nullable?: false}},
+                  partitions:
+                    {{:compact_array,
+                      [
+                        partition_index: {:int32, %{is_nullable?: false}},
+                        committed_offset: {:int64, %{is_nullable?: false}},
+                        committed_leader_epoch: {:int32, %{is_nullable?: false}},
+                        metadata: {:compact_string, %{is_nullable?: true}},
+                        error_code: {:int16, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, %{}}
+                      ]}, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            error_code: {:int16, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(10),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      groups:
+        {{:compact_array,
+          [
+            group_id: {:compact_string, %{is_nullable?: false}},
+            topics:
+              {{:compact_array,
+                [
+                  topic_id: {:uuid, %{is_nullable?: false}},
                   partitions:
                     {{:compact_array,
                       [

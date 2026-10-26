@@ -7,8 +7,14 @@ defmodule KlifeProtocol.Messages.ShareFetch do
   Kafka protocol ShareFetch message
 
   Request versions summary:
+  - Version 0 was used for early access of KIP-932 in Apache Kafka 4.0 but removed in Apache Kafka 4.1.
+  - Version 1 is the initial stable version (KIP-932).
+  - Version 2 introduces ShareAcquireMode and Renew acknowledgements (KIP-1206 and KIP-1222).
 
   Response versions summary:
+  - Version 0 was used for early access of KIP-932 in Apache Kafka 4.0 but removed in Apache Kafka 4.1.
+  - Version 1 is the initial stable version (KIP-932).
+  - Version 2 introduces ShareAcquireMode and Renew acknowledgements (KIP-1206 and KIP-1222).
 
   """
 
@@ -29,16 +35,20 @@ defmodule KlifeProtocol.Messages.ShareFetch do
   - share_session_epoch: The current share session epoch: 0 to open a share session; -1 to close it; otherwise increments for consecutive requests. (int32 | versions 0+)
   - max_wait_ms: The maximum time in milliseconds to wait for the response. (int32 | versions 0+)
   - min_bytes: The minimum bytes to accumulate in the response. (int32 | versions 0+)
-  - max_bytes: The maximum bytes to fetch.  See KIP-74 for cases where this limit may not be honored. (int32 | versions 0+)
+  - max_bytes: The maximum bytes to fetch. See KIP-74 for cases where this limit may not be honored. (int32 | versions 0+)
+  - max_records: The maximum number of records to fetch. This limit can be exceeded for alignment of batch boundaries. (int32 | versions 1+)
+  - batch_size: The optimal number of records for batches of acquired records and acknowledgements. (int32 | versions 1+)
+  - share_acquire_mode: The acquire mode to control the fetch behavior - 0:batch-optimized,1:record-limit. (int8 | versions 2+)
+  - is_renew_ack: Whether Renew type acknowledgements present in AcknowledgementBatches. (bool | versions 2+)
   - topics: The topics to fetch. ([]FetchTopic | versions 0+)
       - topic_id: The unique topic ID. (uuid | versions 0+)
       - partitions: The partitions to fetch. ([]FetchPartition | versions 0+)
           - partition_index: The partition index. (int32 | versions 0+)
-          - partition_max_bytes: The maximum bytes to fetch from this partition. 0 when only acknowledgement with no fetching is required. See KIP-74 for cases where this limit may not be honored. (int32 | versions 0+)
+          - partition_max_bytes: The maximum bytes to fetch from this partition. 0 when only acknowledgement with no fetching is required. See KIP-74 for cases where this limit may not be honored. (int32 | versions 0)
           - acknowledgement_batches: Record batches to acknowledge. ([]AcknowledgementBatch | versions 0+)
               - first_offset: First offset of batch of records to acknowledge. (int64 | versions 0+)
               - last_offset: Last offset (inclusive) of batch of records to acknowledge. (int64 | versions 0+)
-              - acknowledge_types: Array of acknowledge types - 0:Gap,1:Accept,2:Release,3:Reject. ([]int8 | versions 0+)
+              - acknowledge_types: Array of acknowledge types - 0:Gap,1:Accept,2:Release,3:Reject,4:Renew. ([]int8 | versions 0+)
   - forgotten_topics_data: The partitions to remove from this share session. ([]ForgottenTopic | versions 0+)
       - topic_id: The unique topic ID. (uuid | versions 0+)
       - partitions: The partitions indexes to forget. ([]int32 | versions 0+)
@@ -60,6 +70,7 @@ defmodule KlifeProtocol.Messages.ShareFetch do
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - error_code: The top-level response error code. (int16 | versions 0+)
   - error_message: The top-level error message, or null if there was no error. (string | versions 0+)
+  - acquisition_lock_timeout_ms: The time in milliseconds for which the acquired records are locked. (int32 | versions 1+)
   - responses: The response topics. ([]ShareFetchableTopicResponse | versions 0+)
       - topic_id: The unique topic ID. (uuid | versions 0+)
       - partitions: The topic partitions. ([]PartitionData | versions 0+)
@@ -115,7 +126,7 @@ defmodule KlifeProtocol.Messages.ShareFetch do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 0
+  def max_supported_version(), do: 2
 
   @doc """
   Returns the current min supported version of this message.
@@ -167,6 +178,88 @@ defmodule KlifeProtocol.Messages.ShareFetch do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  def request_schema(1),
+    do: [
+      group_id: {:compact_string, %{is_nullable?: true}},
+      member_id: {:compact_string, %{is_nullable?: true}},
+      share_session_epoch: {:int32, %{is_nullable?: false}},
+      max_wait_ms: {:int32, %{is_nullable?: false}},
+      min_bytes: {:int32, %{is_nullable?: false}},
+      max_bytes: {:int32, %{is_nullable?: false}},
+      max_records: {:int32, %{is_nullable?: false}},
+      batch_size: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  acknowledgement_batches:
+                    {{:compact_array,
+                      [
+                        first_offset: {:int64, %{is_nullable?: false}},
+                        last_offset: {:int64, %{is_nullable?: false}},
+                        acknowledge_types: {{:compact_array, :int8}, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, []}
+                      ]}, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      forgotten_topics_data:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions: {{:compact_array, :int32}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  def request_schema(2),
+    do: [
+      group_id: {:compact_string, %{is_nullable?: true}},
+      member_id: {:compact_string, %{is_nullable?: true}},
+      share_session_epoch: {:int32, %{is_nullable?: false}},
+      max_wait_ms: {:int32, %{is_nullable?: false}},
+      min_bytes: {:int32, %{is_nullable?: false}},
+      max_bytes: {:int32, %{is_nullable?: false}},
+      max_records: {:int32, %{is_nullable?: false}},
+      batch_size: {:int32, %{is_nullable?: false}},
+      share_acquire_mode: {:int8, %{is_nullable?: false}},
+      is_renew_ack: {:boolean, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  acknowledgement_batches:
+                    {{:compact_array,
+                      [
+                        first_offset: {:int64, %{is_nullable?: false}},
+                        last_offset: {:int64, %{is_nullable?: false}},
+                        acknowledge_types: {{:compact_array, :int8}, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, []}
+                      ]}, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      forgotten_topics_data:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions: {{:compact_array, :int32}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message ShareFetch")
 
@@ -195,6 +288,106 @@ defmodule KlifeProtocol.Messages.ShareFetch do
                         tag_buffer: {:tag_buffer, %{}}
                       ]}, %{is_nullable?: false}},
                   records: {:compact_record_batch, %{is_nullable?: true}},
+                  acquired_records:
+                    {{:compact_array,
+                      [
+                        first_offset: {:int64, %{is_nullable?: false}},
+                        last_offset: {:int64, %{is_nullable?: false}},
+                        delivery_count: {:int16, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, %{}}
+                      ]}, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      node_endpoints:
+        {{:compact_array,
+          [
+            node_id: {:int32, %{is_nullable?: false}},
+            host: {:compact_string, %{is_nullable?: false}},
+            port: {:int32, %{is_nullable?: false}},
+            rack: {:compact_string, %{is_nullable?: true}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(1),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      error_message: {:compact_string, %{is_nullable?: true}},
+      acquisition_lock_timeout_ms: {:int32, %{is_nullable?: false}},
+      responses:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  error_message: {:compact_string, %{is_nullable?: true}},
+                  acknowledge_error_code: {:int16, %{is_nullable?: false}},
+                  acknowledge_error_message: {:compact_string, %{is_nullable?: true}},
+                  current_leader:
+                    {{:object,
+                      [
+                        leader_id: {:int32, %{is_nullable?: false}},
+                        leader_epoch: {:int32, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, %{}}
+                      ]}, %{is_nullable?: false}},
+                  records: {:compact_record_batch, %{is_nullable?: false}},
+                  acquired_records:
+                    {{:compact_array,
+                      [
+                        first_offset: {:int64, %{is_nullable?: false}},
+                        last_offset: {:int64, %{is_nullable?: false}},
+                        delivery_count: {:int16, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, %{}}
+                      ]}, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      node_endpoints:
+        {{:compact_array,
+          [
+            node_id: {:int32, %{is_nullable?: false}},
+            host: {:compact_string, %{is_nullable?: false}},
+            port: {:int32, %{is_nullable?: false}},
+            rack: {:compact_string, %{is_nullable?: true}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(2),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      error_message: {:compact_string, %{is_nullable?: true}},
+      acquisition_lock_timeout_ms: {:int32, %{is_nullable?: false}},
+      responses:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  error_message: {:compact_string, %{is_nullable?: true}},
+                  acknowledge_error_code: {:int16, %{is_nullable?: false}},
+                  acknowledge_error_message: {:compact_string, %{is_nullable?: true}},
+                  current_leader:
+                    {{:object,
+                      [
+                        leader_id: {:int32, %{is_nullable?: false}},
+                        leader_epoch: {:int32, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, %{}}
+                      ]}, %{is_nullable?: false}},
+                  records: {:compact_record_batch, %{is_nullable?: false}},
                   acquired_records:
                     {{:compact_array,
                       [

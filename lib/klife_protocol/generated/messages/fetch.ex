@@ -14,7 +14,7 @@ defmodule KlifeProtocol.Messages.Fetch do
   Version 3 adds MaxBytes.  Starting in version 3, the partition ordering in
   the request is now relevant.  Partitions will be processed in the order
   they appear in the request.
-  - Version 4 adds IsolationLevel.  Starting in version 4, the reqestor must be
+  - Version 4 adds IsolationLevel.  Starting in version 4, the requestor must be
   able to handle Kafka log message format version 2.
   - Version 5 adds LogStartOffset to indicate the earliest available offset of
   partition data that can be consumed.
@@ -32,6 +32,7 @@ defmodule KlifeProtocol.Messages.Fetch do
   deprecate the old ReplicaId field and set its default value to -1. (KIP-903)
   - Version 16 is the same as version 15 (KIP-951).
   - Version 17 adds directory id support from KIP-853
+  - Version 18 adds high-watermark from KIP-1166
 
   Response versions summary:
   - Versions 0-3 were removed in Apache Kafka 4.0, Version 4 is the new baseline.
@@ -52,6 +53,7 @@ defmodule KlifeProtocol.Messages.Fetch do
   - Version 15 is the same as version 14 (KIP-903).
   - Version 16 adds the 'NodeEndpoints' field (KIP-951).
   - Version 17 no changes to the response (KIP-853).
+  - Version 18 no changes to the response (KIP-1166)
 
   """
 
@@ -89,6 +91,7 @@ defmodule KlifeProtocol.Messages.Fetch do
           - log_start_offset: The earliest available offset of the follower replica.  The field is only used when the request is sent by the follower. (int64 | versions 5+)
           - partition_max_bytes: The maximum bytes to fetch from this partition.  See KIP-74 for cases where this limit may not be honored. (int32 | versions 0+)
           - replica_directory_id: The directory id of the follower fetching. (uuid | versions 17+)
+          - high_watermark: The high-watermark known by the replica. -1 if the high-watermark is not known and 9223372036854775807 if the feature is not supported. (int64 | versions 18+)
   - forgotten_topics_data: In an incremental fetch request, the partitions to remove. ([]ForgottenTopic | versions 7+)
       - topic: The topic name. (string | versions 7-12)
       - topic_id: The unique topic ID. (uuid | versions 13+)
@@ -174,7 +177,7 @@ defmodule KlifeProtocol.Messages.Fetch do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 17
+  def max_supported_version(), do: 18
 
   @doc """
   Returns the current min supported version of this message.
@@ -636,6 +639,59 @@ defmodule KlifeProtocol.Messages.Fetch do
                   partition_max_bytes: {:int32, %{is_nullable?: false}},
                   tag_buffer:
                     {:tag_buffer, [replica_directory_id: {{0, :uuid}, %{is_nullable?: false}}]}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      forgotten_topics_data:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions: {{:compact_array, :int32}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      rack_id: {:compact_string, %{is_nullable?: false}},
+      tag_buffer:
+        {:tag_buffer,
+         [
+           cluster_id: {{0, :compact_string}, %{is_nullable?: true}},
+           replica_state:
+             {{1,
+               {:object,
+                [
+                  replica_id: {:int32, %{is_nullable?: false}},
+                  replica_epoch: {:int64, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}}, %{is_nullable?: false}}
+         ]}
+    ]
+
+  def request_schema(18),
+    do: [
+      max_wait_ms: {:int32, %{is_nullable?: false}},
+      min_bytes: {:int32, %{is_nullable?: false}},
+      max_bytes: {:int32, %{is_nullable?: false}},
+      isolation_level: {:int8, %{is_nullable?: false}},
+      session_id: {:int32, %{is_nullable?: false}},
+      session_epoch: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition: {:int32, %{is_nullable?: false}},
+                  current_leader_epoch: {:int32, %{is_nullable?: false}},
+                  fetch_offset: {:int64, %{is_nullable?: false}},
+                  last_fetched_epoch: {:int32, %{is_nullable?: false}},
+                  log_start_offset: {:int64, %{is_nullable?: false}},
+                  partition_max_bytes: {:int32, %{is_nullable?: false}},
+                  tag_buffer:
+                    {:tag_buffer,
+                     [
+                       replica_directory_id: {{0, :uuid}, %{is_nullable?: false}},
+                       high_watermark: {{1, :int64}, %{is_nullable?: false}}
+                     ]}
                 ]}, %{is_nullable?: false}},
             tag_buffer: {:tag_buffer, []}
           ]}, %{is_nullable?: false}},
@@ -1197,6 +1253,79 @@ defmodule KlifeProtocol.Messages.Fetch do
     ]
 
   def response_schema(17),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      session_id: {:int32, %{is_nullable?: false}},
+      responses:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  high_watermark: {:int64, %{is_nullable?: false}},
+                  last_stable_offset: {:int64, %{is_nullable?: false}},
+                  log_start_offset: {:int64, %{is_nullable?: false}},
+                  aborted_transactions:
+                    {{:compact_array,
+                      [
+                        producer_id: {:int64, %{is_nullable?: false}},
+                        first_offset: {:int64, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, %{}}
+                      ]}, %{is_nullable?: true}},
+                  preferred_read_replica: {:int32, %{is_nullable?: false}},
+                  records: {:compact_record_batch, %{is_nullable?: true}},
+                  tag_buffer:
+                    {:tag_buffer,
+                     %{
+                       0 =>
+                         {{:diverging_epoch,
+                           {:object,
+                            [
+                              epoch: {:int32, %{is_nullable?: false}},
+                              end_offset: {:int64, %{is_nullable?: false}},
+                              tag_buffer: {:tag_buffer, %{}}
+                            ]}}, %{is_nullable?: false}},
+                       1 =>
+                         {{:current_leader,
+                           {:object,
+                            [
+                              leader_id: {:int32, %{is_nullable?: false}},
+                              leader_epoch: {:int32, %{is_nullable?: false}},
+                              tag_buffer: {:tag_buffer, %{}}
+                            ]}}, %{is_nullable?: false}},
+                       2 =>
+                         {{:snapshot_id,
+                           {:object,
+                            [
+                              end_offset: {:int64, %{is_nullable?: false}},
+                              epoch: {:int32, %{is_nullable?: false}},
+                              tag_buffer: {:tag_buffer, %{}}
+                            ]}}, %{is_nullable?: false}}
+                     }}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer:
+        {:tag_buffer,
+         %{
+           0 =>
+             {{:node_endpoints,
+               {:compact_array,
+                [
+                  node_id: {:int32, %{is_nullable?: false}},
+                  host: {:compact_string, %{is_nullable?: false}},
+                  port: {:int32, %{is_nullable?: false}},
+                  rack: {:compact_string, %{is_nullable?: true}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}}, %{is_nullable?: false}}
+         }}
+    ]
+
+  def response_schema(18),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},

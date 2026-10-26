@@ -7,8 +7,10 @@ defmodule KlifeProtocol.Messages.AddRaftVoter do
   Kafka protocol AddRaftVoter message
 
   Request versions summary:
+  - Version 1 adds the AckWhenCommitted field.
 
   Response versions summary:
+  - Version 1 is the same as version 0
 
   """
 
@@ -32,6 +34,7 @@ defmodule KlifeProtocol.Messages.AddRaftVoter do
       - name: The name of the endpoint. (string | versions 0+)
       - host: The hostname. (string | versions 0+)
       - port: The port. (uint16 | versions 0+)
+  - ack_when_committed: When true, return a response after the new voter set is committed. Otherwise, return after the leader writes the changes locally. (bool | versions 1+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -84,7 +87,7 @@ defmodule KlifeProtocol.Messages.AddRaftVoter do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 0
+  def max_supported_version(), do: 1
 
   @doc """
   Returns the current min supported version of this message.
@@ -114,10 +117,36 @@ defmodule KlifeProtocol.Messages.AddRaftVoter do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  def request_schema(1),
+    do: [
+      cluster_id: {:compact_string, %{is_nullable?: true}},
+      timeout_ms: {:int32, %{is_nullable?: false}},
+      voter_id: {:int32, %{is_nullable?: false}},
+      voter_directory_id: {:uuid, %{is_nullable?: false}},
+      listeners:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            host: {:compact_string, %{is_nullable?: false}},
+            port: {:uint16, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      ack_when_committed: {:boolean, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message AddRaftVoter")
 
   def response_schema(0),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      error_message: {:compact_string, %{is_nullable?: true}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(1),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},

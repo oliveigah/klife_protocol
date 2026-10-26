@@ -7,8 +7,12 @@ defmodule KlifeProtocol.Messages.ShareGroupDescribe do
   Kafka protocol ShareGroupDescribe message
 
   Request versions summary:
+  - Version 0 was used for early access of KIP-932 in Apache Kafka 4.0 but removed in Apache Kafka 4.1.
+  - Version 1 is the initial stable version (KIP-932).
 
   Response versions summary:
+  - Version 0 was used for early access of KIP-932 in Apache Kafka 4.0 but removed in Apache Kafka 4.1.
+  - Version 1 is the initial stable version (KIP-932).
 
   """
 
@@ -93,7 +97,7 @@ defmodule KlifeProtocol.Messages.ShareGroupDescribe do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 0
+  def max_supported_version(), do: 1
 
   @doc """
   Returns the current min supported version of this message.
@@ -113,10 +117,61 @@ defmodule KlifeProtocol.Messages.ShareGroupDescribe do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  def request_schema(1),
+    do: [
+      group_ids: {{:compact_array, :compact_string}, %{is_nullable?: false}},
+      include_authorized_operations: {:boolean, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message ShareGroupDescribe")
 
   def response_schema(0),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      groups:
+        {{:compact_array,
+          [
+            error_code: {:int16, %{is_nullable?: false}},
+            error_message: {:compact_string, %{is_nullable?: true}},
+            group_id: {:compact_string, %{is_nullable?: false}},
+            group_state: {:compact_string, %{is_nullable?: false}},
+            group_epoch: {:int32, %{is_nullable?: false}},
+            assignment_epoch: {:int32, %{is_nullable?: false}},
+            assignor_name: {:compact_string, %{is_nullable?: false}},
+            members:
+              {{:compact_array,
+                [
+                  member_id: {:compact_string, %{is_nullable?: false}},
+                  rack_id: {:compact_string, %{is_nullable?: true}},
+                  member_epoch: {:int32, %{is_nullable?: false}},
+                  client_id: {:compact_string, %{is_nullable?: false}},
+                  client_host: {:compact_string, %{is_nullable?: false}},
+                  subscribed_topic_names:
+                    {{:compact_array, :compact_string}, %{is_nullable?: false}},
+                  assignment:
+                    {{:object,
+                      [
+                        topic_partitions:
+                          {{:compact_array,
+                            [
+                              topic_id: {:uuid, %{is_nullable?: false}},
+                              topic_name: {:compact_string, %{is_nullable?: false}},
+                              partitions: {{:compact_array, :int32}, %{is_nullable?: false}},
+                              tag_buffer: {:tag_buffer, %{}}
+                            ]}, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, %{}}
+                      ]}, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            authorized_operations: {:int32, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(1),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       groups:

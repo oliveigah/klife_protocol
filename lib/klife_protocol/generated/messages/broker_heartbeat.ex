@@ -115,8 +115,7 @@ defmodule KlifeProtocol.Messages.BrokerHeartbeat do
       want_fence: {:boolean, %{is_nullable?: false}},
       want_shut_down: {:boolean, %{is_nullable?: false}},
       tag_buffer:
-        {:tag_buffer,
-         [offline_log_dirs: {{"0", {:compact_array, :uuid}}, %{is_nullable?: false}}]}
+        {:tag_buffer, [offline_log_dirs: {{0, {:compact_array, :uuid}}, %{is_nullable?: false}}]}
     ]
 
   def request_schema(unkown_version),
