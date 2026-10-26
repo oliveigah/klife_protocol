@@ -21,6 +21,12 @@ defmodule KlifeProtocol.Deserializer do
         {val, rest_data} = do_deserialize_value(type, data)
         do_deserialize(rest_schema, rest_data, val ++ acc)
 
+      # Only nullable struct fields carry the int8 presence marker, non
+      # nullable ones are read inline.
+      [{key, {{:object, obj_schema}, %{is_nullable?: false}}} | rest_schema] ->
+        {val, rest_data} = do_deserialize(obj_schema, data, [])
+        do_deserialize(rest_schema, rest_data, [{key, val} | acc])
+
       [{key, {type, _}} | rest_schema] ->
         {val, rest_data} = do_deserialize_value(type, data)
         do_deserialize(rest_schema, rest_data, [{key, val} | acc])
@@ -246,6 +252,7 @@ defmodule KlifeProtocol.Deserializer do
 
       {{field_name, field_schema}, _} ->
         {field_value, rest_binary} = do_deserialize_value(field_schema, rest_binary)
+
         deserialize_tag_buffer(rest_binary, len - 1, tagged_fields, [
           {field_name, field_value} | result
         ])
