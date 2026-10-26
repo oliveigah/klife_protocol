@@ -398,6 +398,24 @@ defmodule KlifeProtocol.SerializerTest do
           ]}, @default_metadata}
     ]
 
+    assert <<4, "aaa", 321::16-signed, 123::16-signed>> =
+             Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
+  end
+
+  @tag core: true
+  test "nullable object" do
+    input = %{a: %{a: "aaa", b: 321, c: 123}}
+
+    schema = [
+      a:
+        {{:object,
+          [
+            a: {:compact_string, @default_metadata},
+            b: {:int16, @default_metadata},
+            c: {:int16, @default_metadata}
+          ]}, %{is_nullable?: true}}
+    ]
+
     assert <<1, 4, "aaa", 321::16-signed, 123::16-signed>> =
              Serializer.execute(input, schema) |> :erlang.iolist_to_binary()
   end

@@ -400,7 +400,7 @@ defmodule KlifeProtocol.DeserializerTest do
 
   @tag core: true
   test "object" do
-    input = <<1, 4, "aaa", 321::16-signed, 123::16-signed>>
+    input = <<4, "aaa", 321::16-signed, 123::16-signed>>
 
     schema = [
       a:
@@ -410,6 +410,25 @@ defmodule KlifeProtocol.DeserializerTest do
             b: {:int16, @default_metadata},
             c: {:int16, @default_metadata}
           ]}, @default_metadata}
+    ]
+
+    assert {:ok, {result, <<>>}} = Deserializer.execute(input, schema)
+
+    assert %{a: %{a: "aaa", b: 321, c: 123}} == result
+  end
+
+  @tag core: true
+  test "nullable object" do
+    input = <<1, 4, "aaa", 321::16-signed, 123::16-signed>>
+
+    schema = [
+      a:
+        {{:object,
+          [
+            a: {:compact_string, @default_metadata},
+            b: {:int16, @default_metadata},
+            c: {:int16, @default_metadata}
+          ]}, %{is_nullable?: true}}
     ]
 
     assert {:ok, {result, <<>>}} = Deserializer.execute(input, schema)
