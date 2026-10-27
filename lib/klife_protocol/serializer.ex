@@ -48,6 +48,11 @@ defmodule KlifeProtocol.Serializer do
     """
   end
 
+  # Only nullable struct fields carry the int8 presence marker, non nullable
+  # ones are written inline.
+  defp serialize_value(val, _key, {{:object, schema}, %{is_nullable?: false}}),
+    do: do_serialize(schema, val, [])
+
   defp serialize_value(val, _key, {type, _metadata}), do: do_serialize_value(val, type)
 
   defp do_serialize_value(true, :boolean), do: <<1>>
