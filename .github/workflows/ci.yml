@@ -35,8 +35,8 @@ jobs:
       - run: mix compile --warning-as-errors
       - run: mix test
 
-  tests-v4_0:
-    name: test-4.0
+  tests-v4_4:
+    name: test-4.4
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -56,7 +56,7 @@ jobs:
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
-      - run: docker compose -f "test/compose_files/docker-compose-kafka-4.0.yml" up -d
+      - run: docker compose -f "test/compose_files/docker-compose-kafka-4.4.0.yml" up -d
       - run: mix deps.get
       - run: mix compile --warning-as-errors
       - run: mix test

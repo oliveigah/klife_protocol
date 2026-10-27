@@ -5,6 +5,123 @@ defmodule Messages.FetchTest do
   alias KlifeProtocol.TestSupport.Helpers
   alias KlifeProtocol.RecordBatch
 
+  @tag "#{Fetch.api_key()}": 18
+  test "request and response v18" do
+    version = 18
+    topic_name = "test_topic_fetch_v18"
+    {:ok, topic_id} = Helpers.get_or_create_topic(topic_name)
+
+    {:ok, %{broker: broker, partition_index: partition_index, offset: offset}} =
+      Helpers.produce_message(topic_name, "fetch_v18")
+
+    %{leader_epoch: leader_epoch} =
+      Helpers.get_metadata_for_topic_and_partition(topic_name, partition_index)
+
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
+
+    content = %{
+      max_wait_ms: 1000,
+      min_bytes: 1,
+      max_bytes: 100_000,
+      isolation_level: 0,
+      session_id: 0,
+      session_epoch: -1,
+      topics: [
+        %{
+          topic_id: topic_id,
+          partitions: [
+            %{
+              partition: partition_index,
+              current_leader_epoch: leader_epoch,
+              fetch_offset: offset,
+              last_fetched_epoch: -1,
+              log_start_offset: -1,
+              partition_max_bytes: 100_000,
+              high_watermark: -1
+            }
+          ]
+        }
+      ],
+      forgotten_topics_data: [],
+      rack_id: "rack"
+    }
+
+    {:ok, result} =
+      %{headers: headers, content: content}
+      |> Fetch.serialize_request(version)
+      |> Helpers.send_message_to_broker(broker)
+      |> Fetch.deserialize_response(version)
+
+    assert %{
+             headers: %{correlation_id: ^correlation_id},
+             content: %{
+               error_code: 0,
+               responses: [
+                 %{
+                   topic_id: ^topic_id,
+                   partitions: [
+                     %{
+                       partition_index: ^partition_index,
+                       error_code: 0,
+                       high_watermark: high_watermark,
+                       records: [%{base_offset: ^offset, records: [%{value: "fetch_v18"}]}]
+                     }
+                   ]
+                 }
+               ]
+             }
+           } = result
+
+    assert high_watermark > offset
+  end
+
+  @tag core: true
+  test "serialize request v18 - high watermark tag is absent in v17" do
+    headers = %{correlation_id: 42, client_id: "klife_test_client"}
+
+    content = %{
+      max_wait_ms: 1000,
+      min_bytes: 1,
+      max_bytes: 100_000,
+      isolation_level: 0,
+      session_id: 0,
+      session_epoch: -1,
+      topics: [
+        %{
+          topic_id: "00112233-4455-6677-8899-aabbccddeeff",
+          partitions: [
+            %{
+              partition: 0,
+              current_leader_epoch: 3,
+              fetch_offset: 10,
+              last_fetched_epoch: -1,
+              log_start_offset: -1,
+              partition_max_bytes: 100_000,
+              high_watermark: 42
+            }
+          ]
+        }
+      ],
+      forgotten_topics_data: [],
+      rack_id: "rack"
+    }
+
+    # Serialized independently by Apache Kafka 4.4.0's Java message classes.
+    for {version, expected} <- [
+          {17,
+           "AAEAEQAAACoAEWtsaWZlX3Rlc3RfY2xpZW50AAAAA+gAAAABAAGGoAAAAAAA/////wIAESIzRFVmd4iZqrvM3e7/AgAAAAAAAAADAAAAAAAAAAr///////////////8AAYagAAABBXJhY2sA"},
+          {18,
+           "AAEAEgAAACoAEWtsaWZlX3Rlc3RfY2xpZW50AAAAA+gAAAABAAGGoAAAAAAA/////wIAESIzRFVmd4iZqrvM3e7/AgAAAAAAAAADAAAAAAAAAAr///////////////8AAYagAQEIAAAAAAAAACoAAQVyYWNrAA=="}
+        ] do
+      binary =
+        %{headers: headers, content: content}
+        |> Fetch.serialize_request(version)
+        |> IO.iodata_to_binary()
+
+      assert binary == Base.decode64!(expected)
+    end
+  end
+
   @tag "#{Fetch.api_key()}": 4
   test "request and response v4", _ctx do
     version = 4

@@ -4,6 +4,84 @@ defmodule Messages.ProduceTest do
   alias KlifeProtocol.Messages.Produce
   alias KlifeProtocol.TestSupport.Helpers
 
+  @tag "#{Produce.api_key()}": 13
+  test "request and response v13 - topic IDs" do
+    version = 13
+    topic_name = "test_topic_produce_v13"
+    partition_index = 0
+    ts = DateTime.to_unix(DateTime.utc_now(), :millisecond)
+
+    {:ok, topic_id} = Helpers.get_or_create_topic(topic_name)
+    broker = Helpers.get_broker_for_topic_partition(topic_name, partition_index)
+    headers = %{correlation_id: correlation_id} = Helpers.generate_headers()
+
+    content = %{
+      transactional_id: nil,
+      acks: -1,
+      timeout_ms: 1000,
+      topic_data: [
+        %{
+          topic_id: topic_id,
+          partition_data: [
+            %{
+              index: partition_index,
+              records: %{
+                base_offset: 0,
+                partition_leader_epoch: -1,
+                magic: 2,
+                attributes: 0,
+                last_offset_delta: 0,
+                base_timestamp: ts,
+                max_timestamp: ts,
+                producer_id: -1,
+                producer_epoch: -1,
+                base_sequence: -1,
+                records: [
+                  %{
+                    attributes: 0,
+                    timestamp_delta: 0,
+                    offset_delta: 0,
+                    key: nil,
+                    value: "produce_v13",
+                    headers: nil
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+
+    {:ok, result} =
+      %{headers: headers, content: content}
+      |> Produce.serialize_request(version)
+      |> Helpers.send_message_to_broker(broker)
+      |> Produce.deserialize_response(version)
+
+    assert %{
+             headers: %{correlation_id: ^correlation_id},
+             content: %{
+               responses: [
+                 %{
+                   topic_id: ^topic_id,
+                   partition_responses: [
+                     %{
+                       index: ^partition_index,
+                       error_code: 0,
+                       error_message: nil,
+                       base_offset: base_offset,
+                       record_errors: []
+                     }
+                   ]
+                 }
+               ]
+             }
+           } = result
+
+    assert base_offset >= 0
+  end
+
   @tag "#{Produce.api_key()}": 0
   test "request and response v0", _ctx do
     topic_name = "test_topic_default"

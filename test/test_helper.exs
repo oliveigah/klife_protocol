@@ -8,7 +8,9 @@ alias KlifeProtocol.TestSupport.Helpers
 # that makes tests being flaky on the first execution
 
 test_topics = [
-  {"test_topic_default", []}
+  {"test_topic_default", []},
+  {"test_topic_produce_v13", []},
+  {"test_topic_fetch_v18", []}
 ]
 
 Enum.map(test_topics, fn {topic_name, opts} ->
