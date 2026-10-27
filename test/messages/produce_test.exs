@@ -1,5 +1,5 @@
 defmodule Messages.ProduceTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias KlifeProtocol.Messages.Produce
   alias KlifeProtocol.TestSupport.Helpers
