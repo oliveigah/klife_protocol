@@ -9,6 +9,7 @@ defmodule KlifeProtocol.Messages.WriteTxnMarkers do
   Request versions summary:
   - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
   - Version 1 enables flexible versions.
+  Version 2 adds TransactionVersion field to the WritableTxnMarker (KIP-1228).
 
   Response versions summary:
 
@@ -34,6 +35,7 @@ defmodule KlifeProtocol.Messages.WriteTxnMarkers do
           - name: The topic name. (string | versions 0+)
           - partition_indexes: The indexes of the partitions to write transaction markers for. ([]int32 | versions 0+)
       - coordinator_epoch: Epoch associated with the transaction state partition hosted by this transaction coordinator. (int32 | versions 0+)
+      - transaction_version: Transaction version of the marker. Ex: 0/1 = legacy (TV0/TV1), 2 = TV2 etc. (int8 | versions 2+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -90,7 +92,7 @@ defmodule KlifeProtocol.Messages.WriteTxnMarkers do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 1
+  def max_supported_version(), do: 2
 
   @doc """
   Returns the current min supported version of this message.
@@ -142,6 +144,28 @@ defmodule KlifeProtocol.Messages.WriteTxnMarkers do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  def request_schema(2),
+    do: [
+      markers:
+        {{:compact_array,
+          [
+            producer_id: {:int64, %{is_nullable?: false}},
+            producer_epoch: {:int16, %{is_nullable?: false}},
+            transaction_result: {:boolean, %{is_nullable?: false}},
+            topics:
+              {{:compact_array,
+                [
+                  name: {:compact_string, %{is_nullable?: false}},
+                  partition_indexes: {{:compact_array, :int32}, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            coordinator_epoch: {:int32, %{is_nullable?: false}},
+            transaction_version: {:int8, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message WriteTxnMarkers")
 
@@ -166,6 +190,30 @@ defmodule KlifeProtocol.Messages.WriteTxnMarkers do
     ]
 
   def response_schema(1),
+    do: [
+      markers:
+        {{:compact_array,
+          [
+            producer_id: {:int64, %{is_nullable?: false}},
+            topics:
+              {{:compact_array,
+                [
+                  name: {:compact_string, %{is_nullable?: false}},
+                  partitions:
+                    {{:compact_array,
+                      [
+                        partition_index: {:int32, %{is_nullable?: false}},
+                        error_code: {:int16, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, %{}}
+                      ]}, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(2),
     do: [
       markers:
         {{:compact_array,

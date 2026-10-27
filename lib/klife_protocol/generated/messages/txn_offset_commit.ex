@@ -15,6 +15,7 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
   transaction V2 (KIP_890 part 2) is enabled, the TxnOffsetCommit request will also include the function for a
   AddOffsetsToTxn call. If V2 is disabled, the client can't use TxnOffsetCommit request version higher than 4 within
   a transaction.
+  - Version 6 adds support for topic IDs and removes support for topic names (KIP-1319).
 
   Response versions summary:
   - Starting in version 1, on quota violation, brokers send out responses before throttling.
@@ -22,6 +23,8 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
   - Version 3 adds illegal generation, fenced instance id, and unknown member id errors.
   - Version 4 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
   - Version 5 is the same with version 3 (KIP-890).
+  - Version 6 adds support for topic IDs and removes support for topic names. It can also return
+  GROUP_ID_NOT_FOUND, STALE_MEMBER_EPOCH and UNKNOWN_TOPIC_ID (KIP-1319).
 
   """
 
@@ -41,11 +44,12 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
   - group_id: The ID of the group. (string | versions 0+)
   - producer_id: The current producer ID in use by the transactional ID. (int64 | versions 0+)
   - producer_epoch: The current epoch associated with the producer ID. (int16 | versions 0+)
-  - generation_id: The generation of the consumer. (int32 | versions 3+)
+  - generation_id_or_member_epoch: The generation of the group if using the classic group protocol or the member epoch if using the consumer protocol. (int32 | versions 3+)
   - member_id: The member ID assigned by the group coordinator. (string | versions 3+)
   - group_instance_id: The unique identifier of the consumer instance provided by end user. (string | versions 3+)
   - topics: Each topic that we want to commit offsets for. ([]TxnOffsetCommitRequestTopic | versions 0+)
-      - name: The topic name. (string | versions 0+)
+      - name: The topic name. (string | versions 0-5)
+      - topic_id: The topic ID. (uuid | versions 6+)
       - partitions: The partitions inside the topic that we want to commit offsets for. ([]TxnOffsetCommitRequestPartition | versions 0+)
           - partition_index: The index of the partition within the topic. (int32 | versions 0+)
           - committed_offset: The message offset to be committed. (int64 | versions 0+)
@@ -68,7 +72,8 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
   - topics: The responses for each topic. ([]TxnOffsetCommitResponseTopic | versions 0+)
-      - name: The topic name. (string | versions 0+)
+      - name: The topic name. (string | versions 0-5)
+      - topic_id: The topic ID. (uuid | versions 6+)
       - partitions: The responses for each partition in the topic. ([]TxnOffsetCommitResponsePartition | versions 0+)
           - partition_index: The partition index. (int32 | versions 0+)
           - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
@@ -106,7 +111,7 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 5
+  def max_supported_version(), do: 6
 
   @doc """
   Returns the current min supported version of this message.
@@ -186,7 +191,7 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
       group_id: {:compact_string, %{is_nullable?: false}},
       producer_id: {:int64, %{is_nullable?: false}},
       producer_epoch: {:int16, %{is_nullable?: false}},
-      generation_id: {:int32, %{is_nullable?: false}},
+      generation_id_or_member_epoch: {:int32, %{is_nullable?: false}},
       member_id: {:compact_string, %{is_nullable?: false}},
       group_instance_id: {:compact_string, %{is_nullable?: true}},
       topics:
@@ -213,7 +218,7 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
       group_id: {:compact_string, %{is_nullable?: false}},
       producer_id: {:int64, %{is_nullable?: false}},
       producer_epoch: {:int16, %{is_nullable?: false}},
-      generation_id: {:int32, %{is_nullable?: false}},
+      generation_id_or_member_epoch: {:int32, %{is_nullable?: false}},
       member_id: {:compact_string, %{is_nullable?: false}},
       group_instance_id: {:compact_string, %{is_nullable?: true}},
       topics:
@@ -240,13 +245,40 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
       group_id: {:compact_string, %{is_nullable?: false}},
       producer_id: {:int64, %{is_nullable?: false}},
       producer_epoch: {:int16, %{is_nullable?: false}},
-      generation_id: {:int32, %{is_nullable?: false}},
+      generation_id_or_member_epoch: {:int32, %{is_nullable?: false}},
       member_id: {:compact_string, %{is_nullable?: false}},
       group_instance_id: {:compact_string, %{is_nullable?: true}},
       topics:
         {{:compact_array,
           [
             name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  committed_offset: {:int64, %{is_nullable?: false}},
+                  committed_leader_epoch: {:int32, %{is_nullable?: false}},
+                  committed_metadata: {:compact_string, %{is_nullable?: true}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  def request_schema(6),
+    do: [
+      transactional_id: {:compact_string, %{is_nullable?: false}},
+      group_id: {:compact_string, %{is_nullable?: false}},
+      producer_id: {:int64, %{is_nullable?: false}},
+      producer_epoch: {:int16, %{is_nullable?: false}},
+      generation_id_or_member_epoch: {:int32, %{is_nullable?: false}},
+      member_id: {:compact_string, %{is_nullable?: false}},
+      group_instance_id: {:compact_string, %{is_nullable?: true}},
+      topics:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
             partitions:
               {{:compact_array,
                 [
@@ -357,6 +389,25 @@ defmodule KlifeProtocol.Messages.TxnOffsetCommit do
         {{:compact_array,
           [
             name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(6),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
             partitions:
               {{:compact_array,
                 [

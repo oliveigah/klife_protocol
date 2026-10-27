@@ -7,8 +7,12 @@ defmodule KlifeProtocol.Messages.WriteShareGroupState do
   Kafka protocol WriteShareGroupState message
 
   Request versions summary:
+  - Version 0 is the initial version (KIP-932).
+  - Version 1 introduces DeliveryCompleteCount (KIP-1226).
 
   Response versions summary:
+  - Version 0 is the initial version (KIP-932).
+  - Version 1 introduces DeliveryCompleteCount in the request (KIP-1226).
 
   """
 
@@ -29,13 +33,14 @@ defmodule KlifeProtocol.Messages.WriteShareGroupState do
       - topic_id: The topic identifier. (uuid | versions 0+)
       - partitions: The data for the partitions. ([]PartitionData | versions 0+)
           - partition: The partition index. (int32 | versions 0+)
-          - state_epoch: The state epoch for this share-partition. (int32 | versions 0+)
+          - state_epoch: The state epoch of the share-partition. (int32 | versions 0+)
           - leader_epoch: The leader epoch of the share-partition. (int32 | versions 0+)
           - start_offset: The share-partition start offset, or -1 if the start offset is not being written. (int64 | versions 0+)
+          - delivery_complete_count: The number of offsets greater than or equal to share-partition start offset for which delivery has been completed. (int32 | versions 1+)
           - state_batches: The state batches for the share-partition. ([]StateBatch | versions 0+)
-              - first_offset: The base offset of this state batch. (int64 | versions 0+)
+              - first_offset: The first offset of this state batch. (int64 | versions 0+)
               - last_offset: The last offset of this state batch. (int64 | versions 0+)
-              - delivery_state: The state - 0:Available,2:Acked,4:Archived. (int8 | versions 0+)
+              - delivery_state: The delivery state - 0:Available,2:Acked,4:Archived. (int8 | versions 0+)
               - delivery_count: The delivery count. (int16 | versions 0+)
 
   """
@@ -92,7 +97,7 @@ defmodule KlifeProtocol.Messages.WriteShareGroupState do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 0
+  def max_supported_version(), do: 1
 
   @doc """
   Returns the current min supported version of this message.
@@ -135,10 +140,60 @@ defmodule KlifeProtocol.Messages.WriteShareGroupState do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  def request_schema(1),
+    do: [
+      group_id: {:compact_string, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition: {:int32, %{is_nullable?: false}},
+                  state_epoch: {:int32, %{is_nullable?: false}},
+                  leader_epoch: {:int32, %{is_nullable?: false}},
+                  start_offset: {:int64, %{is_nullable?: false}},
+                  delivery_complete_count: {:int32, %{is_nullable?: false}},
+                  state_batches:
+                    {{:compact_array,
+                      [
+                        first_offset: {:int64, %{is_nullable?: false}},
+                        last_offset: {:int64, %{is_nullable?: false}},
+                        delivery_state: {:int8, %{is_nullable?: false}},
+                        delivery_count: {:int16, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, []}
+                      ]}, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message WriteShareGroupState")
 
   def response_schema(0),
+    do: [
+      results:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  error_message: {:compact_string, %{is_nullable?: true}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(1),
     do: [
       results:
         {{:compact_array,

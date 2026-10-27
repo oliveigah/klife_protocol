@@ -7,8 +7,12 @@ defmodule KlifeProtocol.Messages.ReadShareGroupStateSummary do
   Kafka protocol ReadShareGroupStateSummary message
 
   Request versions summary:
+  - Version 0 is the initial version (KIP-932).
+  - Version 1 introduces DeliveryCompleteCount in the response (KIP-1226).
 
   Response versions summary:
+  - Version 0 is the initial version (KIP-932).
+  - Version 1 introduces DeliveryCompleteCount (KIP-1226).
 
   """
 
@@ -52,7 +56,9 @@ defmodule KlifeProtocol.Messages.ReadShareGroupStateSummary do
           - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
           - error_message: The error message, or null if there was no error. (string | versions 0+)
           - state_epoch: The state epoch of the share-partition. (int32 | versions 0+)
+          - leader_epoch: The leader epoch of the share-partition. (int32 | versions 0+)
           - start_offset: The share-partition start offset. (int64 | versions 0+)
+          - delivery_complete_count: The number of offsets greater than or equal to share-partition start offset for which delivery has been completed. (int32 | versions 1+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)
@@ -87,7 +93,7 @@ defmodule KlifeProtocol.Messages.ReadShareGroupStateSummary do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 0
+  def max_supported_version(), do: 1
 
   @doc """
   Returns the current min supported version of this message.
@@ -101,6 +107,25 @@ defmodule KlifeProtocol.Messages.ReadShareGroupStateSummary do
     do: if(msg_version >= @min_flexible_version_res, do: 1, else: 0)
 
   def request_schema(0),
+    do: [
+      group_id: {:compact_string, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition: {:int32, %{is_nullable?: false}},
+                  leader_epoch: {:int32, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  def request_schema(1),
     do: [
       group_id: {:compact_string, %{is_nullable?: false}},
       topics:
@@ -135,7 +160,31 @@ defmodule KlifeProtocol.Messages.ReadShareGroupStateSummary do
                   error_code: {:int16, %{is_nullable?: false}},
                   error_message: {:compact_string, %{is_nullable?: true}},
                   state_epoch: {:int32, %{is_nullable?: false}},
+                  leader_epoch: {:int32, %{is_nullable?: false}},
                   start_offset: {:int64, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(1),
+    do: [
+      results:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  error_message: {:compact_string, %{is_nullable?: true}},
+                  state_epoch: {:int32, %{is_nullable?: false}},
+                  leader_epoch: {:int32, %{is_nullable?: false}},
+                  start_offset: {:int64, %{is_nullable?: false}},
+                  delivery_complete_count: {:int32, %{is_nullable?: false}},
                   tag_buffer: {:tag_buffer, %{}}
                 ]}, %{is_nullable?: false}},
             tag_buffer: {:tag_buffer, %{}}

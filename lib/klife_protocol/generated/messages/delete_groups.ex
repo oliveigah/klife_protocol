@@ -9,10 +9,15 @@ defmodule KlifeProtocol.Messages.DeleteGroups do
   Request versions summary:
   - Version 1 is the same as version 0.
   - Version 2 is the first flexible version.
+  - Version 3 corresponds to the addition of an ErrorMessage field on each per-group
+  result in the response (populated when the broker needs to surface a cause to the
+  caller). The request body shape is unchanged at version 3.
 
   Response versions summary:
   - Starting in version 1, on quota violation, brokers send out responses before throttling.
   - Version 2 is the first flexible version.
+  - Version 3 adds the per-group ErrorMessage field so the broker can surface a cause
+  string when GROUP_DELETION_FAILED (or any other non-NONE error) is returned for a group.
 
   """
 
@@ -48,6 +53,7 @@ defmodule KlifeProtocol.Messages.DeleteGroups do
   - results: The deletion results. ([]DeletableGroupResult | versions 0+)
       - group_id: The group id. (string | versions 0+)
       - error_code: The deletion error, or 0 if the deletion succeeded. (int16 | versions 0+)
+      - error_message: The error message, or null if there was no error. (string | versions 3+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)
@@ -82,7 +88,7 @@ defmodule KlifeProtocol.Messages.DeleteGroups do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 2
+  def max_supported_version(), do: 3
 
   @doc """
   Returns the current min supported version of this message.
@@ -99,6 +105,12 @@ defmodule KlifeProtocol.Messages.DeleteGroups do
   def request_schema(1), do: [groups_names: {{:array, :string}, %{is_nullable?: false}}]
 
   def request_schema(2),
+    do: [
+      groups_names: {{:compact_array, :compact_string}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  def request_schema(3),
     do: [
       groups_names: {{:compact_array, :compact_string}, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, []}
@@ -137,6 +149,20 @@ defmodule KlifeProtocol.Messages.DeleteGroups do
           [
             group_id: {:compact_string, %{is_nullable?: false}},
             error_code: {:int16, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(3),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      results:
+        {{:compact_array,
+          [
+            group_id: {:compact_string, %{is_nullable?: false}},
+            error_code: {:int16, %{is_nullable?: false}},
+            error_message: {:compact_string, %{is_nullable?: true}},
             tag_buffer: {:tag_buffer, %{}}
           ]}, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, %{}}

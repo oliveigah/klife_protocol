@@ -25,6 +25,7 @@ defmodule KlifeProtocol.Messages.Produce do
   transaction V2 (KIP_890 part 2) is enabled, the produce request will also include the function for a
   AddPartitionsToTxn call. If V2 is disabled, the client can't use produce request version higher than 11 within
   a transaction.
+  Version 13 replaces topic names with topic IDs (KIP-516). May return UNKNOWN_TOPIC_ID error code.
 
   Response versions summary:
   - Versions 0-2 were removed in Apache Kafka 4.0, version 3 is the new baseline. Due to a bug in librdkafka,
@@ -41,6 +42,7 @@ defmodule KlifeProtocol.Messages.Produce do
   - Version 10 adds 'CurrentLeader' and 'NodeEndpoints' as tagged fields (KIP-951)
   - Version 11 adds support for new error code TRANSACTION_ABORTABLE (KIP-890).
   - Version 12 is the same as version 10 (KIP-890).
+  Version 13 replaces topic names with topic IDs (KIP-516). May return UNKNOWN_TOPIC_ID error code.
 
   """
 
@@ -60,7 +62,8 @@ defmodule KlifeProtocol.Messages.Produce do
   - acks: The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments, 1 for only the leader and -1 for the full ISR. (int16 | versions 0+)
   - timeout_ms: The timeout to await a response in milliseconds. (int32 | versions 0+)
   - topic_data: Each topic to produce to. ([]TopicProduceData | versions 0+)
-      - name: The topic name. (string | versions 0+)
+      - name: The topic name. (string | versions 0-12)
+      - topic_id: The unique topic ID (uuid | versions 13+)
       - partition_data: Each partition to produce to. ([]PartitionProduceData | versions 0+)
           - index: The partition index. (int32 | versions 0+)
           - records: The record data to be produced. (records | versions 0+)
@@ -80,7 +83,8 @@ defmodule KlifeProtocol.Messages.Produce do
   Response content fields:
 
   - responses: Each produce response. ([]TopicProduceResponse | versions 0+)
-      - name: The topic name. (string | versions 0+)
+      - name: The topic name. (string | versions 0-12)
+      - topic_id: The unique topic ID (uuid | versions 13+)
       - partition_responses: Each partition that we produced to within the topic. ([]PartitionProduceResponse | versions 0+)
           - index: The partition index. (int32 | versions 0+)
           - error_code: The error code, or 0 if there was no error. (int16 | versions 0+)
@@ -134,7 +138,7 @@ defmodule KlifeProtocol.Messages.Produce do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 12
+  def max_supported_version(), do: 13
 
   @doc """
   Returns the current min supported version of this message.
@@ -378,6 +382,27 @@ defmodule KlifeProtocol.Messages.Produce do
         {{:compact_array,
           [
             name: {:compact_string, %{is_nullable?: false}},
+            partition_data:
+              {{:compact_array,
+                [
+                  index: {:int32, %{is_nullable?: false}},
+                  records: {:compact_record_batch, %{is_nullable?: true}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  def request_schema(13),
+    do: [
+      transactional_id: {:compact_string, %{is_nullable?: true}},
+      acks: {:int16, %{is_nullable?: false}},
+      timeout_ms: {:int32, %{is_nullable?: false}},
+      topic_data:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
             partition_data:
               {{:compact_array,
                 [
@@ -707,6 +732,60 @@ defmodule KlifeProtocol.Messages.Produce do
         {{:compact_array,
           [
             name: {:compact_string, %{is_nullable?: false}},
+            partition_responses:
+              {{:compact_array,
+                [
+                  index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  base_offset: {:int64, %{is_nullable?: false}},
+                  log_append_time_ms: {:int64, %{is_nullable?: false}},
+                  log_start_offset: {:int64, %{is_nullable?: false}},
+                  record_errors:
+                    {{:compact_array,
+                      [
+                        batch_index: {:int32, %{is_nullable?: false}},
+                        batch_index_error_message: {:compact_string, %{is_nullable?: true}},
+                        tag_buffer: {:tag_buffer, %{}}
+                      ]}, %{is_nullable?: false}},
+                  error_message: {:compact_string, %{is_nullable?: true}},
+                  tag_buffer:
+                    {:tag_buffer,
+                     %{
+                       0 =>
+                         {{:current_leader,
+                           {:object,
+                            [
+                              leader_id: {:int32, %{is_nullable?: false}},
+                              leader_epoch: {:int32, %{is_nullable?: false}},
+                              tag_buffer: {:tag_buffer, %{}}
+                            ]}}, %{is_nullable?: false}}
+                     }}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      tag_buffer:
+        {:tag_buffer,
+         %{
+           0 =>
+             {{:node_endpoints,
+               {:compact_array,
+                [
+                  node_id: {:int32, %{is_nullable?: false}},
+                  host: {:compact_string, %{is_nullable?: false}},
+                  port: {:int32, %{is_nullable?: false}},
+                  rack: {:compact_string, %{is_nullable?: true}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}}, %{is_nullable?: false}}
+         }}
+    ]
+
+  def response_schema(13),
+    do: [
+      responses:
+        {{:compact_array,
+          [
+            topic_id: {:uuid, %{is_nullable?: false}},
             partition_responses:
               {{:compact_array,
                 [

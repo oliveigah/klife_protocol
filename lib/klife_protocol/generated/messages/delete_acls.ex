@@ -35,7 +35,7 @@ defmodule KlifeProtocol.Messages.DeleteAcls do
   Input content fields:
   - filters: The filters to use when deleting ACLs. ([]DeleteAclsFilter | versions 0+)
       - resource_type_filter: The resource type. (int8 | versions 0+)
-      - resource_name_filter: The resource name. (string | versions 0+)
+      - resource_name_filter: The resource name, or null to match any resource name. (string | versions 0+)
       - pattern_type_filter: The pattern type. (int8 | versions 1+)
       - principal_filter: The principal filter, or null to accept all principals. (string | versions 0+)
       - host_filter: The host filter, or null to accept all hosts. (string | versions 0+)

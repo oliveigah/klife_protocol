@@ -10,6 +10,7 @@ defmodule KlifeProtocol.Messages.ApiVersions do
   - Versions 0 through 2 of ApiVersionsRequest are the same.
   - Version 3 is the first flexible version and adds ClientSoftwareName and ClientSoftwareVersion.
   - Version 4 fixes KAFKA-17011, which blocked SupportedFeatures.MinVersion in the response from being 0.
+  - Version 5 introduces ClusterId and NodeId checking and REBOOTSTRAP_REQUIRED error (KIP-1242).
 
   Response versions summary:
   - Version 1 adds throttle time to the response.
@@ -20,6 +21,7 @@ defmodule KlifeProtocol.Messages.ApiVersions do
   - Starting from Apache Kafka 2.4 (KIP-511), ApiKeys field is populated with the supported
   versions of the ApiVersionsRequest when an UNSUPPORTED_VERSION error is returned.
   - Version 4 fixes KAFKA-17011, which blocked SupportedFeatures.MinVersion from being 0.
+  - Version 5 introduces ClusterId and NodeId checking and REBOOTSTRAP_REQUIRED error (KIP-1242).
 
   """
 
@@ -36,6 +38,8 @@ defmodule KlifeProtocol.Messages.ApiVersions do
   Input content fields:
   - client_software_name: The name of the client. (string | versions 3+)
   - client_software_version: The version of the client. (string | versions 3+)
+  - cluster_id: The cluster ID the client intends to connect to. Provide both ClusterId and NodeId, if known. (string | versions 5+)
+  - node_id: The node ID the client intends to connect to. Provide both ClusterId and NodeId, if known. (int32 | versions 5+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -101,7 +105,7 @@ defmodule KlifeProtocol.Messages.ApiVersions do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 4
+  def max_supported_version(), do: 5
 
   @doc """
   Returns the current min supported version of this message.
@@ -128,6 +132,15 @@ defmodule KlifeProtocol.Messages.ApiVersions do
     do: [
       client_software_name: {:compact_string, %{is_nullable?: false}},
       client_software_version: {:compact_string, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  def request_schema(5),
+    do: [
+      client_software_name: {:compact_string, %{is_nullable?: false}},
+      client_software_version: {:compact_string, %{is_nullable?: false}},
+      cluster_id: {:compact_string, %{is_nullable?: true}},
+      node_id: {:int32, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, []}
     ]
 
@@ -211,6 +224,44 @@ defmodule KlifeProtocol.Messages.ApiVersions do
     ]
 
   def response_schema(4),
+    do: [
+      error_code: {:int16, %{is_nullable?: false}},
+      api_keys:
+        {{:compact_array,
+          [
+            api_key: {:int16, %{is_nullable?: false}},
+            min_version: {:int16, %{is_nullable?: false}},
+            max_version: {:int16, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      tag_buffer:
+        {:tag_buffer,
+         %{
+           0 =>
+             {{:supported_features,
+               {:compact_array,
+                [
+                  name: {:compact_string, %{is_nullable?: false}},
+                  min_version: {:int16, %{is_nullable?: false}},
+                  max_version: {:int16, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}}, %{is_nullable?: false}},
+           1 => {{:finalized_features_epoch, :int64}, %{is_nullable?: false}},
+           2 =>
+             {{:finalized_features,
+               {:compact_array,
+                [
+                  name: {:compact_string, %{is_nullable?: false}},
+                  max_version_level: {:int16, %{is_nullable?: false}},
+                  min_version_level: {:int16, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}}, %{is_nullable?: false}},
+           3 => {{:zk_migration_ready, :boolean}, %{is_nullable?: false}}
+         }}
+    ]
+
+  def response_schema(5),
     do: [
       error_code: {:int16, %{is_nullable?: false}},
       api_keys:

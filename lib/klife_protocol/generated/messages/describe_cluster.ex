@@ -52,7 +52,7 @@ defmodule KlifeProtocol.Messages.DescribeCluster do
   - error_message: The top-level error message, or null if there was no error. (string | versions 0+)
   - endpoint_type: The endpoint type that was described. 1=brokers, 2=controllers. (int8 | versions 1+)
   - cluster_id: The cluster ID that responding broker belongs to. (string | versions 0+)
-  - controller_id: The ID of the controller broker. (int32 | versions 0+)
+  - controller_id: The ID of the controller. When handled by a controller, returns the current voter leader ID. When handled by a broker, returns a random alive broker ID as a fallback. (int32 | versions 0+)
   - brokers: Each broker in the response. ([]DescribeClusterBroker | versions 0+)
       - broker_id: The broker ID. (int32 | versions 0+)
       - host: The broker hostname. (string | versions 0+)

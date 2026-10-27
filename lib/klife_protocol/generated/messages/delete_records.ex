@@ -32,7 +32,7 @@ defmodule KlifeProtocol.Messages.DeleteRecords do
       - name: The topic name. (string | versions 0+)
       - partitions: Each partition that we want to delete records from. ([]DeleteRecordsPartition | versions 0+)
           - partition_index: The partition index. (int32 | versions 0+)
-          - offset: The deletion offset. (int64 | versions 0+)
+          - offset: The deletion offset. -1 means that records should be truncated to the high watermark. (int64 | versions 0+)
   - timeout_ms: How long to wait for the deletion to complete, in milliseconds. (int32 | versions 0+)
 
   """
