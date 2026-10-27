@@ -12,6 +12,7 @@ defmodule KlifeProtocol.Messages.DescribeLogDirs do
   Version 2 is the first flexible version.
   Version 3 is the same as version 2 (new field in response).
   Version 4 is the same as version 2 (new fields in response).
+  Version 5 is the same as version 2 (new fields in response).
 
   Response versions summary:
   - Version 0 was removed in Apache Kafka 4.0, Version 1 is the new baseline.
@@ -19,6 +20,7 @@ defmodule KlifeProtocol.Messages.DescribeLogDirs do
   Version 2 is the first flexible version.
   Version 3 adds the top-level ErrorCode field
   Version 4 adds the TotalBytes and UsableBytes fields
+  Version 5 adds IsCordoned field
 
   """
 
@@ -64,8 +66,9 @@ defmodule KlifeProtocol.Messages.DescribeLogDirs do
               - partition_size: The size of the log segments in this partition in bytes. (int64 | versions 0+)
               - offset_lag: The lag of the log's LEO w.r.t. partition's HW (if it is the current log for the partition) or current replica's LEO (if it is the future log for the partition). (int64 | versions 0+)
               - is_future_key: True if this log is created by AlterReplicaLogDirsRequest and will replace the current log of the replica in the future. (bool | versions 0+)
-      - total_bytes: The total size in bytes of the volume the log directory is in. (int64 | versions 4+)
-      - usable_bytes: The usable size in bytes of the volume the log directory is in. (int64 | versions 4+)
+      - total_bytes: The total size in bytes of the volume the log directory is in. This value does not include the size of data stored in remote storage. (int64 | versions 4+)
+      - usable_bytes: The usable size in bytes of the volume the log directory is in. This value does not include the size of data stored in remote storage. (int64 | versions 4+)
+      - is_cordoned: True if this log directory is cordoned. (bool | versions 5+)
 
   """
   def deserialize_response(data, version, with_header? \\ true)
@@ -100,7 +103,7 @@ defmodule KlifeProtocol.Messages.DescribeLogDirs do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 4
+  def max_supported_version(), do: 5
 
   @doc """
   Returns the current min supported version of this message.
@@ -158,6 +161,18 @@ defmodule KlifeProtocol.Messages.DescribeLogDirs do
     ]
 
   def request_schema(4),
+    do: [
+      topics:
+        {{:compact_array,
+          [
+            topic: {:compact_string, %{is_nullable?: false}},
+            partitions: {{:compact_array, :int32}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: true}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
+  def request_schema(5),
     do: [
       topics:
         {{:compact_array,
@@ -303,6 +318,38 @@ defmodule KlifeProtocol.Messages.DescribeLogDirs do
                 ]}, %{is_nullable?: false}},
             total_bytes: {:int64, %{is_nullable?: false}},
             usable_bytes: {:int64, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(5),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      results:
+        {{:compact_array,
+          [
+            error_code: {:int16, %{is_nullable?: false}},
+            log_dir: {:compact_string, %{is_nullable?: false}},
+            topics:
+              {{:compact_array,
+                [
+                  name: {:compact_string, %{is_nullable?: false}},
+                  partitions:
+                    {{:compact_array,
+                      [
+                        partition_index: {:int32, %{is_nullable?: false}},
+                        partition_size: {:int64, %{is_nullable?: false}},
+                        offset_lag: {:int64, %{is_nullable?: false}},
+                        is_future_key: {:boolean, %{is_nullable?: false}},
+                        tag_buffer: {:tag_buffer, %{}}
+                      ]}, %{is_nullable?: false}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            total_bytes: {:int64, %{is_nullable?: false}},
+            usable_bytes: {:int64, %{is_nullable?: false}},
+            is_cordoned: {:boolean, %{is_nullable?: false}},
             tag_buffer: {:tag_buffer, %{}}
           ]}, %{is_nullable?: false}},
       tag_buffer: {:tag_buffer, %{}}

@@ -30,6 +30,7 @@ defmodule KlifeProtocol.Messages.BrokerHeartbeat do
   - want_fence: True if the broker wants to be fenced, false otherwise. (bool | versions 0+)
   - want_shut_down: True if the broker wants to be shut down, false otherwise. (bool | versions 0+)
   - offline_log_dirs: Log directories that failed and went offline. ([]uuid | versions 1+)
+  - cordoned_log_dirs: List of log directories that are cordoned. This is null before the broker reaches the RECOVERY state. ([]uuid | versions 2+)
 
   """
   def serialize_request(%{headers: headers, content: content}, version) do
@@ -84,7 +85,7 @@ defmodule KlifeProtocol.Messages.BrokerHeartbeat do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 1
+  def max_supported_version(), do: 2
 
   @doc """
   Returns the current min supported version of this message.
@@ -115,8 +116,22 @@ defmodule KlifeProtocol.Messages.BrokerHeartbeat do
       want_fence: {:boolean, %{is_nullable?: false}},
       want_shut_down: {:boolean, %{is_nullable?: false}},
       tag_buffer:
+        {:tag_buffer, [offline_log_dirs: {{0, {:compact_array, :uuid}}, %{is_nullable?: false}}]}
+    ]
+
+  def request_schema(2),
+    do: [
+      broker_id: {:int32, %{is_nullable?: false}},
+      broker_epoch: {:int64, %{is_nullable?: false}},
+      current_metadata_offset: {:int64, %{is_nullable?: false}},
+      want_fence: {:boolean, %{is_nullable?: false}},
+      want_shut_down: {:boolean, %{is_nullable?: false}},
+      tag_buffer:
         {:tag_buffer,
-         [offline_log_dirs: {{"0", {:compact_array, :uuid}}, %{is_nullable?: false}}]}
+         [
+           offline_log_dirs: {{0, {:compact_array, :uuid}}, %{is_nullable?: false}},
+           cordoned_log_dirs: {{1, {:compact_array, :uuid}}, %{is_nullable?: true}}
+         ]}
     ]
 
   def request_schema(unkown_version),
@@ -133,6 +148,16 @@ defmodule KlifeProtocol.Messages.BrokerHeartbeat do
     ]
 
   def response_schema(1),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      is_caught_up: {:boolean, %{is_nullable?: false}},
+      is_fenced: {:boolean, %{is_nullable?: false}},
+      should_shut_down: {:boolean, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(2),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},

@@ -7,8 +7,10 @@ defmodule KlifeProtocol.Messages.AlterPartitionReassignments do
   Kafka protocol AlterPartitionReassignments message
 
   Request versions summary:
+  - Version 1 adds the ability to allow/disallow changing the replication factor as part of the request.
 
   Response versions summary:
+  - Version 1 adds the ability to allow/disallow changing the replication factor as part of the request.
 
   """
 
@@ -25,6 +27,7 @@ defmodule KlifeProtocol.Messages.AlterPartitionReassignments do
 
   Input content fields:
   - timeout_ms: The time in ms to wait for the request to complete. (int32 | versions 0+)
+  - allow_replication_factor_change: The option indicating whether changing the replication factor of any given partition as part of this request is a valid move. (bool | versions 1+)
   - topics: The topics to reassign. ([]ReassignableTopic | versions 0+)
       - name: The topic name. (string | versions 0+)
       - partitions: The partitions to reassign. ([]ReassignablePartition | versions 0+)
@@ -46,6 +49,7 @@ defmodule KlifeProtocol.Messages.AlterPartitionReassignments do
   Response content fields:
 
   - throttle_time_ms: The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota. (int32 | versions 0+)
+  - allow_replication_factor_change: The option indicating whether changing the replication factor of any given partition as part of the request was allowed. (bool | versions 1+)
   - error_code: The top-level error code, or 0 if there was no error. (int16 | versions 0+)
   - error_message: The top-level error message, or null if there was no error. (string | versions 0+)
   - responses: The responses to topics to reassign. ([]ReassignableTopicResponse | versions 0+)
@@ -88,7 +92,7 @@ defmodule KlifeProtocol.Messages.AlterPartitionReassignments do
   @doc """
   Returns the current max supported version of this message.
   """
-  def max_supported_version(), do: 0
+  def max_supported_version(), do: 1
 
   @doc """
   Returns the current min supported version of this message.
@@ -120,12 +124,55 @@ defmodule KlifeProtocol.Messages.AlterPartitionReassignments do
       tag_buffer: {:tag_buffer, []}
     ]
 
+  def request_schema(1),
+    do: [
+      timeout_ms: {:int32, %{is_nullable?: false}},
+      allow_replication_factor_change: {:boolean, %{is_nullable?: false}},
+      topics:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  replicas: {{:compact_array, :int32}, %{is_nullable?: true}},
+                  tag_buffer: {:tag_buffer, []}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, []}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, []}
+    ]
+
   def request_schema(unkown_version),
     do: raise("Unknown version #{unkown_version} for message AlterPartitionReassignments")
 
   def response_schema(0),
     do: [
       throttle_time_ms: {:int32, %{is_nullable?: false}},
+      error_code: {:int16, %{is_nullable?: false}},
+      error_message: {:compact_string, %{is_nullable?: true}},
+      responses:
+        {{:compact_array,
+          [
+            name: {:compact_string, %{is_nullable?: false}},
+            partitions:
+              {{:compact_array,
+                [
+                  partition_index: {:int32, %{is_nullable?: false}},
+                  error_code: {:int16, %{is_nullable?: false}},
+                  error_message: {:compact_string, %{is_nullable?: true}},
+                  tag_buffer: {:tag_buffer, %{}}
+                ]}, %{is_nullable?: false}},
+            tag_buffer: {:tag_buffer, %{}}
+          ]}, %{is_nullable?: false}},
+      tag_buffer: {:tag_buffer, %{}}
+    ]
+
+  def response_schema(1),
+    do: [
+      throttle_time_ms: {:int32, %{is_nullable?: false}},
+      allow_replication_factor_change: {:boolean, %{is_nullable?: false}},
       error_code: {:int16, %{is_nullable?: false}},
       error_message: {:compact_string, %{is_nullable?: true}},
       responses:
