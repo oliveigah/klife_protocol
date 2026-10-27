@@ -339,10 +339,10 @@ if Mix.env() == :dev do
               # Common structs are complex types that can be reused on multiple fields of the message
               # and because of it, the field that refers to a common struct does not have
               # the key `fields` that usually indicates the schema of that complex type.
-              # Therefore we need to handle the common structs first nd add it to the msg metadata
+              # Therefore we need to handle the common structs first and add them to the msg metadata
               # in order to copy their schema into the field when they are used.
               # Ex: ConsumerGroupHeartbeatResponse, DescribeQuorumResponse and many others
-              common_structs = parse_commom_structs(message[:commonStructs] || [], msg_metadata)
+              common_structs = parse_common_structs(message[:commonStructs] || [], msg_metadata)
               msg_metadata = Map.put(msg_metadata, :common_structs, common_structs)
 
               # Traverse the list of fields for properly build the schema
@@ -358,48 +358,52 @@ if Mix.env() == :dev do
       end
     end
 
-    defp parse_commom_structs(common_structs, msg_metadata) do
-      grouped_structs =
-        Enum.group_by(common_structs, &is_recursive_common_struct?(&1, msg_metadata))
-
-      # Some common structs can refer to other common structs, i've called them recursives
-      # therefore we need to build the non recursive ones first, in order to reuse them
-      # on the recursive common structs that refer to them
-      # Example: AddPartitionsToTxnResponse
-      non_recursive_structs = grouped_structs[false] || []
-      recursive_structs = grouped_structs[true] || []
-
-      base_commom_structs =
-        non_recursive_structs
-        |> Enum.map(&Map.put_new(&1, :type, &1.name))
-        |> parse_schema(msg_metadata)
-
-      recursive_commom_structs =
-        recursive_structs
-        |> Enum.map(&Map.put_new(&1, :type, &1.name))
-        |> parse_schema(Map.put(msg_metadata, :common_structs, base_commom_structs))
-
-      base_commom_structs ++ recursive_commom_structs
+    defp parse_common_structs(common_structs, %{version: version} = msg_metadata) do
+      common_structs
+      |> Enum.filter(&available_in_version?(&1, version))
+      |> Enum.map(&Map.put_new(&1, :type, &1.name))
+      |> parse_common_structs(msg_metadata, [])
     end
 
-    defp is_recursive_common_struct?(common_struct, msg_metadata) do
-      Enum.map(common_struct.fields, fn f ->
-        cond do
-          get_type(f.type, msg_metadata, false) in [:array, :compact_array, :not_found] ->
-            case Map.get(f, :fields) do
-              nil ->
-                true
+    defp parse_common_structs([], _msg_metadata, resolved), do: resolved
 
-              nested_fields ->
-                is_recursive_common_struct?(nested_fields, msg_metadata)
-            end
+    defp parse_common_structs(common_structs, msg_metadata, resolved) do
+      msg_metadata = Map.put(msg_metadata, :common_structs, resolved)
+
+      # Resolve dependencies before their users, regardless of declaration order or depth.
+      {ready, pending} =
+        Enum.split_with(
+          common_structs,
+          &common_struct_dependencies_resolved?(&1.fields, msg_metadata)
+        )
+
+      if ready == [] do
+        names = Enum.map_join(pending, ", ", & &1.name)
+
+        raise "Cannot resolve common structs for version #{msg_metadata.version}: #{names} " <>
+                "(missing or cyclic references)"
+      end
+
+      schemas = parse_schema(ready, msg_metadata)
+      parse_common_structs(pending, msg_metadata, resolved ++ schemas)
+    end
+
+    defp common_struct_dependencies_resolved?(fields, %{version: version} = msg_metadata) do
+      Enum.all?(fields, fn field ->
+        cond do
+          not available_in_version?(field, version) ->
+            true
+
+          Map.has_key?(field, :fields) ->
+            common_struct_dependencies_resolved?(field.fields, msg_metadata)
+
+          get_type(field.type, msg_metadata, false) in [:array, :compact_array, :not_found] ->
+            Keyword.has_key?(msg_metadata.common_structs, get_type_name(field.type))
 
           true ->
-            false
+            true
         end
       end)
-      |> List.flatten()
-      |> Enum.any?()
     end
 
     # Recursivelly parse fields into klife protocol schemas
