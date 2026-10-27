@@ -123,6 +123,72 @@ defmodule KlifeProtocol.SaslTest do
     end)
   end
 
+  for mech <- ["SCRAM-SHA-256", "SCRAM-SHA-512"] do
+    @tag core: true
+    test "success with #{mech} sasl opts" do
+      ssl_opts = [
+        verify: :verify_peer,
+        cacertfile: Path.relative("test/compose_files/ssl/ca.crt")
+      ]
+
+      sasl_opts = [
+        mechanism: unquote(mech),
+        auth_vsn: 2,
+        handshake_vsn: 1,
+        mechanism_opts: [
+          username: "klifeusr",
+          password: "klifepwd"
+        ]
+      ]
+
+      socket_backend = :ssl
+      opts = [backend: socket_backend, active: false, sasl_opts: sasl_opts] ++ ssl_opts
+
+      sockets =
+        Enum.map(@brokers_sasl, fn {_broker, hostname} ->
+          [host, port] = String.split(hostname, ":")
+          {:ok, socket} = Socket.connect(host, String.to_integer(port), opts)
+          socket
+        end)
+
+      Enum.each(sockets, fn socket ->
+        {data, version} = get_produce_msg_binary()
+        :ok = apply(socket_backend, :send, [socket, data])
+        {:ok, rcv_bin} = apply(socket_backend, :recv, [socket, 0, 5000])
+        {:ok, _rcv_data} = Produce.deserialize_response(rcv_bin, version)
+      end)
+    end
+
+    @tag core: true
+    test "fail with #{mech} and wrong password" do
+      ssl_opts = [
+        verify: :verify_peer,
+        cacertfile: Path.relative("test/compose_files/ssl/ca.crt")
+      ]
+
+      sasl_opts = [
+        mechanism: unquote(mech),
+        auth_vsn: 2,
+        handshake_vsn: 1,
+        mechanism_opts: [
+          username: "klifeusr",
+          password: "wrongpwd"
+        ]
+      ]
+
+      socket_backend = :ssl
+      opts = [backend: socket_backend, active: false] ++ ssl_opts
+
+      [{_broker, hostname} | _] = @brokers_sasl
+      [host, port] = String.split(hostname, ":")
+      {:ok, socket} = Socket.connect(host, String.to_integer(port), opts)
+
+      assert_raise RuntimeError, ~r/SASL authentication/, fn ->
+        Socket.authenticate(socket, socket_backend, sasl_opts)
+      end
+    end
+  end
+
   @tag core: true
   test "success with plain sasl opts 2 step auth" do
     ssl_opts = [

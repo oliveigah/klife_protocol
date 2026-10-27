@@ -3,7 +3,9 @@ defmodule KlifeProtocol.SASL do
   alias KlifeProtocol.Messages.SaslHandshake
 
   @supported_mechanisms %{
-    "PLAIN" => KlifeProtocol.SASL.Mechanism.Plain
+    "PLAIN" => KlifeProtocol.SASL.Mechanism.Plain,
+    "SCRAM-SHA-256" => KlifeProtocol.SASL.Mechanism.ScramSha256,
+    "SCRAM-SHA-512" => KlifeProtocol.SASL.Mechanism.ScramSha512
   }
 
   def authenticate(mech, handshake_vsn, auth_vsn, mech_opts, send_recv_raw_fun) do

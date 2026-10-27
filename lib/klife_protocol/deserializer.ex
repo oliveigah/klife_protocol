@@ -246,6 +246,7 @@ defmodule KlifeProtocol.Deserializer do
 
       {{field_name, field_schema}, _} ->
         {field_value, rest_binary} = do_deserialize_value(field_schema, rest_binary)
+
         deserialize_tag_buffer(rest_binary, len - 1, tagged_fields, [
           {field_name, field_value} | result
         ])

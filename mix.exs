@@ -56,6 +56,8 @@ defmodule KlifeProtocol.MixProject do
       {:crc32cer, "~> 1.1"},
       # Compression
       {:snappyer, "~> 1.2.10"},
+      # SASL SCRAM
+      {:fast_scram, "~> 0.7.3"},
       # Code generation
       {:jason, "~> 1.4", only: :dev, runtime: false},
       # Benchmarks and tests
