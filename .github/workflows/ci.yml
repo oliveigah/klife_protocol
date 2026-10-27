@@ -56,7 +56,7 @@ jobs:
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
-      - run: docker compose -f "test/compose_files/docker-compose-kafka-4.4.0.yml" up -d
+      - run: docker compose -f "test/compose_files/docker-compose-kafka-4.4.yml" up -d
       - run: mix deps.get
       - run: mix compile --warning-as-errors
       - run: mix test
