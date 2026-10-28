@@ -248,6 +248,10 @@ attr_val = RecordBatch.encode_attributes(opts)
 
 With these functions, a client can easily generate and decode attributes for each record batch it handles.
 
+## Upgrade from 1.x to 2.x
+
+- **SASL authentication result**: `Socket.authenticate/3` (and `KlifeProtocol.SASL.authenticate/5`) now returns `{:ok, %{session_lifetime_ms: lifetime}}` instead of `:ok`, so clients know when the broker will end the session (see [Session lifetime](#session-lifetime)). Pattern matches on `:ok` may need to be updated accordingly.
+
 ## Performance
 
 This section provides performance benchmarks for the main use cases of produce serialization and fetch deserialization, conducted using the [benchee tool](https://github.com/bencheeorg/benchee). The benchmarks measure only the serialization work, as the Kafka cluster is running solely to retrieve data samples for benchmarking purposes. Note that network latency is not included in the measurements, only serialization/deserialization performance.
