@@ -196,7 +196,7 @@ sasl_opts = [
 ]
 ```
 
-For `OAUTHBEARER`, pass `token_mfa`, a `{module, function, args}` tuple that returns the token as a binary. Klife Protocol does not fetch tokens from your identity provider: getting, caching and refreshing them is up to you. The MFA is applied on every authentication (every new connection to every broker), so it should return a cached token rather than call the token endpoint each time. Optional `extensions` are sent as SASL extensions (KIP-342), e.g. the ones Confluent Cloud requires.
+For `OAUTHBEARER`, pass `token_mfa`, a `{module, function, args}` tuple that returns the token as a binary. Klife Protocol does not fetch tokens from your identity provider: getting, caching and refreshing them is up to you. The MFA is applied on every authentication (every new connection to every broker), so it should return a cached token rather than call the token endpoint each time. The broker ends an `OAUTHBEARER` session when its token expires, so refresh the cached token well before that (the Java client does it at 80% of the token's lifetime): a connection authenticated with an almost expired token has to be replaced almost right away. Optional `extensions` are sent as SASL extensions (KIP-342), e.g. the ones Confluent Cloud requires.
 
 ```elixir
 sasl_opts = [
@@ -212,10 +212,9 @@ sasl_opts = [
 
 ### Session lifetime
 
-`Socket.authenticate/3` returns `{:ok, %{session_lifetime_ms: lifetime}}`, how long the broker keeps the session ([KIP-368](https://cwiki.apache.org/confluence/display/KAFKA/KIP-368%3A+Allow+SASL+Connections+to+Periodically+Re-Authenticate)). Once it is over, the broker closes the connection on the next request, without answering it. So when `lifetime` is positive, the client must act before it ends:
+`Socket.authenticate/3` returns `{:ok, %{session_lifetime_ms: lifetime}}`, how long the broker keeps the session ([KIP-368](https://cwiki.apache.org/confluence/display/KAFKA/KIP-368%3A+Allow+SASL+Connections+to+Periodically+Re-Authenticate)). Once it is over, the broker closes the connection on the next request, without answering it. So when `lifetime` is positive, the client must act before it ends.
 
-- reconnect, or
-- call `Socket.authenticate/3` again on the same socket, which is only safe while the socket is passive and has no requests in flight
+Reconnecting is the simplest way: open and authenticate a new connection, send new requests through it, and close the old one once its requests are answered. You can also call `Socket.authenticate/3` again on the same socket, but Kafka closes the connection if any other request is sent before it finishes, and this implementation reads the broker's replies with `recv`, so the socket must be passive with no requests in flight.
 
 ## Compression and Record Batch Attributes
 
