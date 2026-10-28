@@ -1,3 +1,5 @@
 defmodule KlifeProtocol.SASL.Mechanism.Behaviour do
-  @callback execute_auth(sendrcv_fun :: function, opts :: list) :: :ok | {:error, reason :: term}
+  # send_recv_fun returns the SaslAuthenticate response content (raises on error codes);
+  # mechanisms return the last one, which carries the session lifetime
+  @callback execute_auth(send_recv_fun :: function, opts :: list) :: {:ok, final_response :: map}
 end

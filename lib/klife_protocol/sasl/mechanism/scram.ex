@@ -17,7 +17,7 @@ defmodule KlifeProtocol.SASL.Mechanism.Scram do
     client_nonce = Base.encode64(:crypto.strong_rand_bytes(32))
     client_first_bare = "n=#{escape(username)},r=#{client_nonce}"
 
-    server_first = send_recv_fun.(@gs2_header <> client_first_bare)
+    %{auth_bytes: server_first} = send_recv_fun.(@gs2_header <> client_first_bare)
     %{"r" => nonce, "s" => salt, "i" => iterations} = parse(server_first)
     iterations = String.to_integer(iterations)
 
@@ -36,7 +36,8 @@ defmodule KlifeProtocol.SASL.Mechanism.Scram do
     client_signature = hmac(digest, :crypto.hash(digest, client_key), auth_message)
     client_proof = :crypto.exor(client_key, client_signature)
 
-    server_final =
+    %{auth_bytes: server_final} =
+      final_resp =
       send_recv_fun.(client_final_without_proof <> ",p=" <> Base.encode64(client_proof))
 
     server_signature = hmac(digest, hmac(digest, salted_password, "Server Key"), auth_message)
@@ -44,7 +45,7 @@ defmodule KlifeProtocol.SASL.Mechanism.Scram do
     case parse(server_final) do
       %{"v" => v} ->
         if Base.decode64!(v) == server_signature,
-          do: :ok,
+          do: {:ok, final_resp},
           else: raise("SCRAM server signature mismatch")
 
       %{"e" => reason} ->

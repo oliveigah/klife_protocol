@@ -30,7 +30,12 @@ services:
       KAFKA_SSL_KEYSTORE_PASSWORD: klifeprotocol
       KAFKA_SSL_TRUSTSTORE_PASSWORD: klifeprotocol
       KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
-      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN,SCRAM-SHA-256,SCRAM-SHA-512
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN,SCRAM-SHA-256,SCRAM-SHA-512,OAUTHBEARER
+      # Own JAAS entry: the default (unsecured) OAUTHBEARER validator refuses a section with other modules
+      KAFKA_LISTENER_NAME_SASL__SSL_OAUTHBEARER_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required unsecuredLoginStringClaim_sub="klifeusr";'
+      # SCRAM sessions end after an hour, so tests see the lifetime the broker reports
+      KAFKA_LISTENER_NAME_SASL__SSL_SCRAM___SHA___256_CONNECTIONS_MAX_REAUTH_MS: 3600000
+      KAFKA_LISTENER_NAME_SASL__SSL_SCRAM___SHA___512_CONNECTIONS_MAX_REAUTH_MS: 3600000
       KAFKA_SSL_KEYSTORE_FILENAME: kafka.keystore.jks
       KAFKA_SSL_KEYSTORE_CREDENTIALS: creds
       KAFKA_SSL_KEY_CREDENTIALS: creds
@@ -71,7 +76,12 @@ services:
       KAFKA_SSL_KEYSTORE_PASSWORD: klifeprotocol
       KAFKA_SSL_TRUSTSTORE_PASSWORD: klifeprotocol
       KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
-      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN,SCRAM-SHA-256,SCRAM-SHA-512
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN,SCRAM-SHA-256,SCRAM-SHA-512,OAUTHBEARER
+      # Own JAAS entry: the default (unsecured) OAUTHBEARER validator refuses a section with other modules
+      KAFKA_LISTENER_NAME_SASL__SSL_OAUTHBEARER_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required unsecuredLoginStringClaim_sub="klifeusr";'
+      # SCRAM sessions end after an hour, so tests see the lifetime the broker reports
+      KAFKA_LISTENER_NAME_SASL__SSL_SCRAM___SHA___256_CONNECTIONS_MAX_REAUTH_MS: 3600000
+      KAFKA_LISTENER_NAME_SASL__SSL_SCRAM___SHA___512_CONNECTIONS_MAX_REAUTH_MS: 3600000
       KAFKA_SSL_KEYSTORE_FILENAME: kafka.keystore.jks
       KAFKA_SSL_KEYSTORE_CREDENTIALS: creds
       KAFKA_SSL_KEY_CREDENTIALS: creds
@@ -113,7 +123,12 @@ services:
       KAFKA_SSL_KEYSTORE_PASSWORD: klifeprotocol
       KAFKA_SSL_TRUSTSTORE_PASSWORD: klifeprotocol
       KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
-      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN,SCRAM-SHA-256,SCRAM-SHA-512
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN,SCRAM-SHA-256,SCRAM-SHA-512,OAUTHBEARER
+      # Own JAAS entry: the default (unsecured) OAUTHBEARER validator refuses a section with other modules
+      KAFKA_LISTENER_NAME_SASL__SSL_OAUTHBEARER_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required unsecuredLoginStringClaim_sub="klifeusr";'
+      # SCRAM sessions end after an hour, so tests see the lifetime the broker reports
+      KAFKA_LISTENER_NAME_SASL__SSL_SCRAM___SHA___256_CONNECTIONS_MAX_REAUTH_MS: 3600000
+      KAFKA_LISTENER_NAME_SASL__SSL_SCRAM___SHA___512_CONNECTIONS_MAX_REAUTH_MS: 3600000
       KAFKA_SSL_KEYSTORE_FILENAME: kafka.keystore.jks
       KAFKA_SSL_KEYSTORE_CREDENTIALS: creds
       KAFKA_SSL_KEY_CREDENTIALS: creds
