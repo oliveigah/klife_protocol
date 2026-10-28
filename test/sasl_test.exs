@@ -158,4 +158,60 @@ defmodule KlifeProtocol.SaslTest do
       {:ok, _rcv_data} = Produce.deserialize_response(rcv_bin, version)
     end)
   end
+
+  @tag core: true
+  test "success with scram sasl opts" do
+    ssl_opts = [
+      verify: :verify_peer,
+      cacertfile: Path.relative("test/compose_files/ssl/ca.crt")
+    ]
+
+    socket_backend = :ssl
+
+    for mechanism <- ["SCRAM-SHA-256", "SCRAM-SHA-512"], {_broker, hostname} <- @brokers_sasl do
+      sasl_opts = [
+        mechanism: mechanism,
+        auth_vsn: 2,
+        handshake_vsn: 1,
+        mechanism_opts: [
+          username: "klifeusr",
+          password: "klifepwd"
+        ]
+      ]
+
+      opts = [backend: socket_backend, active: false, sasl_opts: sasl_opts] ++ ssl_opts
+      [host, port] = String.split(hostname, ":")
+      {:ok, socket} = Socket.connect(host, String.to_integer(port), opts)
+
+      {data, version} = get_produce_msg_binary()
+      :ok = apply(socket_backend, :send, [socket, data])
+      {:ok, rcv_bin} = apply(socket_backend, :recv, [socket, 0, 5000])
+      {:ok, _rcv_data} = Produce.deserialize_response(rcv_bin, version)
+    end
+  end
+
+  @tag core: true
+  test "fail with wrong scram password" do
+    ssl_opts = [
+      verify: :verify_peer,
+      cacertfile: Path.relative("test/compose_files/ssl/ca.crt")
+    ]
+
+    sasl_opts = [
+      mechanism: "SCRAM-SHA-512",
+      auth_vsn: 2,
+      handshake_vsn: 1,
+      mechanism_opts: [
+        username: "klifeusr",
+        password: "wrongpwd"
+      ]
+    ]
+
+    opts = [backend: :ssl, active: false, sasl_opts: sasl_opts] ++ ssl_opts
+    [host, port] = String.split(@brokers_sasl[:kafka1], ":")
+
+    assert_raise RuntimeError, ~r/ErrorCode: 58/, fn ->
+      Socket.connect(host, String.to_integer(port), opts)
+    end
+  end
 end
