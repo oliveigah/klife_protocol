@@ -147,7 +147,8 @@ defmodule KlifeProtocol.SaslTest do
       Enum.map(@brokers_sasl, fn {_broker, hostname} ->
         [host, port] = String.split(hostname, ":")
         {:ok, socket} = Socket.connect(host, String.to_integer(port), opts)
-        :ok = Socket.authenticate(socket, socket_backend, sasl_opts)
+        # PLAIN credentials never expire and the brokers don't set connections.max.reauth.ms
+        {:ok, %{session_lifetime_ms: 0}} = Socket.authenticate(socket, socket_backend, sasl_opts)
         socket
       end)
 
@@ -179,9 +180,14 @@ defmodule KlifeProtocol.SaslTest do
         ]
       ]
 
-      opts = [backend: socket_backend, active: false, sasl_opts: sasl_opts] ++ ssl_opts
+      opts = [backend: socket_backend, active: false] ++ ssl_opts
       [host, port] = String.split(hostname, ":")
       {:ok, socket} = Socket.connect(host, String.to_integer(port), opts)
+
+      # The brokers end SCRAM sessions after an hour (connections.max.reauth.ms), and
+      # only the final SCRAM message carries it: the first one says 0
+      {:ok, %{session_lifetime_ms: 3_600_000}} =
+        Socket.authenticate(socket, socket_backend, sasl_opts)
 
       {data, version} = get_produce_msg_binary()
       :ok = apply(socket_backend, :send, [socket, data])
@@ -213,5 +219,109 @@ defmodule KlifeProtocol.SaslTest do
     assert_raise RuntimeError, ~r/ErrorCode: 58/, fn ->
       Socket.connect(host, String.to_integer(port), opts)
     end
+  end
+
+  # Brokers without a configured validator accept unsecured JWTs ("alg": "none"),
+  # which is all a test needs: the client side does not depend on how tokens are signed
+  def unsecured_jwt(expires_in_seconds) do
+    exp = System.os_time(:second) + expires_in_seconds
+    header = Base.url_encode64(~s({"alg":"none"}), padding: false)
+    claims = Base.url_encode64(~s({"sub":"klifeusr","exp":#{exp}}), padding: false)
+    "#{header}.#{claims}."
+  end
+
+  @tag core: true
+  test "success with oauthbearer sasl opts" do
+    ssl_opts = [
+      verify: :verify_peer,
+      cacertfile: Path.relative("test/compose_files/ssl/ca.crt")
+    ]
+
+    sasl_opts = [
+      mechanism: "OAUTHBEARER",
+      auth_vsn: 2,
+      handshake_vsn: 1,
+      mechanism_opts: [
+        token_mfa: {__MODULE__, :unsecured_jwt, [60]},
+        extensions: %{"traceId" => "klife"}
+      ]
+    ]
+
+    socket_backend = :ssl
+    opts = [backend: socket_backend, active: false, sasl_opts: sasl_opts] ++ ssl_opts
+
+    for {_broker, hostname} <- @brokers_sasl do
+      [host, port] = String.split(hostname, ":")
+      {:ok, socket} = Socket.connect(host, String.to_integer(port), opts)
+
+      {data, version} = get_produce_msg_binary()
+      :ok = apply(socket_backend, :send, [socket, data])
+      {:ok, rcv_bin} = apply(socket_backend, :recv, [socket, 0, 5000])
+      {:ok, _rcv_data} = Produce.deserialize_response(rcv_bin, version)
+    end
+  end
+
+  @tag core: true
+  test "fail with expired oauthbearer token" do
+    ssl_opts = [
+      verify: :verify_peer,
+      cacertfile: Path.relative("test/compose_files/ssl/ca.crt")
+    ]
+
+    sasl_opts = [
+      mechanism: "OAUTHBEARER",
+      auth_vsn: 2,
+      handshake_vsn: 1,
+      mechanism_opts: [
+        token_mfa: {__MODULE__, :unsecured_jwt, [-60]}
+      ]
+    ]
+
+    opts = [backend: :ssl, active: false, sasl_opts: sasl_opts] ++ ssl_opts
+    [host, port] = String.split(@brokers_sasl[:kafka1], ":")
+
+    assert_raise RuntimeError, ~r/ErrorCode: 58.*invalid_token/s, fn ->
+      Socket.connect(host, String.to_integer(port), opts)
+    end
+  end
+
+  @tag core: true
+  test "oauthbearer session lasts until the token expires and re-authentication extends it" do
+    ssl_opts = [
+      verify: :verify_peer,
+      cacertfile: Path.relative("test/compose_files/ssl/ca.crt")
+    ]
+
+    sasl_opts = fn expires_in_seconds ->
+      [
+        mechanism: "OAUTHBEARER",
+        auth_vsn: 2,
+        handshake_vsn: 1,
+        mechanism_opts: [token_mfa: {__MODULE__, :unsecured_jwt, [expires_in_seconds]}]
+      ]
+    end
+
+    socket_backend = :ssl
+    opts = [backend: socket_backend, active: false] ++ ssl_opts
+    [host, port] = String.split(@brokers_sasl[:kafka1], ":")
+    {:ok, socket} = Socket.connect(host, String.to_integer(port), opts)
+
+    {:ok, %{session_lifetime_ms: short}} =
+      Socket.authenticate(socket, socket_backend, sasl_opts.(2))
+
+    assert short in 1..2000
+
+    {:ok, %{session_lifetime_ms: long}} =
+      Socket.authenticate(socket, socket_backend, sasl_opts.(60))
+
+    assert long > 50_000
+
+    # Past the first token's expiry: without the re-authentication, the broker would
+    # close the connection on this request
+    Process.sleep(short + 500)
+    {data, version} = get_produce_msg_binary()
+    :ok = apply(socket_backend, :send, [socket, data])
+    {:ok, rcv_bin} = apply(socket_backend, :recv, [socket, 0, 5000])
+    {:ok, _rcv_data} = Produce.deserialize_response(rcv_bin, version)
   end
 end

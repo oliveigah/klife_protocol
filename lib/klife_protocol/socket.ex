@@ -22,7 +22,7 @@ defmodule KlifeProtocol.Socket do
 
     case backend.connect(String.to_charlist(host), port, opts ++ must_have_opts) do
       {:ok, socket} ->
-        :ok = authenticate(socket, backend, sasl_opts)
+        {:ok, _session} = authenticate(socket, backend, sasl_opts)
         {:ok, socket}
 
       err ->
@@ -30,7 +30,19 @@ defmodule KlifeProtocol.Socket do
     end
   end
 
-  def authenticate(_socket, _backend, []), do: :ok
+  @doc """
+  Authenticates an open socket using `sasl_opts` (see the module docs).
+
+  Returns `{:ok, %{session_lifetime_ms: lifetime}}`, how long the broker keeps the session:
+
+  - positive integer: past it, the broker closes the connection on the next request, without
+    answering it. Before that, either reconnect or call `authenticate/3` again on the same
+    socket, which is only safe while it is passive and has no requests in flight
+  - `0`: the broker never ends the session (also returned for empty `sasl_opts`)
+  - `nil`: unknown, `auth_vsn` 0 responses do not carry it; the broker may still end the session
+  """
+  # No SASL means nothing to authenticate and no session for the broker to end
+  def authenticate(_socket, _backend, []), do: {:ok, %{session_lifetime_ms: 0}}
 
   def authenticate(socket, backend, sasl_opts) do
     mech = Keyword.fetch!(sasl_opts, :mechanism)
@@ -44,6 +56,6 @@ defmodule KlifeProtocol.Socket do
       rcv_bin
     end
 
-    :ok = SASL.authenticate(mech, handshake_vsn, auth_vsn, mechanism_opts, send_recv_raw_fun)
+    SASL.authenticate(mech, handshake_vsn, auth_vsn, mechanism_opts, send_recv_raw_fun)
   end
 end

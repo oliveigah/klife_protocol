@@ -5,7 +5,7 @@ defmodule KlifeProtocol.SASL.Mechanism.Plain do
     usr = Keyword.fetch!(opts, :username)
     pwd = Keyword.fetch!(opts, :password)
     to_send = :erlang.iolist_to_binary([0, usr, 0, pwd])
-    "" = send_recv_fun.(to_send)
-    :ok
+    %{auth_bytes: ""} = final_resp = send_recv_fun.(to_send)
+    {:ok, final_resp}
   end
 end

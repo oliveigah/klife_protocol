@@ -159,7 +159,7 @@ SASL is handled by the `KlifeProtocol.Socket` module and client libraries can us
 - Passing SASL options to `connect/3` function when creationg a new socket
 - Passing an already open socket and SASL opts to `authenticate/3` function
 
-The supported mechanisms are `PLAIN`, `SCRAM-SHA-256` and `SCRAM-SHA-512`. All of them take `username` and `password` as mechanism options, and you can use them like this:
+The supported mechanisms are `PLAIN`, `SCRAM-SHA-256`, `SCRAM-SHA-512` and `OAUTHBEARER`. `PLAIN` and `SCRAM` take `username` and `password` as mechanism options, and you can use them like this:
 
 ```elixir
 alias KlifeProtocol.Socket
@@ -179,7 +179,7 @@ sasl_opts = [
 
 # After socket initialization
 {:ok, socket} = Socket.connect("localhost", 9092, [backend: :ssl])
-:ok = Socket.authenticate(socket, :ssl, sasl_opts)
+{:ok, %{session_lifetime_ms: _}} = Socket.authenticate(socket, :ssl, sasl_opts)
 ```
 
 For SCRAM, only the mechanism name changes. SCRAM requires OTP 24.2 or later.
@@ -195,6 +195,27 @@ sasl_opts = [
   ]
 ]
 ```
+
+For `OAUTHBEARER`, pass `token_mfa`, a `{module, function, args}` tuple that returns the token as a binary. Klife Protocol does not fetch tokens from your identity provider: getting, caching and refreshing them is up to you. The MFA is applied on every authentication (every new connection to every broker), so it should return a cached token rather than call the token endpoint each time. Optional `extensions` are sent as SASL extensions (KIP-342), e.g. the ones Confluent Cloud requires.
+
+```elixir
+sasl_opts = [
+  mechanism: "OAUTHBEARER",
+  auth_vsn: 2,
+  handshake_vsn: 1,
+  mechanism_opts: [
+    token_mfa: {MyApp.KafkaToken, :fetch!, []},
+    extensions: %{"logicalCluster" => "lkc-abc123", "identityPoolId" => "pool-xyz"}
+  ]
+]
+```
+
+### Session lifetime
+
+`Socket.authenticate/3` returns `{:ok, %{session_lifetime_ms: lifetime}}`, how long the broker keeps the session ([KIP-368](https://cwiki.apache.org/confluence/display/KAFKA/KIP-368%3A+Allow+SASL+Connections+to+Periodically+Re-Authenticate)). Once it is over, the broker closes the connection on the next request, without answering it. So when `lifetime` is positive, the client must act before it ends:
+
+- reconnect, or
+- call `Socket.authenticate/3` again on the same socket, which is only safe while the socket is passive and has no requests in flight
 
 ## Compression and Record Batch Attributes
 

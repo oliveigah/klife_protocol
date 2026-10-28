@@ -5,7 +5,8 @@ defmodule KlifeProtocol.SASL do
   @supported_mechanisms %{
     "PLAIN" => {KlifeProtocol.SASL.Mechanism.Plain, []},
     "SCRAM-SHA-256" => {KlifeProtocol.SASL.Mechanism.Scram, [digest: :sha256]},
-    "SCRAM-SHA-512" => {KlifeProtocol.SASL.Mechanism.Scram, [digest: :sha512]}
+    "SCRAM-SHA-512" => {KlifeProtocol.SASL.Mechanism.Scram, [digest: :sha512]},
+    "OAUTHBEARER" => {KlifeProtocol.SASL.Mechanism.OAuthBearer, []}
   }
 
   def authenticate(mech, handshake_vsn, auth_vsn, mech_opts, send_recv_raw_fun) do
@@ -22,8 +23,8 @@ defmodule KlifeProtocol.SASL do
         SaslAuthenticate.deserialize_response(rcv_bin, auth_vsn)
 
       case resp do
-        %{error_code: 0, auth_bytes: auth_bytes} ->
-          auth_bytes
+        %{error_code: 0} ->
+          resp
 
         %{error_code: ec, error_message: error_message} ->
           raise """
@@ -35,7 +36,10 @@ defmodule KlifeProtocol.SASL do
     :ok = handshake(mech, handshake_vsn, send_recv_raw_fun)
 
     # fixed_opts win: callers can't override what the mechanism name implies
-    :ok = mech_mod.execute_auth(send_recv_fun, Keyword.merge(mech_opts, fixed_opts))
+    {:ok, final_resp} = mech_mod.execute_auth(send_recv_fun, Keyword.merge(mech_opts, fixed_opts))
+
+    # SaslAuthenticate v0 has no session lifetime (nil): the broker may still end the session
+    {:ok, %{session_lifetime_ms: Map.get(final_resp, :session_lifetime_ms)}}
   end
 
   defp handshake(mech, hanshake_vsn, send_rcv_raw_fun) do
