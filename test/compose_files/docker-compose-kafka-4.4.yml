@@ -154,6 +154,12 @@ services:
       kafka2: {condition: service_healthy}
       kafka3: {condition: service_healthy}
     network_mode: host
+    init: true
     command: ["/bin/bash", "/etc/kafka/scram-users.sh"]
     volumes:
       - ./sasl/scram-users.sh:/etc/kafka/scram-users.sh
+    healthcheck:
+      test: ["CMD", "bash", "-c", "[ -f /tmp/scram-users-ready ]"]
+      interval: 2s
+      timeout: 2s
+      retries: 60

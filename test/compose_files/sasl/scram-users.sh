@@ -11,3 +11,8 @@ for mechanism in SCRAM-SHA-256 SCRAM-SHA-512; do
     --alter --entity-type users --entity-name klifeusr \
     --add-config "$mechanism=[iterations=8192,password=klifepwd]"
 done
+
+# Stay up and report healthy, so `docker compose up --wait` returns only once
+# the users exist (older Compose versions can't `wait` on an exited container)
+touch /tmp/scram-users-ready
+exec sleep infinity
