@@ -159,15 +159,15 @@ SASL is handled by the `KlifeProtocol.Socket` module and client libraries can us
 - Passing SASL options to `connect/3` function when creationg a new socket
 - Passing an already open socket and SASL opts to `authenticate/3` function
 
-For now the only supported mechanism is PLAIN and you can use it like this:
+The supported mechanisms are `PLAIN`, `SCRAM-SHA-256` and `SCRAM-SHA-512`. All of them take `username` and `password` as mechanism options, and you can use them like this:
 
 ```elixir
 alias KlifeProtocol.Socket
 
 sasl_opts = [
   mechanism: "PLAIN",
-  sasl_auth_vsn: 2,
-  sasl_handshake_vsn: 1,
+  auth_vsn: 2,
+  handshake_vsn: 1,
   mechanism_opts: [
     username: "klifeusr",
     password: "klifepwd"
@@ -180,6 +180,20 @@ sasl_opts = [
 # After socket initialization
 {:ok, socket} = Socket.connect("localhost", 9092, [backend: :ssl])
 :ok = Socket.authenticate(socket, :ssl, sasl_opts)
+```
+
+For SCRAM, only the mechanism name changes. SCRAM requires OTP 24.2 or later.
+
+```elixir
+sasl_opts = [
+  mechanism: "SCRAM-SHA-512",
+  auth_vsn: 2,
+  handshake_vsn: 1,
+  mechanism_opts: [
+    username: "klifeusr",
+    password: "klifepwd"
+  ]
+]
 ```
 
 ## Compression and Record Batch Attributes

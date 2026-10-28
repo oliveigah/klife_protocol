@@ -33,6 +33,8 @@ jobs:
       - run: docker compose -f "test/compose_files/docker-compose-kafka-3.9.yml" up -d
       - run: mix deps.get
       - run: mix compile --warning-as-errors
+      # exits 0 only once every broker is healthy and the SCRAM users exist
+      - run: docker compose -f "test/compose_files/docker-compose-kafka-3.9.yml" wait scram-users
       - run: mix test
 
   tests-v4_4:
@@ -59,4 +61,6 @@ jobs:
       - run: docker compose -f "test/compose_files/docker-compose-kafka-4.4.yml" up -d
       - run: mix deps.get
       - run: mix compile --warning-as-errors
+      # exits 0 only once every broker is healthy and the SCRAM users exist
+      - run: docker compose -f "test/compose_files/docker-compose-kafka-4.4.yml" wait scram-users
       - run: mix test
