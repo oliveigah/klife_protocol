@@ -135,7 +135,7 @@ defmodule KlifeProtocol.Deserializer do
 
     if len > 0 do
       len = len - 1
-      <<val::binary-size(len), rest_binary::binary>> = rest_binary
+      <<val::binary-size(^len), rest_binary::binary>> = rest_binary
       {maybe_copy(val), rest_binary}
     else
       {nil, rest_binary}
@@ -147,7 +147,7 @@ defmodule KlifeProtocol.Deserializer do
 
     if len > 0 do
       len = len - 1
-      <<val::binary-size(len), rest_binary::binary>> = rest_binary
+      <<val::binary-size(^len), rest_binary::binary>> = rest_binary
       {maybe_copy(val), rest_binary}
     else
       {nil, rest_binary}
@@ -182,14 +182,14 @@ defmodule KlifeProtocol.Deserializer do
 
   defp do_deserialize_value(:record_batch, data) do
     {len, rest_binary} = do_deserialize_value(:int32, data)
-    <<rest_binary::size(len)-binary, rest::binary>> = rest_binary
+    <<rest_binary::size(^len)-binary, rest::binary>> = rest_binary
     {resp, <<>>} = deserialize_record_batch(rest_binary, [])
     {resp, rest}
   end
 
   defp do_deserialize_value(:compact_record_batch, data) do
     {len, rest_binary} = deserialize_unsigned_varint(data)
-    <<rest_binary::size(len - 1)-binary, rest::binary>> = rest_binary
+    <<rest_binary::size(^len - 1)-binary, rest::binary>> = rest_binary
     {resp, <<>>} = deserialize_record_batch(rest_binary, [])
     {resp, rest}
   end
@@ -208,7 +208,7 @@ defmodule KlifeProtocol.Deserializer do
         {<<>>, rest_binary}
 
       {len, rest_binary} ->
-        <<record::binary-size(len), rest::binary>> = rest_binary
+        <<record::binary-size(^len), rest::binary>> = rest_binary
         {maybe_copy(record), rest}
     end
   end
@@ -240,7 +240,7 @@ defmodule KlifeProtocol.Deserializer do
 
     case Map.get(tagged_fields, field_tag) do
       nil ->
-        <<_::field_len*8, rest_binary::binary>> = rest_binary
+        <<_::binary-size(^field_len), rest_binary::binary>> = rest_binary
         deserialize_tag_buffer(rest_binary, len - 1, tagged_fields, result)
 
       {{field_name, {:object, schema}}, %{is_nullable?: false}} ->

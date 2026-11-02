@@ -9,60 +9,29 @@ permissions:
   contents: read
 
 jobs:
-  tests-v3_9:
-    name: test-3.9
+  # Oldest and newest supported Elixir, ubuntu-latest has no OTP builds older than 26
+  tests:
+    name: test-kafka-${{ matrix.kafka }}-elixir-${{ matrix.beam.elixir }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - elixir: 1.19
-            otp: 28
-          - elixir: 1.18
-            otp: 28
-          - elixir: 1.17
-            otp: 27
-          - elixir: 1.16
-            otp: 26
+        kafka: ["3.9", "4.4"]
+        beam:
+          - elixir: "1.20"
+            otp: "28"
+          - elixir: "1.15"
+            otp: "26"
     steps:
       - uses: actions/checkout@v3
       - uses: erlef/setup-beam@v1
         with:
-          elixir-version: ${{ matrix.elixir }}
-          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.beam.elixir }}
+          otp-version: ${{ matrix.beam.otp }}
       # returns once every broker is healthy and the SCRAM users exist
-      - run: docker compose -f "test/compose_files/docker-compose-kafka-3.9.yml" up -d --wait --wait-timeout 180
+      - run: docker compose -f "test/compose_files/docker-compose-kafka-${{ matrix.kafka }}.yml" up -d --wait --wait-timeout 180
       - run: mix deps.get
-      - run: mix compile --warning-as-errors
-      - run: mix test
+      - run: MIX_ENV=prod mix compile --warnings-as-errors
+      - run: mix test --warnings-as-errors
       - if: failure()
-        run: docker compose -f "test/compose_files/docker-compose-kafka-3.9.yml" logs --no-color
-
-  tests-v4_4:
-    name: test-4.4
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - elixir: 1.17
-            otp: 27
-          - elixir: 1.16
-            otp: 26
-          - elixir: 1.15
-            otp: 25
-          - elixir: 1.14
-            otp: 24
-    steps:
-      - uses: actions/checkout@v3
-      - uses: erlef/setup-beam@v1
-        with:
-          elixir-version: ${{ matrix.elixir }}
-          otp-version: ${{ matrix.otp }}
-      # returns once every broker is healthy and the SCRAM users exist
-      - run: docker compose -f "test/compose_files/docker-compose-kafka-4.4.yml" up -d --wait --wait-timeout 180
-      - run: mix deps.get
-      - run: mix compile --warning-as-errors
-      - run: mix test
-      - if: failure()
-        run: docker compose -f "test/compose_files/docker-compose-kafka-4.4.yml" logs --no-color
+        run: docker compose -f "test/compose_files/docker-compose-kafka-${{ matrix.kafka }}.yml" logs --no-color
