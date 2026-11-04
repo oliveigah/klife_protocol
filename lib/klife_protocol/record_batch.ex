@@ -61,12 +61,13 @@ defmodule KlifeProtocol.RecordBatch do
           timestamp_delta: {:varint, %{is_nullable?: false}},
           offset_delta: {:varint, %{is_nullable?: false}},
           key: {:record_bytes, %{is_nullable?: true}},
-          value: {:record_bytes, %{is_nullable?: false}},
+          # A nil value is a tombstone, used to delete a key on compacted topics.
+          value: {:record_bytes, %{is_nullable?: true}},
           headers:
             {{:record_headers,
               [
                 key: {:record_bytes, %{is_nullable?: false}},
-                value: {:record_bytes, %{is_nullable?: false}}
+                value: {:record_bytes, %{is_nullable?: true}}
               ]}, %{is_nullable?: true}}
         ]}, %{is_nullable?: false}}
   ]

@@ -317,6 +317,8 @@ mix test
 bash stop-kafka.sh ${KAFKA_VERSION}
 ```
 
+`KAFKA_VERSION` is one of `3.9`, `4.0` or `4.4`, matching the files in `test/compose_files`, and defaults to `4.0`.
+
 In order to prevent race conditions with kafka initialization is recommended to wait a couple seconds between `bash run-kafka.sh` and `mix test`.
 
 If you want to run tests using a SSL connection, you can use an env var `CONN_MODE=SSL` like this:

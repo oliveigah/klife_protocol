@@ -174,7 +174,7 @@ services:
     volumes:
       - ./sasl/scram-users.sh:/etc/kafka/scram-users.sh
     healthcheck:
-      test: ["CMD", "bash", "-c", "[ -f /tmp/scram-users-ready ]"]
+      test: ["CMD", "test", "-f", "/tmp/scram-users-ready"]
       interval: 2s
       timeout: 2s
       retries: 60

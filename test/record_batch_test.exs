@@ -54,4 +54,69 @@ defmodule KlifeProtocol.RecordBatchTest do
              has_delete_horizon: true
            } = RecordBatch.decode_attributes(input)
   end
+
+  @tag core: true
+  test "serializes and deserializes tombstones and null header values" do
+    for compression <- [:none, :gzip, :snappy] do
+      input = %{
+        base_offset: 0,
+        partition_leader_epoch: -1,
+        magic: 2,
+        attributes: RecordBatch.encode_attributes(compression: compression),
+        last_offset_delta: 0,
+        base_timestamp: 1_000,
+        max_timestamp: 1_000,
+        producer_id: -1,
+        producer_epoch: -1,
+        base_sequence: -1,
+        records: [
+          %{
+            attributes: 0,
+            timestamp_delta: 0,
+            offset_delta: 0,
+            key: "key",
+            value: nil,
+            headers: [%{key: "header", value: nil}]
+          }
+        ]
+      }
+
+      bin = input |> RecordBatch.serialize() |> :erlang.iolist_to_binary()
+
+      assert {%{records: [%{key: "key", value: nil, headers: headers}]}, <<>>} =
+               RecordBatch.deserialize(bin)
+
+      assert [%{key: "header", value: nil}] = headers
+
+      # Without compression the record is the tail of the batch, so the wire
+      # format can be checked directly. Varints are zigzag encoded, so the -1
+      # length that marks a null value is the single byte 0x01.
+      if compression == :none do
+        expected_record = <<
+          # attributes, timestamp_delta, offset_delta
+          0,
+          0,
+          0,
+          # key length 3, key
+          6,
+          "key",
+          # value length -1 (tombstone)
+          1,
+          # header count 1
+          2,
+          # header key length 6, header key
+          12,
+          "header",
+          # header value length -1
+          1
+        >>
+
+        # record count, then the record length as a zigzag varint
+        expected_tail =
+          <<1::32>> <> <<byte_size(expected_record) * 2>> <> expected_record
+
+        assert String.ends_with?(bin, expected_tail)
+      end
+    end
+  end
 end
